@@ -1,7 +1,9 @@
-var NDVITimelineManager = function (lmap, params, userRole) {
+var NDVITimelineManager = function (lmap, params, userRole, container) {
 
     //leaflet map
     this.lmap = lmap;
+
+    this._container = container || document.getElementById("flash");
 
     //этот параметр не рассматривается с точки зрения безопасноти, 
     //только лишь изменяет функциональность
@@ -660,6 +662,7 @@ NDVITimelineManager.prototype._main = function () {
         return;
     }
 
+    this._initSwitcher();
     this.initializeTimeline(true);
     this.applyZoomHandler();
 
@@ -672,67 +675,10 @@ NDVITimelineManager.prototype._main = function () {
     //красная надпись при свернутом таймлайне
     this._attDiv = document.createElement('div');
     this._attDiv.style.display = "none";
-    this._attDiv.style.height = "20px";
-    this._attDiv.style.position = "absolute";
-    this._attDiv.style.zIndex = "50000";
-    this._attDiv.style.bottom = "34px";
-    this._attDiv.style.right = "350px";
+    this._attDiv.classList.add("ntAttentionMessage");
     this._attDiv.innerHTML = NDVITimelineManager.ATTENTION_DIV;
-    document.getElementById("flash").appendChild(this._attDiv);
+    this._container.appendChild(this._attDiv);
 
-    //свитчер здесь
-    var that = this;
-    this.switcher = new SwitchControl({
-        "parentId": "flash",
-        "onshow": function (manually) {
-            if (that.lmap.getZoom() <= NDVITimelineManager.MIN_ZOOM) {
-                document.getElementById("ntLoading").style.display = "none";
-                that._attDiv.style.bottom = "147px";
-                that._attDiv.style.right = "310px";
-                //that.optHelper.style.display = "none";
-                $(".ntHelp").removeClass("ntHelpLightOn");
-                document.getElementById("ntZoomRestrictionLabel").style.display = "none";
-            } else {
-                that._attDiv.style.display = "none";
-            }
-
-            if (manually) {
-                that._manuallyCollapsed = false;
-                that._manuallyUnfolded = true;
-            }
-
-            that.timeLine.toggleVisibility(true);
-
-            setTimeout(function () {
-                NDVITimelineManager.fires_ht = {};
-                that.timeLine.updateFilters();
-                window.resizeAll && resizeAll();
-            }, 200);
-
-            $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 135);
-
-            window.resizeAll && resizeAll();
-        },
-        "onhide": function (manually) {
-            that._attDiv.style.bottom = "34px";
-            that._attDiv.style.right = "350px";
-
-            if (manually) {
-                that._manuallyCollapsed = true;
-                that._manuallyUnfolded = false;
-            }
-
-            if (that.lmap.getZoom() <= NDVITimelineManager.MIN_ZOOM) {
-                that._attDiv.style.display = "block";
-            }
-
-            that.timeLine.toggleVisibility(false);
-
-            $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 10);
-
-            window.resizeAll && resizeAll();
-        }
-    });
 
     //баг не показываются деления при деволтном зумирвоании на хоз-ве
     setTimeout(function () { that.onMoveEnd(); }, 3000);
@@ -821,6 +767,61 @@ NDVITimelineManager.prototype._main = function () {
     this.startFinishLoading();
 
     this.refreshOptionsDisplay();
+};
+
+NDVITimelineManager.prototype._initSwitcher = function () {
+    var that = this;
+    this.switcher = new SwitchControl({
+        "parentId": this._container.id,
+        "onshow": function (manually) {
+            if (that.lmap.getZoom() <= NDVITimelineManager.MIN_ZOOM) {
+                document.getElementById("ntLoading").style.display = "none";
+                that._attDiv.style.bottom = "147px";
+                that._attDiv.style.right = "310px";
+                //that.optHelper.style.display = "none";
+                $(".ntHelp").removeClass("ntHelpLightOn");
+                document.getElementById("ntZoomRestrictionLabel").style.display = "none";
+            } else {
+                that._attDiv.style.display = "none";
+            }
+
+            if (manually) {
+                that._manuallyCollapsed = false;
+                that._manuallyUnfolded = true;
+            }
+
+            that.timeLine.toggleVisibility(true);
+
+            setTimeout(function () {
+                NDVITimelineManager.fires_ht = {};
+                that.timeLine.updateFilters();
+                window.resizeAll && resizeAll();
+            }, 200);
+
+            $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 135);
+
+            window.resizeAll && resizeAll();
+        },
+        "onhide": function (manually) {
+            that._attDiv.style.bottom = "34px";
+            that._attDiv.style.right = "350px";
+
+            if (manually) {
+                that._manuallyCollapsed = true;
+                that._manuallyUnfolded = false;
+            }
+
+            if (that.lmap.getZoom() <= NDVITimelineManager.MIN_ZOOM) {
+                that._attDiv.style.display = "block";
+            }
+
+            that.timeLine.toggleVisibility(false);
+
+            $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 10);
+
+            window.resizeAll && resizeAll();
+        }
+    });
 };
 
 NDVITimelineManager.prototype.setRenderHook = function (layer, callback, callback2) {
@@ -2389,19 +2390,17 @@ NDVITimelineManager.prototype.dateDivHoverCallback = function (e) {
 };
 
 NDVITimelineManager.prototype.showLoading = function () {
-    if ($("div#flash").length) {
-        var el = document.getElementById("loading");
-        if (el) {
-            el.style.display = "block";
-        } else {
-            $('<div id="loading" class="timeline-container" style="width:42px; height:42px"></div>').appendTo("div#flash");
-            $("#loading").append(
-                '<div style="float: right;"> \
+    var el = document.getElementById("loading");
+    if (el) {
+        el.style.display = "block";
+    } else {
+        $('<div id="loading" class="timeline-container" style="width:42px; height:42px"></div>').appendTo($(this._container));
+        $("#loading").append(
+            '<div style="float: right;"> \
             <div id="floatingCirclesG"> \
             <div class="f_circleG" id="frotateG_01"></div><div class="f_circleG" id="frotateG_02"></div><div class="f_circleG" id="frotateG_03"></div><div class="f_circleG" id="frotateG_04"></div><div class="f_circleG" id="frotateG_05"></div><div class="f_circleG" id="frotateG_06"></div><div class="f_circleG" id="frotateG_07"></div><div class="f_circleG" id="frotateG_08"></div> \
             </div> \
             </div>');
-        }
     }
 };
 
