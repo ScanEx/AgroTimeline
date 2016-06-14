@@ -1139,7 +1139,7 @@ NDVITimelineManager._legendCallback["ndviRadio_hr"] = function () {
 };
 
 NDVITimelineManager._legendCallback["ratingRadio"] = function () {
-    AgroLegend.toggleLegend(AgroLegend.legendInhomogenuity);
+    AgroLegend.toggleLegend(AgroLegend.legendRating);
 };
 
 NDVITimelineManager._legendCallback["ndviMeanRadio"] = function () {
@@ -3786,23 +3786,23 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         that._redrawShots();
     }, true);
 
-    this.addRadio("secondPanel_1", "Состояние полей", "shotsOptions", "classificationRadio", 1, true, function (r) {
-        that._selectedType[that._selectedCombo] = NDVITimelineManager.CLASSIFICATION;
-        that._redrawShots();
-    }, true);
-
     this.addRadio("firstPanel_0", "Композит NDVI", "shotsOptions", "ndviRadio_modis", 0, false, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI16;
         that._redrawShots();
     }, false, true);
 
-    this.addRadio("thirdPanel_1", "NDVI - среднее", "shotsOptions", "ndviMeanRadio", 1, true, function (r) {
+    this.addRadio("secondPanel_1", "NDVI - среднее", "shotsOptions", "ndviMeanRadio", 1, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI_MEAN;
         that._redrawShots();
     }, true);
 
     this.addRadio("thirdPanel_1", "Рейтинг", "shotsOptions", "ratingRadio", 1, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.RATING;
+        that._redrawShots();
+    }, true);
+
+    this.addRadio("thirdPanel_1", "Состояние полей", "shotsOptions", "classificationRadio", 1, true, function (r) {
+        that._selectedType[that._selectedCombo] = NDVITimelineManager.CLASSIFICATION;
         that._redrawShots();
     }, true);
 
