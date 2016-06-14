@@ -1,7 +1,9 @@
-var NDVITimelineManager = function (lmap, params, userRole) {
+var NDVITimelineManager = function (lmap, params, userRole, container) {
 
     //leaflet map
     this.lmap = lmap;
+
+    this._container = container || document.getElementById("flash");
 
     //этот параметр не рассматривается с точки зрения безопасноти, 
     //только лишь изменяет функциональность
@@ -132,6 +134,7 @@ var NDVITimelineManager = function (lmap, params, userRole) {
     this._neodnrHandler.dataSource = "1F7E5026D73447D09897217CE737F565";
     this._neodnrHandler.katalogName = this._layersLegend.CLASSIFICATION.name;
 
+    this._ratingHandler = new Rating();
 
     //раскрашиватель по уклонам
     //this._slopeManager = new SlopeManager();
@@ -201,6 +204,7 @@ var NDVITimelineManager = function (lmap, params, userRole) {
 
     this._currentSelection = null;
     this.selectedDiv = null;
+    this._selectedDiv = null;//Образовались два указателя, по сути они одинаковые, но где-то баг, который мешает их объединить.
 
     this._integralIndexes = null;
 
@@ -246,6 +250,7 @@ NDVITimelineManager.CLASSIFICATION = 105;
 NDVITimelineManager.CONDITIONS_OF_VEGETATION = 106;
 NDVITimelineManager.INHOMOGENUITY = 107;
 NDVITimelineManager.MEAN_VCI = 108;
+NDVITimelineManager.RATING = 109;
 NDVITimelineManager.RGB753 = 2000;
 NDVITimelineManager.RGB432 = 2001;
 NDVITimelineManager.FIRES_POINTS = 5000;
@@ -367,6 +372,7 @@ NDVITimelineManager.radioProduct = {
     "ndviMeanRadio": { "prodId": NDVITimelineManager.NDVI_MEAN, "numCombo": 1 },
     "inhomogenuityRadio": { "prodId": NDVITimelineManager.INHOMOGENUITY, "numCombo": 1 },
     "classificationRadio": { "prodId": NDVITimelineManager.CLASSIFICATION, "numCombo": 1 },
+    "ratingRadio": { "prodId": NDVITimelineManager.RATING, "numCombo": 1 },
     "ndviRadio_modis": { "prodId": NDVITimelineManager.NDVI16, "numCombo": 0 },
     "qualityRadio": { "prodId": NDVITimelineManager.QUALITY16, "numCombo": 0 },
     "conditionsOfVegetationRadio": { "prodId": NDVITimelineManager.CONDITIONS_OF_VEGETATION, "numCombo": 0 },
@@ -388,6 +394,7 @@ NDVITimelineManager.minZoomOption[NDVITimelineManager.RGB2_HR] = NDVITimelineMan
 NDVITimelineManager.minZoomOption[NDVITimelineManager.QUALITY16] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.NDVI_MEAN] = NDVITimelineManager.MIN_ZOOM_HR;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.CLASSIFICATION] = NDVITimelineManager.MIN_ZOOM_HR;
+NDVITimelineManager.minZoomOption[NDVITimelineManager.RATING] = NDVITimelineManager.MIN_ZOOM_HR;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.CONDITIONS_OF_VEGETATION] = 0;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.INHOMOGENUITY] = NDVITimelineManager.MIN_ZOOM_HR;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.MEAN_VCI] = NDVITimelineManager.MIN_ZOOM_HR;
@@ -660,6 +667,7 @@ NDVITimelineManager.prototype._main = function () {
         return;
     }
 
+    this._initSwitcher();
     this.initializeTimeline(true);
     this.applyZoomHandler();
 
@@ -668,71 +676,15 @@ NDVITimelineManager.prototype._main = function () {
 
     //вначале выключаем выбор тематики по средним ndvi
     this.setRadioLabelActive("ndviMeanRadio", false);
+    this.setRadioLabelActive("ratingRadio", false);
 
     //красная надпись при свернутом таймлайне
     this._attDiv = document.createElement('div');
     this._attDiv.style.display = "none";
-    this._attDiv.style.height = "20px";
-    this._attDiv.style.position = "absolute";
-    this._attDiv.style.zIndex = "50000";
-    this._attDiv.style.bottom = "34px";
-    this._attDiv.style.right = "350px";
+    this._attDiv.classList.add("ntAttentionMessage");
     this._attDiv.innerHTML = NDVITimelineManager.ATTENTION_DIV;
-    document.getElementById("flash").appendChild(this._attDiv);
+    this._container.appendChild(this._attDiv);
 
-    //свитчер здесь
-    var that = this;
-    this.switcher = new SwitchControl({
-        "parentId": "flash",
-        "onshow": function (manually) {
-            if (that.lmap.getZoom() <= NDVITimelineManager.MIN_ZOOM) {
-                document.getElementById("ntLoading").style.display = "none";
-                that._attDiv.style.bottom = "147px";
-                that._attDiv.style.right = "310px";
-                //that.optHelper.style.display = "none";
-                $(".ntHelp").removeClass("ntHelpLightOn");
-                document.getElementById("ntZoomRestrictionLabel").style.display = "none";
-            } else {
-                that._attDiv.style.display = "none";
-            }
-
-            if (manually) {
-                that._manuallyCollapsed = false;
-                that._manuallyUnfolded = true;
-            }
-
-            that.timeLine.toggleVisibility(true);
-
-            setTimeout(function () {
-                NDVITimelineManager.fires_ht = {};
-                that.timeLine.updateFilters();
-                window.resizeAll && resizeAll();
-            }, 200);
-
-            $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 135);
-
-            window.resizeAll && resizeAll();
-        },
-        "onhide": function (manually) {
-            that._attDiv.style.bottom = "34px";
-            that._attDiv.style.right = "350px";
-
-            if (manually) {
-                that._manuallyCollapsed = true;
-                that._manuallyUnfolded = false;
-            }
-
-            if (that.lmap.getZoom() <= NDVITimelineManager.MIN_ZOOM) {
-                that._attDiv.style.display = "block";
-            }
-
-            that.timeLine.toggleVisibility(false);
-
-            $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 10);
-
-            window.resizeAll && resizeAll();
-        }
-    });
 
     //баг не показываются деления при деволтном зумирвоании на хоз-ве
     setTimeout(function () { that.onMoveEnd(); }, 3000);
@@ -821,6 +773,61 @@ NDVITimelineManager.prototype._main = function () {
     this.startFinishLoading();
 
     this.refreshOptionsDisplay();
+};
+
+NDVITimelineManager.prototype._initSwitcher = function () {
+    var that = this;
+    this.switcher = new SwitchControl({
+        "parentId": this._container.id,
+        "onshow": function (manually) {
+            if (that.lmap.getZoom() <= NDVITimelineManager.MIN_ZOOM) {
+                document.getElementById("ntLoading").style.display = "none";
+                that._attDiv.style.bottom = "147px";
+                that._attDiv.style.right = "310px";
+                //that.optHelper.style.display = "none";
+                $(".ntHelp").removeClass("ntHelpLightOn");
+                document.getElementById("ntZoomRestrictionLabel").style.display = "none";
+            } else {
+                that._attDiv.style.display = "none";
+            }
+
+            if (manually) {
+                that._manuallyCollapsed = false;
+                that._manuallyUnfolded = true;
+            }
+
+            that.timeLine.toggleVisibility(true);
+
+            setTimeout(function () {
+                NDVITimelineManager.fires_ht = {};
+                that.timeLine.updateFilters();
+                window.resizeAll && resizeAll();
+            }, 200);
+
+            $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 135);
+
+            window.resizeAll && resizeAll();
+        },
+        "onhide": function (manually) {
+            that._attDiv.style.bottom = "34px";
+            that._attDiv.style.right = "350px";
+
+            if (manually) {
+                that._manuallyCollapsed = true;
+                that._manuallyUnfolded = false;
+            }
+
+            if (that.lmap.getZoom() <= NDVITimelineManager.MIN_ZOOM) {
+                that._attDiv.style.display = "block";
+            }
+
+            that.timeLine.toggleVisibility(false);
+
+            $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 10);
+
+            window.resizeAll && resizeAll();
+        }
+    });
 };
 
 NDVITimelineManager.prototype.setRenderHook = function (layer, callback, callback2) {
@@ -1131,6 +1138,10 @@ NDVITimelineManager._legendCallback["ndviRadio_hr"] = function () {
     AgroLegend.toggleLegend(AgroLegend.legendNdvi);
 };
 
+NDVITimelineManager._legendCallback["ratingRadio"] = function () {
+    AgroLegend.toggleLegend(AgroLegend.legendInhomogenuity);
+};
+
 NDVITimelineManager._legendCallback["ndviMeanRadio"] = function () {
     AgroLegend.toggleLegend(AgroLegend.legendNdvi);
 };
@@ -1271,6 +1282,11 @@ NDVITimelineManager.prototype._hideLayers = function () {
     this._hideINHOMOGENUITY();
     this._hideSLOPE();
 
+    this._ratingHandler.clear();
+    if (window.fieldsTable2) {
+        fieldsTable2.redraw();
+    }
+
     this._meanVCILayer && this.lmap.removeLayer(this._meanVCILayer);
 
     this.clearRenderHook();
@@ -1301,6 +1317,8 @@ NDVITimelineManager.prototype._showRedraw = function () {
             this._showNDVI_MEAN();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.INHOMOGENUITY) {
             this._showINHOMOGENUITY();
+        } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.RATING) {
+            this._showRATING();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.CLASSIFICATION) {
             this._showCLASSIFICATION();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.CONDITIONS_OF_VEGETATION) {
@@ -1565,7 +1583,7 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
     });
     layer.setDateInterval(NDVITimelineManager.addDays(this._selectedDate, -1), NDVITimelineManager.addDays(this._selectedDate, 1));
     this.lmap.addLayer(layer);
-    layer.bringToFront();
+    layer.setZIndex(1000);
     this._selectedLayers.push(layer);
 };
 
@@ -1639,7 +1657,7 @@ NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
             NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
-    layer.bringToFront();
+    layer.setZIndex(1000);
     this._selectedLayers.push(layer);
 };
 
@@ -1671,7 +1689,7 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
             NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
-    layer.bringToFront();
+    layer.setZIndex(1000);
     this._selectedLayers.push(layer);
 };
 
@@ -1703,7 +1721,7 @@ NDVITimelineManager.prototype._showCLASSIFICATION = function () {
             NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
-    layer.bringToFront();
+    layer.setZIndex(1000);
     this._selectedLayers.push(layer);
 };
 
@@ -1741,7 +1759,7 @@ NDVITimelineManager.prototype._showNDVI16 = function () {
             });
             layer.setDateInterval(NDVITimelineManager.addDays(this._selectedDate, -1), NDVITimelineManager.addDays(this._selectedDate, 1));
             this.lmap.addLayer(layer);
-            layer.bringToFront();
+            layer.setZIndex(1000);
             this._selectedLayers.push(layer);
         }
     }
@@ -1770,8 +1788,23 @@ NDVITimelineManager.prototype._showQUALITY16 = function () {
     });
     layer.setDateInterval(NDVITimelineManager.addDays(this._selectedDate, -1), NDVITimelineManager.addDays(this._selectedDate, 1));
     this.lmap.addLayer(layer);
-    layer.bringToFront();
+    layer.setZIndex(1000);
     this._selectedLayers.push(layer);
+};
+
+NDVITimelineManager.prototype._showRATING = function () {
+    if (this.lmap.getZoom() >= NDVITimelineManager.MIN_ZOOM_HR) {
+        this.hideSelectedLayer();
+        this._selectedOption = "RATING";
+        if (window.fieldsTable2) {
+            fieldsTable2.startRating();
+            if (fieldsTable2._selectedRows.length <= 1) {
+                this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
+            }
+        } else {
+            this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
+        }
+    }
 };
 
 NDVITimelineManager.prototype._showNDVI_MEAN = function () {
@@ -1791,7 +1824,7 @@ NDVITimelineManager.prototype._showNDVI_MEAN = function () {
 
 NDVITimelineManager.prototype._hideNDVI_MEAN = function () {
     if (!this._currentRKIdArr.length) {
-        this.setRadioLabelActive("ndviMeanRadio", false)
+        this.setRadioLabelActive("ndviMeanRadio", false);
     }
     this._themesHandler.clear();
 };
@@ -1903,6 +1936,7 @@ NDVITimelineManager.prototype.applyHRZoomREstriction = function (zoom) {
                     }
                 }
             }
+            this.setRadioLabelActive_grey("ratingRadio", false);
             this.setRadioLabelActive_grey("ndviRadio_hr", false);
             this.setRadioLabelActive_grey("ndviMeanRadio", false);
             this.setRadioLabelActive_grey("inhomogenuityRadio", false);
@@ -1984,27 +2018,6 @@ NDVITimelineManager.prototype._setExistentProds = function (params, success) {
             alert(res);
         };
 
-        //$.getJSON(window.serverBase + "VectorLayer/Search.ashx?jsoncallback=hoho",
-        //    data).done(
-        //    function (result) {
-        //        var res = result.Result;
-        //        if (res && res.values.length > 0) {
-        //            sender.existentShots[radioId] = true;
-        //            var ind = res.fields.indexOf("GMX_RasterCatalogID");
-        //            for (var i = 0; i < res.values.length; i++) {
-        //                if (!rkArr[radioId]) {
-        //                    rkArr[radioId] = [];
-        //                }
-        //                rkArr[radioId].push(res.values[i][ind]);
-        //            }
-        //        }
-        //        //else {
-        //        //    sender.existentShots[radioId] = false;
-        //        //}
-        //        defArr[defIndex].resolve();
-        //    }
-        //);
-
         sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", {
             'query': query,
             'geometry': false,
@@ -2022,9 +2035,6 @@ NDVITimelineManager.prototype._setExistentProds = function (params, success) {
                     rkArr[radioId].push(res.values[i][ind]);
                 }
             }
-            //else {
-            //    sender.existentShots[radioId] = false;
-            //}
             defArr[defIndex].resolve();
         });
     }
@@ -2074,7 +2084,6 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
 
     if (this._selectedLayers.length && !NDVITimelineManager.equal(that._visibleLayersOnTheDisplay, prevLayers)) {
         if (this._selectedOption == "HR" || this._selectedOption == "CLASSIFICATION") {
-            //this.layerBounds && this._selectedLayer.removeClipPolygon(this.layerBounds);
             this.removeSelectedLayersClipPolygon();
             if (this._cutOff) {
 
@@ -2087,10 +2096,13 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
                 }
 
                 this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
-                //this._selectedLayer.addClipPolygon(this.layerBounds);
                 this.addSelectedLayersClipPolygon(this.layerBounds);
             }
         }
+    }
+
+    if (this._selectedOption == "RATING" && !NDVITimelineManager.equal(that._visibleLayersOnTheDisplay, prevLayers)) {
+        this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
     }
 
     this.updateRadioLabelsActivity();
@@ -2131,38 +2143,28 @@ NDVITimelineManager.prototype.updateRadioLabelsActivity = function () {
 
     this.radioActiveLabels.style.display = "none";
 
-
-    //$("#light_ndviRadio_hr").addClass("ntHelpLightOn");
-    //$("#light_classificationRadio").addClass("ntHelpLightOn");
-    //$("#light_ndviMeanRadio").addClass("ntHelpLightOn");
-    //$("#light_inhomogenuityRadio").addClass("ntHelpLightOn");
-
     if (this.selectedDiv && this._visibleLayersOnTheDisplay.length) {
         if (this.lmap.getZoom() >= NDVITimelineManager.MIN_ZOOM_HR) {
             this.getProductAvailability("ndviRadio_hr") && this.setRadioLabelActive_grey("ndviRadio_hr", true);
             this.getProductAvailability("classificationRadio") && this.setRadioLabelActive_grey("classificationRadio", true);
-            this.getProductAvailability("ndviMeanRadio") && this.setRadioLabelActive_grey("ndviMeanRadio", true);
+            if (this.getProductAvailability("ndviMeanRadio")) {
+                this.setRadioLabelActive_grey("ndviMeanRadio", true);
+                this.setRadioLabelActive_grey("ratingRadio", true);
+            }
             this.getProductAvailability("inhomogenuityRadio") && this.setRadioLabelActive_grey("inhomogenuityRadio", true);
-            //this.optHelper.style.display = "none";
             $(".ntHelp").removeClass("ntHelpLightOn");
         }
     } else {
 
         if (this._selectedCombo == 1 && this.selectedDiv && this.zoomRestrictionLabel.style.display == "none") {
-
             this.radioActiveLabels.style.display = "block";
-            //this.optHelper.style.display = "block";
             $(".ntHelp").addClass("ntHelpLightOn");
-
-            //$("#light_ndviRadio_hr").addClass("ntHelpLightOn");
-            //$("#light_classificationRadio").addClass("ntHelpLightOn");
-            //$("#light_ndviMeanRadio").addClass("ntHelpLightOn");
-            //$("#light_inhomogenuityRadio").addClass("ntHelpLightOn");
         }
 
         this.setRadioLabelActive_grey("ndviRadio_hr", false);
         this.setRadioLabelActive_grey("classificationRadio", false);
 
+        this.setRadioLabelActive_grey("ratingRadio", false);
         this.setRadioLabelActive_grey("ndviMeanRadio", false);
         this.setRadioLabelActive_grey("inhomogenuityRadio", false);
     }
@@ -2172,8 +2174,6 @@ NDVITimelineManager.prototype.updateRadioLabelsActivity = function () {
         this.getProductAvailability("classificationRadio") && this.setRadioLabelActive_grey("classificationRadio", true);
         $("#light_ndviRadio_hr").removeClass("ntHelpLightOn");
         $("#light_classificationRadio").removeClass("ntHelpLightOn");
-        //document.getElementById("nth1").style.display = "none";
-        //document.getElementById("nth2").style.display = "none";
     }
 };
 
@@ -2389,19 +2389,17 @@ NDVITimelineManager.prototype.dateDivHoverCallback = function (e) {
 };
 
 NDVITimelineManager.prototype.showLoading = function () {
-    if ($("div#flash").length) {
-        var el = document.getElementById("loading");
-        if (el) {
-            el.style.display = "block";
-        } else {
-            $('<div id="loading" class="timeline-container" style="width:42px; height:42px"></div>').appendTo("div#flash");
-            $("#loading").append(
-                '<div style="float: right;"> \
+    var el = document.getElementById("loading");
+    if (el) {
+        el.style.display = "block";
+    } else {
+        $('<div id="loading" class="timeline-container" style="width:42px; height:42px"></div>').appendTo($(this._container));
+        $("#loading").append(
+            '<div style="float: right;"> \
             <div id="floatingCirclesG"> \
             <div class="f_circleG" id="frotateG_01"></div><div class="f_circleG" id="frotateG_02"></div><div class="f_circleG" id="frotateG_03"></div><div class="f_circleG" id="frotateG_04"></div><div class="f_circleG" id="frotateG_05"></div><div class="f_circleG" id="frotateG_06"></div><div class="f_circleG" id="frotateG_07"></div><div class="f_circleG" id="frotateG_08"></div> \
             </div> \
             </div>');
-        }
     }
 };
 
@@ -2612,6 +2610,7 @@ NDVITimelineManager.prototype.deactivateUnknownRadios = function () {
         }
     }
 
+    this.setRadioLabelActive_grey("ratingRadio", false);
     this.setRadioLabelActive_grey("ndviMeanRadio", false);
     this.setRadioLabelActive_grey("inhomogenuityRadio", false);
 };
@@ -2958,6 +2957,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
         that._hideLayers();
         that._currentRKIdArr = [];
         if (!that._showThemesNDVI) {
+            that.setRadioLabelActive("ratingRadio", false);
             that.setRadioLabelActive("ndviMeanRadio", false);
             that.setProductAvailability("ndviMeanRadio", false);
         }
@@ -3041,11 +3041,13 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                     that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB_HR;
                     document.getElementById("rgbRadio").checked = true;
                     this.setRadioLabelActive_grey("ndviRadio_hr", false);
+                    this.setRadioLabelActive_grey("ratingRadio", false);
                     this.setRadioLabelActive_grey("ndviMeanRadio", false);
                     this.setRadioLabelActive_grey("inhomogenuityRadio", false);
                     this.setRadioLabelActive_grey("classificationRadio", false);
 
                     this.setProductAvailability("ndviRadio_hr", false);
+                    this.setProductAvailability("ratingRadio", false);
                     this.setProductAvailability("ndviMeanRadio", false);
                     this.setProductAvailability("inhomogenuityRadio", false);
                     this.setProductAvailability("classificationRadio", false);
@@ -3171,6 +3173,8 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                     if (i == "ndviRadio_hr" && that.existentShots["ndviRadio_hr"]) {
                         that.setRadioLabelActive("ndviMeanRadio", that.existentShots[i]);
                         that.setProductAvailability("ndviMeanRadio", that.existentShots[i]);
+                        that.setRadioLabelActive("ratingRadio", that.existentShots[i]);
+                        that.setProductAvailability("ratingRadio", that.existentShots[i]);
 
                         that._currentRKIdArr = [].concat(rkArr["ndviRadio_hr"]);
                     }
@@ -3797,6 +3801,11 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         that._redrawShots();
     }, true);
 
+    this.addRadio("thirdPanel_1", "Рейтинг", "shotsOptions", "ratingRadio", 1, true, function (r) {
+        that._selectedType[that._selectedCombo] = NDVITimelineManager.RATING;
+        that._redrawShots();
+    }, true);
+
     this.addRadio("thirdPanel_1", "Однородность", "shotsOptions", "inhomogenuityRadio", 1, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.INHOMOGENUITY;
         that._redrawShots();
@@ -4179,6 +4188,7 @@ NDVITimelineManager.prototype.setTimelineCombo = function (index) {
     that.refreshTimeline();
     that._hideLayers();
     that.setRadioLabelActive("ndviMeanRadio", false);
+    that.setRadioLabelActive("ratingRadio", false);
 
     that.setDatesStickHoverCallback();
 

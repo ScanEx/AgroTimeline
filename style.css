@@ -8,6 +8,11 @@
     display: none;
 }
 
+#agrotimeline .switcherControl {
+    bottom: 13px !important;
+    right: 5px !important;
+}
+
 .shadeBackground {
     /*background-color: rgba(1,106,138,0.17) !important;*/
 }
@@ -15,6 +20,18 @@
 .shadeColor {
     color: rgba(175, 175, 175, 1) !important;
     cursor: default !important;
+}
+
+.ntAttentionMessage{
+    height:20px;
+    position:absolute;
+    zIndex:50000;
+    bottom:34px;
+    right:350px;
+}
+
+#agrotimeline .ntAttentionMessage {
+	bottom: 20px !important;
 }
 
 div.timeline-event-box {
