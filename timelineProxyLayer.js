@@ -1,4 +1,5 @@
-var TimelineProxyLayer = function (layer, lmap) {
+var TimelineProxyLayer = function (agroTimeline, layer, lmap) {
+    this._agroTimeline = agroTimeline;
     this.lmap = lmap;
     this.serverLayer = null;
     this.localLayer = null;
@@ -114,8 +115,8 @@ TimelineProxyLayer.prototype.bindLayer = function (layer) {
             NDVITimelineManager.fires_ht = {};
             setTimeout(function () {
                 NDVITimelineManager.fires_ht = {};
-                ndviTimelineManager.timeLine.updateFilters();
-                ndviTimelineManager.refreshSelections();
+                that._agroTimeline.timeLine.updateFilters();
+                that._agroTimeline.refreshSelections();
             }, 300);
         }
     });

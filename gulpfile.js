@@ -8,8 +8,8 @@ var html2jsobject = require('gulp-html2jsobject');
 var styles = ['style.css'];
 
 var scripts = ['shared/shared.js', 'shared/RequestsQueue.js', 'shared/ThematicHandler.js', 'shared/styleHookManager.js',
-    'timelineProxyLayer.js', 'switchControl.js', 'optionsMenu.js', 'ndviTimelineSlider.js', 'ndviTimelineManager.js',
-    'meanVCIManager.js', 'bindScrollControl.js', 'agroWarning.js', 'ajax.js', 'L.Control.gmxAgroTimeline.js'];
+    'timelineParams.js', 'timelineProxyLayer.js', 'switchControl.js', 'optionsMenu.js', 'ndviTimelineSlider.js', 'ndviTimelineManager.js',
+    'meanVCIManager.js', 'bindScrollControl.js', 'agroWarning.js', 'rating.js', 'ajax.js', 'L.Control.gmxAgroTimeline.js'];
 
 var images = ['images/up_a.png', 'images/up.png', 'images/settings.png', 'images/prev_a.png', 'images/prev.png', 'images/pointer1.png',
     'images/pointer0.png', 'images/pointer_light.png', 'images/pointer_dark.png', 'images/next_a.png', 'images/next.png',
