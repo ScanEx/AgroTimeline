@@ -1651,7 +1651,7 @@ NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
         }
         return false;
     }).on('doneDraw', function () {
-        ndviTimelineManager.repaintAllVisibleLayers();
+        that.repaintAllVisibleLayers();
     }).setDateInterval(
             NDVITimelineManager.addDays(this._selectedDate, -1),
             NDVITimelineManager.addDays(this._selectedDate, 1)
@@ -1683,7 +1683,7 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
         }
         return false;
     }).on('doneDraw', function () {
-        ndviTimelineManager.repaintAllVisibleLayers();
+        that.repaintAllVisibleLayers();
     }).setDateInterval(
             NDVITimelineManager.addDays(this._selectedDate, -1),
             NDVITimelineManager.addDays(this._selectedDate, 1)
@@ -1715,7 +1715,7 @@ NDVITimelineManager.prototype._showCLASSIFICATION = function () {
         }
         return false;
     }).on('doneDraw', function () {
-        ndviTimelineManager.repaintAllVisibleLayers();
+        that.repaintAllVisibleLayers();
     }).setDateInterval(
             NDVITimelineManager.addDays(this._selectedDate, -1),
             NDVITimelineManager.addDays(this._selectedDate, 1)
@@ -2018,7 +2018,7 @@ NDVITimelineManager.prototype._setExistentProds = function (params, success) {
             alert(res);
         };
 
-        sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", {
+        sendCrossDomainPostRequest("http://maps.kosmosnimki.ru/VectorLayer/Search.ashx", {
             'query': query,
             'geometry': false,
             'layer': layerName,
@@ -4578,6 +4578,7 @@ NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanva
     var that = this;
     if (url) {
         this._palettes[url] = this._palettes[url] || shared.loadPaletteSync(url);
+        var palette;
         this._palettes[url].then(function (palette) {
             shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
                info.destination.x, info.destination.y, that.lmap.getZoom(),
