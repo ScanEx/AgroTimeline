@@ -2555,7 +2555,7 @@ NDVITimelineManager.prototype.bindTimelineCombo = function (selectedCombo) {
         //Вобщем такая бага, приходится все время создавать прокси слой при переключении, если использовать 
         //один и тот же такое ощущение, что теряются риски на таймлайне.
         if (this.isProxyLayer(timelineLayerName) /*&& !this._proxyLayers[timelineLayerName]*/) {
-            this._proxyLayers[timelineLayerName] = new TimelineProxyLayer(this.layerCollection[timelineLayerName], this.lmap);
+            this._proxyLayers[timelineLayerName] = new TimelineProxyLayer(this, this.layerCollection[timelineLayerName], this.lmap);
             this._proxyLayers[timelineLayerName].setDateInterval(new Date(this._selectedYear, 0, 1), new Date(this._selectedYear, 11, 31));
             this.timeLine.bindLayer(this._proxyLayers[timelineLayerName].localLayer, { trackVisibility: false });
             this.layerCollection[this._proxyLayers[timelineLayerName].name] = this._proxyLayers[timelineLayerName].localLayer;
