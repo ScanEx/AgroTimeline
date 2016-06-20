@@ -1301,7 +1301,9 @@ NDVITimelineManager.prototype._prepareRedraw = function () {
 NDVITimelineManager.prototype._showRedraw = function () {
 
     if (this._selectedDiv) {
-        if (this.isSentinel) {
+        if (this._selectedType[this._selectedCombo] == NDVITimelineManager.RATING) {
+            this._showRATING();
+        } else if (this.isSentinel) {
             this._showSENTINEL();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.NDVI16) {
             this._showNDVI16();
@@ -1317,8 +1319,6 @@ NDVITimelineManager.prototype._showRedraw = function () {
             this._showNDVI_MEAN();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.INHOMOGENUITY) {
             this._showINHOMOGENUITY();
-        } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.RATING) {
-            this._showRATING();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.CLASSIFICATION) {
             this._showCLASSIFICATION();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.CONDITIONS_OF_VEGETATION) {
@@ -1651,7 +1651,7 @@ NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
         }
         return false;
     }).on('doneDraw', function () {
-        that.repaintAllVisibleLayers();
+        ndviTimelineManager.repaintAllVisibleLayers();
     }).setDateInterval(
             NDVITimelineManager.addDays(this._selectedDate, -1),
             NDVITimelineManager.addDays(this._selectedDate, 1)
@@ -1683,7 +1683,7 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
         }
         return false;
     }).on('doneDraw', function () {
-        that.repaintAllVisibleLayers();
+        ndviTimelineManager.repaintAllVisibleLayers();
     }).setDateInterval(
             NDVITimelineManager.addDays(this._selectedDate, -1),
             NDVITimelineManager.addDays(this._selectedDate, 1)
@@ -1715,7 +1715,7 @@ NDVITimelineManager.prototype._showCLASSIFICATION = function () {
         }
         return false;
     }).on('doneDraw', function () {
-        that.repaintAllVisibleLayers();
+        ndviTimelineManager.repaintAllVisibleLayers();
     }).setDateInterval(
             NDVITimelineManager.addDays(this._selectedDate, -1),
             NDVITimelineManager.addDays(this._selectedDate, 1)
@@ -2018,7 +2018,7 @@ NDVITimelineManager.prototype._setExistentProds = function (params, success) {
             alert(res);
         };
 
-        sendCrossDomainPostRequest("http://maps.kosmosnimki.ru/VectorLayer/Search.ashx", {
+        sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", {
             'query': query,
             'geometry': false,
             'layer': layerName,
@@ -4578,7 +4578,6 @@ NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanva
     var that = this;
     if (url) {
         this._palettes[url] = this._palettes[url] || shared.loadPaletteSync(url);
-        var palette;
         this._palettes[url].then(function (palette) {
             shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
                info.destination.x, info.destination.y, that.lmap.getZoom(),
