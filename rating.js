@@ -90,6 +90,10 @@ Rating.prototype.start = function (layersArr, dateStr) {
             ratingFeatures[fi.properties.layer_id][fi.properties.layer_gmx_id] = fi.properties;
         }
 
+        if (maxValue == minValue) {
+            minValue = 0;
+        }
+
         for (var i = 0; i < features.length; i++) {
             var fi = features[i];
             var k = (Math.floor((ratingFeatures[fi.properties.layer_id][fi.properties.layer_gmx_id].value - minValue) / (maxValue - minValue) * 10) * 10).toString();
