@@ -308,7 +308,7 @@ NDVITimelineManager._rkId = {
 };
 
 NDVITimelineManager.prototype.setWidth = function (width, right) {
-    var vis = this.timeLine.getContainer()[0].style.display == "block";
+    var vis = !(this.timeLine.getContainer()[0].style.display == "none");
 
     var deltaWidth = (right || 20) + 100;
     //content width
@@ -738,34 +738,19 @@ NDVITimelineManager.prototype._main = function () {
 
     document.getElementById('ntComboBox').value = this._selectedCombo.toString();
 
-    //вот здесь подгоняем размеры таймлайна под экран
-    var sw = document.documentElement.clientWidth;
-    var isiPad = navigator.userAgent.match(/iPad/i) != null;
-    var lp = 360;
-
-    function resize() {
-        var sw = document.documentElement.clientWidth;
-        if (window.layersShown && !isiPad) {
-            that.setWidth(sw - lp);
-        } else {
-            that.setWidth(sw - 12);
-        }
-    };
-
     $(window).resize(function () {
-        resize();
+        that.resize();
     });
 
-    resize();
+    this.resize();
 
     var m = this.optionsMenu.getMenuContainer();
 
     m.style.right = 60 + "px";
 
-    var that = this;
     $('#leftCollapser').on("click", function (e) {
         $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 125);
-        resize();
+        that.resize();
     });
 
     this.applyZoomRestriction(this.lmap.getZoom());
@@ -773,6 +758,14 @@ NDVITimelineManager.prototype._main = function () {
     this.startFinishLoading();
 
     this.refreshOptionsDisplay();
+};
+
+NDVITimelineManager.prototype.resize = function () {
+    if (window.layersShown && !(navigator.userAgent.match(/iPad/i) != null)) {
+        this.setWidth(document.documentElement.clientWidth - 360);
+    } else {
+        this.setWidth(document.documentElement.clientWidth - 12);
+    }
 };
 
 NDVITimelineManager.prototype._initSwitcher = function () {

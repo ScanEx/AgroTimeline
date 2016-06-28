@@ -1,4 +1,4 @@
-var timelineParams = {
+﻿var timelineParams = {
     proxyUrl: '',
     exMap: { host: "maps.kosmosnimki.ru", name: "PLDYO" },
     layers: {
@@ -93,9 +93,11 @@ var timelineParams = {
         }
     },
     combo: [{
+        resolution: "modis",
         caption: "Композиты 16 дн",
         rk: ["MODIS"]
     }, {
+        resolution: "modis",
         caption: "Космосъемка 10-30 м",
         rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI"]
     }, {
