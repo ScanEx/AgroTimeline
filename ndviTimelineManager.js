@@ -308,7 +308,7 @@ NDVITimelineManager._rkId = {
 };
 
 NDVITimelineManager.prototype.setWidth = function (width, right) {
-    var vis = this.timeLine.getContainer()[0].style.display == "block";
+    var vis = !(this.timeLine.getContainer()[0].style.display == "none");
 
     var deltaWidth = (right || 20) + 100;
     //content width
@@ -377,10 +377,10 @@ NDVITimelineManager.radioProduct = {
     "qualityRadio": { "prodId": NDVITimelineManager.QUALITY16, "numCombo": 0 },
     "conditionsOfVegetationRadio": { "prodId": NDVITimelineManager.CONDITIONS_OF_VEGETATION, "numCombo": 0 },
 
-    "rgbRadio753": { "prodId": NDVITimelineManager.RGB753, "numCombo": 5 },
-    "rgbRadio432": { "prodId": NDVITimelineManager.RGB432, "numCombo": 5 },
+    "rgbRadio753": { "prodId": NDVITimelineManager.RGB753, "numCombo": 4 },
+    "rgbRadio432": { "prodId": NDVITimelineManager.RGB432, "numCombo": 4 },
 
-    "firesPoints": { "prodId": NDVITimelineManager.FIRES_POINTS, "numCombo": 4 }
+    "firesPoints": { "prodId": NDVITimelineManager.FIRES_POINTS, "numCombo": 3 }
 };
 
 NDVITimelineManager.MIN_ZOOM = 7;
@@ -738,34 +738,19 @@ NDVITimelineManager.prototype._main = function () {
 
     document.getElementById('ntComboBox').value = this._selectedCombo.toString();
 
-    //вот здесь подгоняем размеры таймлайна под экран
-    var sw = document.documentElement.clientWidth;
-    var isiPad = navigator.userAgent.match(/iPad/i) != null;
-    var lp = 360;
-
-    function resize() {
-        var sw = document.documentElement.clientWidth;
-        if (window.layersShown && !isiPad) {
-            that.setWidth(sw - lp);
-        } else {
-            that.setWidth(sw - 12);
-        }
-    };
-
     $(window).resize(function () {
-        resize();
+        that.resize();
     });
 
-    resize();
+    this.resize();
 
     var m = this.optionsMenu.getMenuContainer();
 
     m.style.right = 60 + "px";
 
-    var that = this;
     $('#leftCollapser').on("click", function (e) {
         $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 125);
-        resize();
+        that.resize();
     });
 
     this.applyZoomRestriction(this.lmap.getZoom());
@@ -773,6 +758,14 @@ NDVITimelineManager.prototype._main = function () {
     this.startFinishLoading();
 
     this.refreshOptionsDisplay();
+};
+
+NDVITimelineManager.prototype.resize = function () {
+    if (window.layersShown && !(navigator.userAgent.match(/iPad/i) != null)) {
+        this.setWidth(document.documentElement.clientWidth - 360);
+    } else {
+        this.setWidth(document.documentElement.clientWidth - 12);
+    }
 };
 
 NDVITimelineManager.prototype._initSwitcher = function () {
@@ -1746,7 +1739,8 @@ NDVITimelineManager.prototype._showNDVI16 = function () {
 
             layer.setFilter(function (item) {
                 var p = item.properties;
-                if (that._selectedCombo == 2) {
+                //КАК-ТО НАДДО ЭТО ВЫНЕСТИ В КОНФИГ!
+                if (that._selectedCombo == 2 || that._selectedCombo == 4 || that._selectedCombo == 5) {
                     if (p[dateId] == that._selectedDateL) {
                         return true;
                     }
@@ -2917,12 +2911,13 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
     this.clearProductAvailability();
 
     function getFilename(properties, layer) {
-        //var filename = layer._gmx.tileAttributeIndexes["filename"];
-        //if (filename == undefined) {
         var sceneid = properties[layer._gmx.tileAttributeIndexes["sceneid"]] || properties[layer._gmx.tileAttributeIndexes["SCENEID"]];
-        return sceneid + "_NDVI";
-        //}
-        //return properties[filename];
+        if (sceneid) {
+            return sceneid + "_NDVI";
+        } else {
+            var filename = layer._gmx.tileAttributeIndexes["filename"];
+            return properties[filename];
+        }
     };
 
     var that = this;
@@ -3015,7 +3010,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
             }
             var comboArr = that._combo[that._selectedCombo].rk;
             var q;
-            if (that._selectedCombo == 1) {
+            if (that._combo[that._selectedCombo].resolution != "modis") {
                 if (this.isSentinel) {
                     q = 4;
                 } else {
@@ -3065,7 +3060,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                     if (that._switchYearCallback)
                         that._switchYearCallback(that._selectedDate);
 
-                    if (that._selectedCombo == 1) {
+                    if (that._combo[that._selectedCombo].resolution != "modis"/*that._selectedCombo == 1*/) {
                         for (var i in layerItems) {
                             var lip = layerItems[i].obj.properties;
 
@@ -3831,15 +3826,26 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         that._redrawShots();
     });
 
+    if (this._combo[2] && this._combo[2].rk[0] == "MOD098DT-test") {
+        that._selectedType[2] = NDVITimelineManager.NDVI16;
+    }
 
-    if (this._combo[4] && this._combo[4].rk[0] == "FIRES") {
-        this.addRadio("firstPanel_4", "Термоточки", "shotsOptions", "firesPoints", 4, true, function (r) {
+    if (this._combo[3] && this._combo[3].rk[0] == "FIRES") {
+        this.addRadio("firstPanel_3", "Термоточки", "shotsOptions", "firesPoints", 3, true, function (r) {
             that._selectedType[that._selectedCombo] = NDVITimelineManager.FIRES_POINTS;
             that._redrawShots();
         }, false, true);
     }
 
-    if (this._combo[5] && this._combo[5].rk[0] == "RGB753") {
+    if (this._combo[4] && this._combo[4].rk[0] == "MOD098DT-test") {
+        that._selectedType[4] = NDVITimelineManager.NDVI16;
+    }
+
+    if (this._combo[5] && this._combo[5].rk[0] == "MOD098DAq-test") {
+        that._selectedType[5] = NDVITimelineManager.NDVI16;
+    }
+
+    if (this._combo[4] && this._combo[4].rk[0] == "RGB753") {
         this.addRadio("firstPanel_5", "7-5-3", "shotsOptions", "rgbRadio753", 5, true, function (r) {
             that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB753;
             that._redrawShots();
