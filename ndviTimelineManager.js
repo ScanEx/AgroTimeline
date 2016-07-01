@@ -1576,7 +1576,7 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
     });
     layer.setDateInterval(NDVITimelineManager.addDays(this._selectedDate, -1), NDVITimelineManager.addDays(this._selectedDate, 1));
     this.lmap.addLayer(layer);
-    layer.setZIndex(1000);
+    //layer.setZIndex(0);
     this._selectedLayers.push(layer);
 };
 
@@ -1650,7 +1650,7 @@ NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
             NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
-    layer.setZIndex(1000);
+    //layer.setZIndex(0);
     this._selectedLayers.push(layer);
 };
 
@@ -1682,7 +1682,7 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
             NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
-    layer.setZIndex(1000);
+    //layer.setZIndex(0);
     this._selectedLayers.push(layer);
 };
 
@@ -1714,7 +1714,7 @@ NDVITimelineManager.prototype._showCLASSIFICATION = function () {
             NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
-    layer.setZIndex(1000);
+    //layer.setZIndex(0);
     this._selectedLayers.push(layer);
 };
 
@@ -1753,7 +1753,7 @@ NDVITimelineManager.prototype._showNDVI16 = function () {
             });
             layer.setDateInterval(NDVITimelineManager.addDays(this._selectedDate, -1), NDVITimelineManager.addDays(this._selectedDate, 1));
             this.lmap.addLayer(layer);
-            layer.setZIndex(1000);
+            //layer.setZIndex(0);
             this._selectedLayers.push(layer);
         }
     }
@@ -1782,7 +1782,7 @@ NDVITimelineManager.prototype._showQUALITY16 = function () {
     });
     layer.setDateInterval(NDVITimelineManager.addDays(this._selectedDate, -1), NDVITimelineManager.addDays(this._selectedDate, 1));
     this.lmap.addLayer(layer);
-    layer.setZIndex(1000);
+    //layer.setZIndex(0);
     this._selectedLayers.push(layer);
 };
 
@@ -2012,7 +2012,7 @@ NDVITimelineManager.prototype._setExistentProds = function (params, success) {
             alert(res);
         };
 
-        sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", {
+        sendCrossDomainPostRequest("http://maps.kosmosnimki.ru/VectorLayer/Search.ashx", {
             'query': query,
             'geometry': false,
             'layer': layerName,
@@ -2233,7 +2233,7 @@ NDVITimelineManager.prototype.getLayersCommonGeometry = function (layersArr, cal
                 if (!NDVITimelineManager.geomCache[layerName]) {
                     NDVITimelineManager.geomCache[layerName] = [];
                     //Получаем геометрию полей с сервера
-                    var url = window.serverBase + "/VectorLayer/Search.ashx?WrapStyle=func" +
+                    var url = "http://maps.kosmosnimki.ru/VectorLayer/Search.ashx?WrapStyle=func" +
                               "&layer=" + layerName +
                               "&geometry=true";
 

@@ -22,16 +22,16 @@
     cursor: default !important;
 }
 
-.ntAttentionMessage{
-    height:20px;
-    position:absolute;
-    zIndex:50000;
-    bottom:4px;
-    right:340px;
+.ntAttentionMessage {
+    height: 20px;
+    position: absolute;
+    zIndex: 50000;
+    bottom: 4px;
+    right: 340px;
 }
 
 #agrotimeline .ntAttentionMessage {
-	bottom: 4px !important;
+    bottom: 4px !important;
     right: 340px !important;
 }
 
@@ -233,7 +233,7 @@ div.timeline-currenttime {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    padding-left: 8px;    
+    padding-left: 8px;
     background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC42/Ixj3wAAAKFJREFUOE+t0d0OwUAYhOHG/11xEZziGnDXCI4cyXpHNhXpWG0/kzzJZlqTbVQppb+yZYQtI2wZYcsIW0bYMsKWEe9DMF0HJ9nXdBmcYY9DPtu0HdStdjjhDI1O0UibwQHWuOCWXbHFEB/5NTjCEkfc8ch0VreC3qlTGtRnbqAf6oGjZ7pp/UeVBseYQ7coWUDvvlIa7JXG4L/YMsKW/aXqCfFSF7y9Y+PtAAAAAElFTkSuQmCC') 150px -1px no-repeat;
     margin-left: 17px;
     padding-bottom: 2px;
@@ -928,6 +928,7 @@ div.timeline-axis-grid {
     width: 350px;
     border: solid 1px rgb(216, 195, 195);
     border-radius: 7px;
+    z-index: 200000;
 }
 
 .ntOptionsArrowDiv {
