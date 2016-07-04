@@ -2012,7 +2012,7 @@ NDVITimelineManager.prototype._setExistentProds = function (params, success) {
             alert(res);
         };
 
-        sendCrossDomainPostRequest("http://maps.kosmosnimki.ru/VectorLayer/Search.ashx", {
+        sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", {
             'query': query,
             'geometry': false,
             'layer': layerName,
