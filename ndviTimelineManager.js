@@ -12,6 +12,18 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     this._exMap = params.exMap;
     this._layersLegend = params.layers;
 
+    //добавочные слои с масками
+    this._layersLegend["LANDSAT2016"] = {
+        name: "8288D69C7C0040EFBB7B7EE6671052E3",
+        mask: "A05BB0207AEE4CFD93C045BF71576FDE",
+        palette: params.layers.HR.palette
+    };
+    this._layersLegend["SENTINEL2016"] = {
+        name: "EC68D0C097BE4F0B9E9DE4A0B9F591A2",
+        mask: "14A988CBC5FD424D9EBE23CEC8168150",
+        palette: params.layers.HR.palette
+    }
+
     this._combo = params.combo;
 
     //addCombo - [{ "caption": "LANDSAT-8", "rk": ["RGB753", "RGB432"] }]
@@ -96,6 +108,7 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     this._themesHandler = new ThematicHandler(ts);
     this._themesHandler.manualOnly = false;
     this._themesHandler.dataSource = "F28D06701EF2432DB21BFDB4015EF9CE";
+    this._themesHandler.dataSource2016 = "F7BF28C501264773B1E7C236D81E963C";
     this._themesHandler.katalogName = this._layersLegend.HR.name;
     var that = this;
     this._themesHandler.errorCallback = function (er) {
@@ -160,7 +173,7 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     this._switchYearCallback = null;
 
     this.timeLine = null;
-    this._deffereds = [];
+    //this._deffereds = [];
 
     this._selectedType = [NDVITimelineManager.NDVI16, NDVITimelineManager.RGB_HR, NDVITimelineManager.NDVI16, NDVITimelineManager.NDVI16, NDVITimelineManager.FIRES_POINTS, NDVITimelineManager.RGB753];
 
@@ -521,6 +534,10 @@ NDVITimelineManager.prototype.loadState = function (data) {
             that.setCutOff(document.getElementById("chkCut"));
         }
 
+        if (document.getElementById("cloudMask").checked) {
+            that._useCloudMask = true;
+        }
+
         if (data.chkQl) {
             that.qlCheckClick(document.getElementById("chkQl"));
         }
@@ -823,6 +840,34 @@ NDVITimelineManager.prototype._initSwitcher = function () {
     });
 };
 
+NDVITimelineManager.prototype.setCloudMaskRenderHook = function (layer, callback, callback2) {
+
+    //if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR") {
+    //    this.layerBounds && layer.removeClipPolygon(this.layerBounds);
+    //}
+
+    //if (this._cutOff) {
+
+    //if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR") {
+    //    this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
+    //    layer.addClipPolygon(this.layerBounds);
+    //}
+
+    layer.addRenderHook(callback);
+
+    for (var i = 0; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
+
+        var l = this._visibleLayersOnTheDisplayPtr[i];
+
+        var styles = l.getStyles();
+        styles[0].HoverStyle.weight = styles[0].RenderStyle.weight;
+        l.setStyles(styles);
+
+        this._visibleLayersOnTheDisplayPtr[i].addPreRenderHook(callback2);
+    }
+    //}
+};
+
 NDVITimelineManager.prototype.setRenderHook = function (layer, callback, callback2) {
 
     if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR") {
@@ -852,9 +897,15 @@ NDVITimelineManager.prototype.setRenderHook = function (layer, callback, callbac
 };
 
 NDVITimelineManager.prototype.clearRenderHook = function () {
+    var landsat2016Layer = this.layerCollection[this._layersLegend.LANDSAT2016.name];
+    var sentinel2016Layer = this.layerCollection[this._layersLegend.SENTINEL2016.name];
+
     var ndviLayer = this.layerCollection[this._layersLegend.HR.name];
     var classLayer = this.layerCollection[this._layersLegend.CLASSIFICATION.name];
     var sentinelNdviLayer = this.layerCollection[this._layersLegend.SENTINEL_NDVI.name];
+
+    landsat2016Layer.removeRenderHook(NDVITimelineManager.kr_hook);
+    sentinel2016Layer.removeRenderHook(NDVITimelineManager.kr_hook);
 
     ndviLayer.removeRenderHook(NDVITimelineManager.kr_hook);
     classLayer.removeRenderHook(NDVITimelineManager.kr_hook);
@@ -1283,6 +1334,8 @@ NDVITimelineManager.prototype._hideLayers = function () {
     this._meanVCILayer && this.lmap.removeLayer(this._meanVCILayer);
 
     this.clearRenderHook();
+
+    this.hideCloudMask();
 };
 
 NDVITimelineManager.prototype._prepareRedraw = function () {
@@ -1578,6 +1631,8 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
     this.lmap.addLayer(layer);
     //layer.setZIndex(0);
     this._selectedLayers.push(layer);
+
+    this.showCloudMask(this._selectedDate);
 };
 
 NDVITimelineManager.prototype._showSENTINEL = function () {
@@ -1606,6 +1661,15 @@ NDVITimelineManager.prototype._showRGB2_HR = function () {
 };
 
 NDVITimelineManager.tolesBG = {};
+NDVITimelineManager.cloudMaskTolesBG = {};
+
+NDVITimelineManager.cloudMaskKr_hook = function (tile, info) {
+    var id = info.x + ':' + info.y + ':' + info.z;
+    if (tile) {
+        NDVITimelineManager.cloudMaskTolesBG[id] = tile;
+        tile.style.display = 'none';
+    }
+};
 
 NDVITimelineManager.kr_hook = function (tile, info) {
     var id = info.x + ':' + info.y + ':' + info.z;
@@ -1620,6 +1684,9 @@ NDVITimelineManager.l_hook = function (tile, info) {
     if (NDVITimelineManager.tolesBG[id]) {
         tile.getContext('2d').drawImage(NDVITimelineManager.tolesBG[id], 0, 0, 256, 256);
     }
+    if (NDVITimelineManager.cloudMaskTolesBG[id]) {
+        tile.getContext('2d').drawImage(NDVITimelineManager.cloudMaskTolesBG[id], 0, 0, 256, 256);
+    }
 };
 
 NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
@@ -1629,6 +1696,9 @@ NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
     this._selectedOption = layerTypeName;
 
     var layer = this.layerCollection[this._layersLegend[layerTypeName].name];
+    if (this._selectedYear == 2016) {
+        layer = this.layerCollection[this._layersLegend.SENTINEL2016.name];
+    }
     layer.removeFilter();
 
     this.setRenderHook(layer, NDVITimelineManager.kr_hook, NDVITimelineManager.l_hook);
@@ -1652,6 +1722,8 @@ NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
     this.lmap.addLayer(layer);
     //layer.setZIndex(0);
     this._selectedLayers.push(layer);
+
+    this.showCloudMask(this._selectedDate);
 };
 
 NDVITimelineManager.prototype._showNDVI_HR = function () {
@@ -1661,6 +1733,10 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
     this._selectedOption = "HR";
 
     var layer = this.layerCollection[this._layersLegend.HR.name];
+
+    if (this._selectedYear == 2016) {
+        layer = this.layerCollection[this._layersLegend.LANDSAT2016.name];
+    }
     layer.removeFilter();
 
     this.setRenderHook(layer, NDVITimelineManager.kr_hook, NDVITimelineManager.l_hook);
@@ -1684,6 +1760,8 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
     this.lmap.addLayer(layer);
     //layer.setZIndex(0);
     this._selectedLayers.push(layer);
+
+    this.showCloudMask(this._selectedDate);
 };
 
 NDVITimelineManager.prototype._showCLASSIFICATION = function () {
@@ -2012,7 +2090,7 @@ NDVITimelineManager.prototype._setExistentProds = function (params, success) {
             alert(res);
         };
 
-        sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", {
+        sendCrossDomainPostRequest("http://maps.kosmosnimki.ru/VectorLayer/Search.ashx", {
             'query': query,
             'geometry': false,
             'layer': layerName,
@@ -2479,6 +2557,33 @@ NDVITimelineManager.prototype.initializeImageProcessor = function () {
                 layer.setStyles(styles);
             }
         }
+    }
+
+    this._setLayerImageProcessing(this.layerCollection[this._layersLegend.LANDSAT2016.name], "LANDSAT2016");
+    this._setLayerImageProcessing(this.layerCollection[this._layersLegend.SENTINEL2016.name], "SENTINEL2016");
+
+    this.landsatCloudMask = this.layerCollection["A05BB0207AEE4CFD93C045BF71576FDE"];
+    this.landsatCloudMask.disable
+    this.sentinelCloudMask = this.layerCollection["14A988CBC5FD424D9EBE23CEC8168150"];
+    this.landsatCloudMask.setRasterHook(function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
+        applyMask(dstCanvas, srcImage, info);
+    });
+    this.sentinelCloudMask.setRasterHook(function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
+        applyMask(dstCanvas, srcImage, info);
+    });
+
+    var that = this;
+    function applyMask(dstCanvas, srcCanvas, info) {
+        shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
+                   info.destination.x, info.destination.y, that.lmap.getZoom(),
+                   dstCanvas,
+                   function (r, g, b, a) {
+                       if (r === 0 || r === 1) {
+                           return [r, g, b, 0];
+                       } else {
+                           return [r, g, b, a];
+                       }
+                   }, shared.NEAREST);
     }
 };
 
@@ -4129,7 +4234,24 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
             that._hideLayers();
             that._slider.setPeriodSelector(e.checked);
         }
+    }, {
+        "id": "cloudMask",
+        "class": "ntOptionsHR",
+        "type": "checkbox",
+        "text": "Маска облачности и теней",
+        "click": function (e) {
+            that._useCloudMask = e.checked;
+            if (e.checked) {
+                that.showCloudMask(that._selectedDate);
+            } else {
+                that.hideCloudMask(true);
+                if (that._cutOff && (that._selectedOption === "SENTINEL_NDVI" || that._selectedOption === "HR")) {
+                    that._redrawShots();
+                }
+            }
+        }
     }];
+
 
     if (!this._userRole) {
         items.push({
@@ -4149,6 +4271,11 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
 
     document.getElementById("ntPeriodSelectOption").style.display = "none";
 
+    //if (document.getElementById("cloudMask")) {
+    document.getElementById("cloudMask").checked = false;
+    this._useCloudMask = false;
+    //}
+
     if (document.getElementById("chkCut")) {
         document.getElementById("chkCut").checked = true;
     }
@@ -4164,6 +4291,67 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
             }
         }
     });
+};
+
+NDVITimelineManager.prototype.showCloudMask = function (date) {
+
+    var that = this;
+
+    function showCloudLayer(layer, cutOff) {
+        layer.removeFilter();
+
+        if (cutOff) {
+            that.setCloudMaskRenderHook(layer, NDVITimelineManager.cloudMaskKr_hook, NDVITimelineManager.l_hook);
+        } else {
+            //that.sentinelCloudMask.removeRenderHook(NDVITimelineManager.cloudMaskKr_hook);
+            //that.landsatCloudMask.removeRenderHook(NDVITimelineManager.cloudMaskKr_hook);
+            //NDVITimelineManager.cloudMaksTolesBG = {};
+            //that.redrawSelectedLayers();
+        }
+
+        var dateCn = "acqdate";
+        var dateId = layer._gmx.tileAttributeIndexes[dateCn];
+
+        layer.setFilter(function (item) {
+            var p = item.properties;
+            if (p[dateId] == that._selectedDateL) {
+                return true;
+            }
+            return false;
+        })
+        .on('doneDraw', function () {
+            ndviTimelineManager.repaintAllVisibleLayers();
+        })
+        .setDateInterval(
+                NDVITimelineManager.addDays(that._selectedDate, -1),
+                NDVITimelineManager.addDays(that._selectedDate, 1)
+            );
+        layer.setZIndex(1);
+        that.lmap.addLayer(layer);
+    };
+
+    if (this._useCloudMask && this._selectedDiv) {
+        if (this._selectedOption === "SENTINEL_NDVI") {
+            showCloudLayer(this.sentinelCloudMask, this._cutOff);
+        } else if (this._selectedOption === "RGB" || this._selectedOption === "RGB2") {
+            showCloudLayer(this.landsatCloudMask);
+        } else if (this._selectedOption === "SENTINEL") {
+            showCloudLayer(this.sentinelCloudMask);
+        } else if (this._selectedOption === "HR") {
+            showCloudLayer(this.landsatCloudMask, this._cutOff);
+        }
+    }
+};
+
+NDVITimelineManager.prototype.hideCloudMask = function (force) {
+    if (!this.selectedDiv || force) {
+        this.lmap.removeLayer(this.landsatCloudMask);
+        this.lmap.removeLayer(this.sentinelCloudMask);
+
+        this.sentinelCloudMask.removeRenderHook(NDVITimelineManager.cloudMaskKr_hook);
+        this.landsatCloudMask.removeRenderHook(NDVITimelineManager.cloudMaskKr_hook);
+        NDVITimelineManager.cloudMaskTolesBG = {};
+    }
 };
 
 NDVITimelineManager.prototype.setTimelineCombo = function (index) {
@@ -4312,6 +4500,9 @@ NDVITimelineManager.prototype.clearSelection = function () {
 NDVITimelineManager.prototype.setCutOff = function (e) {
     this._cutOff = e.checked;
     if (this.selectedDiv) {
+        if (!e.checked) {
+            this.hideCloudMask(true);
+        }
         this._prepareRedraw();
         this._showRedraw();
     }

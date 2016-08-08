@@ -12,7 +12,7 @@
                     prodtype: "NDVI16"
                 },
                 quality: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/QC_grade_1-5.icxleg',
+                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg',
                     prodtype: "QUALITY16"
                 }
             }
@@ -26,7 +26,7 @@
                     prodtype: "NDVI"
                 },
                 quality: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/legend_class_1-5.icxleg',
+                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/legend_class_1-5.icxleg',
                     prodtype: "FIELD"
                 }
             }
@@ -60,7 +60,7 @@
             dateColumnName: "acqdate",
             palette: {
                 classification: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/CLASS_grade_1-5.icxleg',
+                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/CLASS_grade_1-5.icxleg',
                     prodtype: "CLASSIFICATION"
                 }
             }
@@ -97,7 +97,6 @@
         caption: "Композиты 16 дн",
         rk: ["MODIS"]
     }, {
-        resolution: "modis",
         caption: "Космосъемка 10-30 м",
         rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI"]
     }, {
