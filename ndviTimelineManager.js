@@ -654,6 +654,10 @@ NDVITimelineManager.prototype.refreshOptionsDisplay = function () {
         $(".ntOptionsHR").css("display", "block");
         document.getElementById("ntPeriodSelectOption").style.display = "none";
         $(".ntOptionsMODIS").css("display", "none");
+    } if (rkName == "ILAN_LANDSAT" || rkName == "ILAN_SENTINEL") {
+        $(".ntOptionsHR").css("display", "none");
+        $(".ntOptionsMODIS").css("display", "none");
+        $("#chkQl").parent().parent().css("display", "block");
     }
 };
 
@@ -847,17 +851,6 @@ NDVITimelineManager.prototype._initSwitcher = function () {
 
 NDVITimelineManager.prototype.setCloudMaskRenderHook = function (layer, callback, callback2) {
 
-    //if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR") {
-    //    this.layerBounds && layer.removeClipPolygon(this.layerBounds);
-    //}
-
-    //if (this._cutOff) {
-
-    //if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR") {
-    //    this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
-    //    layer.addClipPolygon(this.layerBounds);
-    //}
-
     layer.addRenderHook(callback);
 
     for (var i = 0; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
@@ -870,7 +863,6 @@ NDVITimelineManager.prototype.setCloudMaskRenderHook = function (layer, callback
 
         this._visibleLayersOnTheDisplayPtr[i].addPreRenderHook(callback2);
     }
-    //}
 };
 
 NDVITimelineManager.prototype.setRenderHook = function (layer, callback, callback2) {
@@ -1008,7 +1000,7 @@ NDVITimelineManager.prototype._onLayerTreeDoubleClick = function (prop) {
 
     this.setVisibleYear(this._selectedYear);
 
-    if (this._selectedCombo == 1) {
+    if (this._combo[this._selectedCombo].resolution == "landsat"/*this._selectedCombo == 1*/) {
         this._visibleFieldsLayers[prop.name].visible = true;
         this._doubleClick = true;
     }
@@ -1033,7 +1025,7 @@ NDVITimelineManager.prototype.setVisibleYear = function (year) {
     this.setTimeLineYear(year);
     this._selectedYear = year;
 
-    if (this._selectedCombo == 0 && this.selectedDiv) {
+    if (this._combo[this._selectedCombo].resolution == "modis" && this.selectedDiv) {
         var start = new Date(year, 0, 1);
         var end = new Date(year + 1, 1, 9);
         var tl = this.timeLine.getTimelineController().getTimeline();
@@ -1984,7 +1976,7 @@ NDVITimelineManager.prototype.hodeSelectedLayers = function () {
 NDVITimelineManager.prototype.applyHRZoomREstriction = function (zoom) {
     this.meanNdviNoDataLabel.style.display = "none";
 
-    if (this._selectedCombo == 1) {
+    if (this._combo[this._selectedCombo].resolution == "landsat"/*this._selectedCombo == 1*/) {
         if (zoom >= NDVITimelineManager.MIN_ZOOM_HR) {
             this.showSelectedLayers();
 
@@ -2003,7 +1995,7 @@ NDVITimelineManager.prototype.applyHRZoomREstriction = function (zoom) {
                 this.zoomRestrictionLabel.style.display = "none";
                 $(".ntHelp").removeClass("ntHelpLightOn")
                 if (this.selectedDiv) {
-                    this.hideSelectedLayers();
+                    //this.hideSelectedLayers();
 
                     for (var l in this._visibleFieldsLayers) {
                         var ll = this.layerCollection[l];
@@ -2233,7 +2225,7 @@ NDVITimelineManager.prototype.updateRadioLabelsActivity = function () {
         }
     } else {
 
-        if (this._selectedCombo == 1 && this.selectedDiv && this.zoomRestrictionLabel.style.display == "none") {
+        if (this._combo[this._selectedCombo].resolution == "landsat"/*this._selectedCombo == 1*/ && this.selectedDiv && this.zoomRestrictionLabel.style.display == "none") {
             this.radioActiveLabels.style.display = "block";
             $(".ntHelp").addClass("ntHelpLightOn");
         }
@@ -2723,7 +2715,7 @@ NDVITimelineManager.prototype.refreshSelections = function () {
 
     var layerNames = this.getViewTimelineLayers(this._selectedCombo);
 
-    if (this._selectedCombo == 1 && this._currentSelection) {
+    if (this._combo[this._selectedCombo].resolution == "landsat"/*this._selectedCombo == 1*/ && this._currentSelection) {
 
         this.selectedDiv = null;
 
@@ -2913,8 +2905,8 @@ NDVITimelineManager.prototype.redrawTimelineLinks = function () {
 
     var layerNames = that.getViewTimelineLayers(that._selectedCombo);
 
-    if (that._combo[that._selectedCombo].rk[0] == "HR" ||
-        that._combo[that._selectedCombo].rk[0] == "RGB753") {
+    if (that._combo[that._selectedCombo].clouds/*that._combo[that._selectedCombo].rk[0] == "HR" ||
+        that._combo[that._selectedCombo].rk[0] == "RGB753"*/) {
 
         var isQl = $("#chkQl").is(':checked');
 
@@ -3120,7 +3112,8 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
             }
             var comboArr = that._combo[that._selectedCombo].rk;
             var q;
-            if (that._combo[that._selectedCombo].resolution != "modis") {
+            //TODO: вынести индекс слоя в группе в какой нибудь параметр.
+            if (comboArr.length != 1 && that._combo[that._selectedCombo].resolution != "modis") {
                 if (this.isSentinel) {
                     q = 4;
                 } else {
@@ -3334,7 +3327,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
 
         that.selectedShotFilename = "";
         if (!(that.shiftNext || that.shiftPrev || that.shiftZero)) {
-            if (selectedItems && selectedItems.length == 1 && that._selectedCombo == 1) {
+            if (selectedItems && selectedItems.length == 1 && that._combo[that._selectedCombo].resolution == "landsat"/* that._selectedCombo == 1*/) {
                 that.selectedShotFilename = that.hoverShotFilename.substr(0, that.hoverShotFilename.length - 0);//а было - 5 потому что _NDVI
             }
         } else {
@@ -3342,7 +3335,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                 that.selectedShotFilename = $("#ntFilenameCaption").text();
             } else {
                 var files = that._comboFilenames[that._selectedCombo];
-                if (files && selectedItems && selectedItems.length == 1 && that._selectedCombo == 1) {
+                if (files && selectedItems && selectedItems.length == 1 && that._combo[that._selectedCombo].resolution == "landsat"/*that._selectedCombo == 1*/) {
                     var fn = files[0];
                     that.selectedShotFilename = date + " - " + fn.substr(0, fn.length - 5);//а было - 5 потому что _NDVI
                     that._setSliderState(x.attributes.range, that._selectedDate, true);
@@ -3697,7 +3690,7 @@ NDVITimelineManager.prototype.initSlider = function () {
                     }
 
                     //показываем название снимка в заголовке только для landsat
-                    if (that._selectedCombo == 1) {
+                    if (that._combo[that._selectedCombo].resolution == "landsat"/*that._selectedCombo == 1*/) {
                         var tItemDate = shared.dateToString(new Date(tItem.center));
                         var timelineItems = that.timeLine.data.attributes.items[that._comboAsLayers[that._selectedCombo][1]];
                         var filenames = [];
@@ -3965,6 +3958,14 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
             that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB432;
             that._redrawShots();
         });
+    }
+
+    if (this._combo[4] && this._combo[4].rk[0] == "ILAN_LANDSAT") {
+        that._selectedType[4] = NDVITimelineManager.RGB_HR;
+    }
+
+    if (this._combo[5] && this._combo[5].rk[0] == "ILAN_SENTINEL") {
+        that._selectedType[5] = NDVITimelineManager.RGB_HR;
     }
 
     for (var i = 0; i < this._combo.length; i++) {
@@ -4361,7 +4362,9 @@ NDVITimelineManager.prototype.hideCloudMask = function (force) {
 
 NDVITimelineManager.prototype.setTimelineCombo = function (index) {
 
-    $("#ntComboBox > option").each(function (e, x) { (x.value == index && (x.selected = true)); });
+    $("#ntComboBox > option").each(function (e, x) {
+        (x.value == index && (x.selected = true));
+    });
 
     that = this;
     that.selectedShotFilename = "";
