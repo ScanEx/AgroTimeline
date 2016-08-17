@@ -679,6 +679,11 @@ NDVITimelineManager.prototype._main = function () {
         for (var i in nsGmx.gmxMap.layersByID) {
             this.layerCollection[i] = nsGmx.gmxMap.layersByID[i];
         }
+    } else if (cosmosagro && cosmosagro.layersHash) {
+        //для проекта без редактора
+        for (var i in cosmosagro.layersHash) {
+            this.layerCollection[i] = cosmosagro.layersHash[i];
+        }
     }
 
     this.hideLoading();
