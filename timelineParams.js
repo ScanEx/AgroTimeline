@@ -97,6 +97,8 @@
         caption: "Композиты 16 дн",
         rk: ["MODIS"]
     }, {
+        resolution: "landsat",
+        clouds: true,
         caption: "Космосъемка 10-30 м",
         rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI"]
     }, {
