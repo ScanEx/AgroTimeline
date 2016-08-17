@@ -679,11 +679,6 @@ NDVITimelineManager.prototype._main = function () {
         for (var i in nsGmx.gmxMap.layersByID) {
             this.layerCollection[i] = nsGmx.gmxMap.layersByID[i];
         }
-    } else if (cosmosagro && cosmosagro.layersHash) {
-        //для проекта без редактора
-        for (var i in cosmosagro.layersHash) {
-            this.layerCollection[i] = cosmosagro.layersHash[i];
-        }
     }
 
     this.hideLoading();
@@ -1987,7 +1982,7 @@ NDVITimelineManager.prototype.applyHRZoomREstriction = function (zoom) {
 
         } else {
             if (zoom >= NDVITimelineManager.MIN_ZOOM) {
-                if (this.selectedDiv) {
+                if (this.selectedDiv && this._combo[this._selectedCombo].rk.length > 1) {
                     this.zoomRestrictionLabel.style.display = "block";
                     $(".ntHelp").addClass("ntHelpLightOn")
                 }
@@ -2225,7 +2220,7 @@ NDVITimelineManager.prototype.updateRadioLabelsActivity = function () {
         }
     } else {
 
-        if (this._combo[this._selectedCombo].resolution == "landsat"/*this._selectedCombo == 1*/ && this.selectedDiv && this.zoomRestrictionLabel.style.display == "none") {
+        if (this._combo[this._selectedCombo].rk.length > 1 && this._combo[this._selectedCombo].resolution == "landsat"/*this._selectedCombo == 1*/ && this.selectedDiv && this.zoomRestrictionLabel.style.display == "none") {
             this.radioActiveLabels.style.display = "block";
             $(".ntHelp").addClass("ntHelpLightOn");
         }
@@ -2897,6 +2892,11 @@ NDVITimelineManager.prototype.initializeTimeline = function (show) {
     });
 
     bindScrollControl("ntRightPanel", this.lmap);
+
+    //отключим некоторые опции для ИЛАН РАН(вообще это надо делать в конфиге, но непонтяные ошибки возникают)
+    if (nsGmx.gmxMap.properties.name == "6A56CE2B840543A7B3DF06674C80BA28") {
+        $("#ntComboBox > option").each(function (e, n) { if (e < 4) n.style.display = "none"; });
+    }
 };
 
 NDVITimelineManager.prototype.redrawTimelineLinks = function () {
@@ -3808,11 +3808,11 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
     var getComboRadios = function () {
 
         return '<select id="ntComboBox">' +
-        '<option value="' + 1 + '" selected >' + this._combo[1].caption + '</option>' +
+        '<option value="' + 1 + '">' + this._combo[1].caption + '</option>' +
         '<option value="' + 0 + '">' + this._combo[0].caption + '</option>' +
         '<option value="' + 2 + '">' + this._combo[2].caption + '</option>' +
         '<option value="' + 3 + '">' + this._combo[3].caption + '</option>' +
-        ((this._combo[4] && '<option value="' + 4 + '">' + this._combo[4].caption + '</option>') || "") +
+        ((this._combo[4] && '<option value="' + 4 + '" selected>' + this._combo[4].caption + '</option>') || "") +
         ((this._combo[5] && '<option value="' + 5 + '">' + this._combo[5].caption + '</option>') || "") +
         '</select>';
     }
