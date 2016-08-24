@@ -43,16 +43,19 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     if (params.disableOptions)
         this.disableOptions = true;
 
+    this._layerConfigs = {};
+
     this._dateColumnNames = {};
     this._ndviProdtypes = [];
     for (var p in this._layersLegend) {
         this._dateColumnNames[this._layersLegend[p].name] = this._layersLegend[p].dateColumnName;
-        var p = this._layersLegend[p].palette;
-        if (p) {
-            if (p.ndvi) {
-                this._ndviProdtypes.push(p.ndvi.prodtype);
+        var pp = this._layersLegend[p].palette;
+        if (pp) {
+            if (pp.ndvi) {
+                this._ndviProdtypes.push(pp.ndvi.prodtype);
             }
         }
+        this._layerConfigs[this._layersLegend[p].name] = this._layersLegend[p];
     }
 
     //к какому комбо принадлежит слой
@@ -4670,22 +4673,33 @@ NDVITimelineManager.prototype._filterTimeline = function (elem, layer) {
             return true;
         }
     } else {
-        var isQl = $("#chkQl").is(':checked');
-        var gmxRKid = layer._gmx.tileAttributeIndexes['GMX_RasterCatalogID'];
+        if (this._combo[this._selectedCombo].resolution === "landsat") {
+            var isQl = $("#chkQl").is(':checked');
+            var gmxRKid = layer._gmx.tileAttributeIndexes['GMX_RasterCatalogID'];
 
-        if (!gmxRKid) {
-            return true;
+            if (isQl && this._layerConfigs[layer.options.layerID].showQuicklooks && prop[gmxRKid].length == 0) {
+                return true;
+            }
+
+            var cloudsId = layer._gmx.tileAttributeIndexes[this._layerConfigs[layer.options.layerID].cloudsField];
+            if (cloudsId) {
+                if (isQl && !this._layerConfigs[layer.options.layerID].showQuicklooks && prop[gmxRKid].length != 0) {
+                    return true;
+                } else if (prop[cloudsId] <= this._combo[this._selectedCombo].cloudsMin) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        } else {
+            var prodtypeId = layer._gmx.tileAttributeIndexes['prodtype'];
+            if (!prodtypeId || this._ndviProdtypes.indexOf(prop[prodtypeId]) != -1) {
+                return true;
+            }
         }
 
-        if (!isQl && prop[gmxRKid].length == 0) {
-            return false;
-        }
-
-        var prodtypeId = layer._gmx.tileAttributeIndexes['prodtype'];
-
-        if (!prodtypeId || this._ndviProdtypes.indexOf(prop[prodtypeId]) != -1) {
-            return true;
-        }
         return false;
     }
 };
