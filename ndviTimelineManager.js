@@ -178,7 +178,13 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     this.timeLine = null;
     //this._deffereds = [];
 
-    this._selectedType = [NDVITimelineManager.NDVI16, NDVITimelineManager.RGB_HR, NDVITimelineManager.NDVI16, NDVITimelineManager.NDVI16, NDVITimelineManager.FIRES_POINTS, NDVITimelineManager.RGB753];
+    this._selectedType = [
+        NDVITimelineManager.NDVI16,
+        NDVITimelineManager.RGB_HR,
+        NDVITimelineManager.NDVI16,
+        NDVITimelineManager.NDVI16,
+        NDVITimelineManager.FIRES_POINTS,
+        NDVITimelineManager.RGB753];
 
     //ассоциативный по годам массив в котором хранятся:
     //radio - указатель на элемент переключателя,
@@ -267,11 +273,13 @@ NDVITimelineManager.CONDITIONS_OF_VEGETATION = 106;
 NDVITimelineManager.INHOMOGENUITY = 107;
 NDVITimelineManager.MEAN_VCI = 108;
 NDVITimelineManager.RATING = 109;
+NDVITimelineManager.LANDSAT = 110;
 NDVITimelineManager.RGB753 = 2000;
 NDVITimelineManager.RGB432 = 2001;
 NDVITimelineManager.FIRES_POINTS = 5000;
 
 NDVITimelineManager.prodTypes = [];
+NDVITimelineManager.prodTypes[NDVITimelineManager.LANDSAT] = "LANDSAT";
 NDVITimelineManager.prodTypes[NDVITimelineManager.RGB753] = "RGB753";
 NDVITimelineManager.prodTypes[NDVITimelineManager.RGB432] = "RGB432";
 
@@ -406,6 +414,7 @@ NDVITimelineManager.minZoomOption = {};
 NDVITimelineManager.minZoomOption[NDVITimelineManager.NDVI_HR] = NDVITimelineManager.MIN_ZOOM_HR;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.NDVI16] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.RGB_HR] = NDVITimelineManager.MIN_ZOOM + 1;
+NDVITimelineManager.minZoomOption[NDVITimelineManager.LANDSAT] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.RGB2_HR] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.QUALITY16] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.NDVI_MEAN] = NDVITimelineManager.MIN_ZOOM_HR;
@@ -3204,7 +3213,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
             //Показать снимок
             that._prepareRedraw();
             var selType = that._selectedType[that._selectedCombo];
-            var isDefault = (selType == NDVITimelineManager.RGB_HR || selType == NDVITimelineManager.NDVI16);
+            var isDefault = (selType == NDVITimelineManager.RGB_HR || selType == NDVITimelineManager.NDVI16 || selType == NDVITimelineManager.LANDSAT);
 
             if (isDefault || this._activatePermalink) {
                 that._showRedraw();
@@ -3972,7 +3981,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
     }
 
     if (this._combo[4] && this._combo[4].rk[0] == "LANDSAT") {
-        that._selectedType[4] = NDVITimelineManager.RGB_HR;
+        that._selectedType[4] = NDVITimelineManager.LANDSAT;
     }
 
     if (this._combo[5] && this._combo[5].rk[0] == "SENTINEL") {
