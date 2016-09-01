@@ -379,7 +379,7 @@ NDVITimelineManager.prototype.setWidth = function (width, right) {
 
 //задаю соответствия слоя из this._layersLegend и радиокнопки вручную
 NDVITimelineManager._comboRadios = [{
-    "MODIS": "qualityRadio"
+    "MODIS_QUALITY": "qualityRadio"
 }, {
     "HR": "ndviRadio_hr",
     "RGB2": "rgbRadio2",
@@ -1837,19 +1837,11 @@ NDVITimelineManager.prototype._showNDVI16 = function () {
 
             var dateCn = this._layersLegend[rk[i]].dateColumnName;
             var dateId = layer._gmx.tileAttributeIndexes[dateCn];
-            var prodtypeId = layer._gmx.tileAttributeIndexes["prodtype"];
 
             layer.setFilter(function (item) {
                 var p = item.properties;
-                //КАК-ТО НАДДО ЭТО ВЫНЕСТИ В КОНФИГ!
-                if (that._selectedCombo == 2 || that._selectedCombo == 4 || that._selectedCombo == 5) {
-                    if (p[dateId] == that._selectedDateL) {
-                        return true;
-                    }
-                } else {
-                    if (p[dateId] == that._selectedDateL && p[prodtypeId] == "NDVI16") {
-                        return true;
-                    }
+                if (p[dateId] == that._selectedDateL) {
+                    return true;
                 }
                 return false;
             });
@@ -1863,7 +1855,7 @@ NDVITimelineManager.prototype._showNDVI16 = function () {
 
 NDVITimelineManager.prototype._showQUALITY16 = function () {
 
-    var layer = this.layerCollection[this._layersLegend.MODIS.name];
+    var layer = this.layerCollection[this._layersLegend.MODIS_QUALITY.name];
     this.hideSelectedLayer();
 
     this._selectedOption = "QUALITY16";
@@ -1872,12 +1864,11 @@ NDVITimelineManager.prototype._showQUALITY16 = function () {
 
     var dateCn = this._layersLegend[this._combo[this._selectedCombo].rk[0]].dateColumnName;
     var dateId = layer._gmx.tileAttributeIndexes[dateCn];
-    var prodtypeId = layer._gmx.tileAttributeIndexes["prodtype"];
 
     var that = this;
     layer.setFilter(function (item) {
         var p = item.properties;
-        if (p[dateId] == that._selectedDateL && p[prodtypeId] == "QUALITY16") {
+        if (p[dateId] == that._selectedDateL) {
             return true;
         }
         return false;
@@ -2096,8 +2087,11 @@ NDVITimelineManager.prototype._setExistentProds = function (params, success) {
     this.existentShots = {};
 
     function sendRequest(filenames, layerName, radioId, defIndex, sender) {
-        var identField = ((radioId == "rgbRadio2" || radioId == "rgbRadio") ? "SCENEID" : "filename");
-        identField = (radioId == "ndviRadio_hr" || radioId == "classificationRadio" ? "sceneid" : identField);
+        var identField = that._layerConfigs[layerName].sceneFieldName;
+        if (!identField) {
+            var identField = ((radioId == "rgbRadio2" || radioId == "rgbRadio") ? "SCENEID" : "filename");
+            identField = (radioId == "ndviRadio_hr" || radioId == "classificationRadio" ? "sceneid" : identField);
+        }
 
         var query = "";
         for (var i = 0; i < filenames.length; i++) {
@@ -4694,43 +4688,38 @@ NDVITimelineManager.prototype._filterTimeline = function (elem, layer) {
             NDVITimelineManager.fires_ht[name] = elem;
             return true;
         }
-    } else {
-        if (this._combo[this._selectedCombo].resolution === "landsat") {
-            var isQl = $("#chkQl").is(':checked');
-            var gmxRKid = layer._gmx.tileAttributeIndexes['GMX_RasterCatalogID'];
-            var ql = (prop[gmxRKid].length == 0);
-            var showQuicklooks = this._layerConfigs[layer.options.layerID].showQuicklooks;
+    } else if (this._combo[this._selectedCombo].resolution === "landsat") {
+        var isQl = $("#chkQl").is(':checked');
+        var gmxRKid = layer._gmx.tileAttributeIndexes['GMX_RasterCatalogID'];
+        var ql = (prop[gmxRKid].length == 0);
+        var showQuicklooks = this._layerConfigs[layer.options.layerID].showQuicklooks;
 
-            if (isQl && showQuicklooks && ql) {
-                return true;
-            }
-
-            var cloudsId = this._layerConfigs[layer.options.layerID].cloudsField && (
-                layer._gmx.tileAttributeIndexes[this._layerConfigs[layer.options.layerID].cloudsField.toUpperCase()] ||
-                layer._gmx.tileAttributeIndexes[this._layerConfigs[layer.options.layerID].cloudsField.toLowerCase()]);
-
-            if (cloudsId) {
-                if (isQl && !showQuicklooks && !ql) {
-                    return true;
-                } else if (isQl && showQuicklooks && !ql) {
-                    return true;
-                } else if (prop[cloudsId] <= this._combo[this._selectedCombo].cloudsMin) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return true;
-            }
-        } else {
-            var prodtypeId = layer._gmx.tileAttributeIndexes['prodtype'];
-            if (!prodtypeId || this._ndviProdtypes.indexOf(prop[prodtypeId]) != -1) {
-                return true;
-            }
+        if (isQl && showQuicklooks && ql) {
+            return true;
         }
 
-        return false;
+        var cloudsId = this._layerConfigs[layer.options.layerID].cloudsField && (
+            layer._gmx.tileAttributeIndexes[this._layerConfigs[layer.options.layerID].cloudsField.toUpperCase()] ||
+            layer._gmx.tileAttributeIndexes[this._layerConfigs[layer.options.layerID].cloudsField.toLowerCase()]);
+
+        if (cloudsId) {
+            if (isQl && !showQuicklooks && !ql) {
+                return true;
+            } else if (isQl && showQuicklooks && !ql) {
+                return true;
+            } else if (prop[cloudsId] <= this._combo[this._selectedCombo].cloudsMin) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    } else {
+        return true;
     }
+
+    return false;
 };
 
 /* 
@@ -4757,8 +4746,7 @@ NDVITimelineManager.prototype._setLayerImageProcessing = function (layer, shotTy
 
 NDVITimelineManager.prototype._tileImageProcessing = function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info, shotType, layer) {
 
-    var prodType = info.geoItem.properties[layer._gmx.tileAttributeIndexes["prodtype"]],
-        layerPalette = this._layersLegend[shotType].palette,
+    var layerPalette = this._layersLegend[shotType].palette,
         url;
 
     if (shotType === "CLASSIFICATION") {
@@ -4770,7 +4758,7 @@ NDVITimelineManager.prototype._tileImageProcessing = function (dstCanvas, srcIma
             var q = layerPalette.quality,
                 n = layerPalette.ndvi;
 
-            if (q && prodType === q.prodtype) {
+            if (q) {
                 url = q.url
             } else {
                 url = n.url
@@ -4839,11 +4827,6 @@ NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanva
                info.destination.x, info.destination.y, that.lmap.getZoom(),
                dstCanvas,
                function (r, g, b, a) {
-
-                   if (shotType === "MODIS" && that._selectedType[that._selectedCombo] != NDVITimelineManager.QUALITY16) {
-                       r += 101;
-                   }
-
                    var pal = palette[r];
                    if (pal) {
                        return [pal.partRed, pal.partGreen, pal.partBlue, 255];
