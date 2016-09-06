@@ -3838,7 +3838,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         '<option value="' + 1 + '">' + this._combo[1].caption + '</option>' +
         '<option value="' + 0 + '">' + this._combo[0].caption + '</option>' +
         '<option value="' + 2 + '">' + this._combo[2].caption + '</option>' +
-        '<option value="' + 3 + '">' + this._combo[3].caption + '</option>' +
+        ((this._combo[3] && '<option value="' + 3 + '">' + this._combo[3].caption + '</option>') || "") +
         ((this._combo[4] && '<option value="' + 4 + '" selected>' + this._combo[4].caption + '</option>') || "") +
         ((this._combo[5] && '<option value="' + 5 + '">' + this._combo[5].caption + '</option>') || "") +
         '</select>';
@@ -3956,43 +3956,19 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         that._redrawShots();
     });
 
-    if (this._combo[2] && this._combo[2].rk[0] == "MOD098DT-test") {
-        that._selectedType[2] = NDVITimelineManager.NDVI16;
-    }
-
-    if (this._combo[3] && this._combo[3].rk[0] == "FIRES") {
-        this.addRadio("firstPanel_3", "Термоточки", "shotsOptions", "firesPoints", 3, true, function (r) {
+    if (this._combo[2] && this._combo[2].rk[0] == "FIRES") {
+        this.addRadio("firstPanel_2", "Термоточки", "shotsOptions", "firesPoints", 2, true, function (r) {
             that._selectedType[that._selectedCombo] = NDVITimelineManager.FIRES_POINTS;
             that._redrawShots();
         }, false, true);
     }
 
-    if (this._combo[4] && this._combo[4].rk[0] == "MOD098DT-test") {
-        that._selectedType[4] = NDVITimelineManager.NDVI16;
+    if (this._combo[3] && this._combo[3].rk[0] == "LANDSAT") {
+        that._selectedType[3] = NDVITimelineManager.LANDSAT;
     }
 
-    if (this._combo[5] && this._combo[5].rk[0] == "MOD098DAq-test") {
-        that._selectedType[5] = NDVITimelineManager.NDVI16;
-    }
-
-    if (this._combo[4] && this._combo[4].rk[0] == "RGB753") {
-        this.addRadio("firstPanel_5", "7-5-3", "shotsOptions", "rgbRadio753", 5, true, function (r) {
-            that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB753;
-            that._redrawShots();
-        }, false, true);
-
-        this.addRadio("firstPanel_5", "4-3-2", "shotsOptions", "rgbRadio432", 5, true, function (r) {
-            that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB432;
-            that._redrawShots();
-        });
-    }
-
-    if (this._combo[4] && this._combo[4].rk[0] == "LANDSAT") {
-        that._selectedType[4] = NDVITimelineManager.LANDSAT;
-    }
-
-    if (this._combo[5] && this._combo[5].rk[0] == "SENTINEL") {
-        that._selectedType[5] = NDVITimelineManager.RGB_HR;
+    if (this._combo[4] && this._combo[4].rk[0] == "SENTINEL") {
+        that._selectedType[4] = NDVITimelineManager.RGB_HR;
     }
 
     for (var i = 0; i < this._combo.length; i++) {
@@ -4760,7 +4736,7 @@ NDVITimelineManager.prototype._tileImageProcessing = function (dstCanvas, srcIma
 
             if (n) {
                 url = n.url
-            } else if(q){
+            } else if (q) {
                 url = q.url
             }
         }

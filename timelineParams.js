@@ -4,16 +4,21 @@
     layers: {
         "MODIS": {
             viewTimeline: true,
-            name: "3AD0B4A220D349848A383D828781DF4C",
-            dateColumnName: "lastday",
+            name: "A10C86983EB140019725D00CE3A58833",
+            dateColumnName: "date",
             palette: {
                 ndvi: {
                     url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
-                    prodtype: "NDVI16"
-                },
+                }
+            }
+        },
+        "MODIS_QUALITY": {
+            sceneFieldName: "sceneid",
+            name: "3471393ADBD546EC9E6D7935F30EA7BA",
+            dateColumnName: "date",
+            palette: {
                 quality: {
                     url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg',
-                    prodtype: "QUALITY16"
                 }
             }
         },
@@ -33,6 +38,8 @@
         },
         "SENTINEL": {
             viewTimeline: true,
+            showQuicklooks: true,
+            cloudsField: "clouds",
             name: "58A10C3522764BA69D2EA75B02E8A210",
             dateColumnName: "acqdate"
         },
@@ -47,11 +54,15 @@
             }
         },
         "RGB": {
+            showQuicklooks: true,
             viewTimeline: true,
+            cloudsField: "CLOUDS",
             name: "04DDB23F49F84B9A9122CBA6BC26D3ED",
             dateColumnName: "ACQDATE"
         },
         "RGB2": {
+            showQuicklooks: true,
+            cloudsField: "CLOUDS",
             name: "47A9D4E5E5AE497A8A1A7EA49C7FC336",
             dateColumnName: "ACQDATE"
         },
@@ -70,40 +81,18 @@
             dateColumnName: "DateTime",
             timelineMode: "screen",
             viewTimeline: true
-        },
-        "OPERATIVE_MODIS_AQUA_NDVI": {
-            viewTimeline: true,
-            name: "D0EC9464BFBE4A09BA0EEDF983CBBA08",
-            dateColumnName: "acqdate",
-            palette: {
-                ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
-                }
-            }
-        },
-        "OPERATIVE_MODIS_TERRA_NDVI": {
-            viewTimeline: true,
-            name: "6CCDFB87663D431CA0B22CCDE4892859",
-            dateColumnName: "acqdate",
-            palette: {
-                ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
-                }
-            }
         }
     },
     combo: [{
         resolution: "modis",
         caption: "Композиты 16 дн",
-        rk: ["MODIS"]
+        rk: ["MODIS", "MODIS_QUALITY"]
     }, {
         resolution: "landsat",
         clouds: true,
+        cloudsMin: 50,
         caption: "Космосъемка 10-30 м",
         rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI"]
-    }, {
-        caption: "Космосъемка 250 м",
-        rk: ["OPERATIVE_MODIS_AQUA_NDVI", "OPERATIVE_MODIS_TERRA_NDVI"]
     }, {
         caption: "Пожары",
         rk: ["FIRES"]
