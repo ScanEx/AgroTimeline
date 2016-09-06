@@ -4758,10 +4758,10 @@ NDVITimelineManager.prototype._tileImageProcessing = function (dstCanvas, srcIma
             var q = layerPalette.quality,
                 n = layerPalette.ndvi;
 
-            if (q) {
-                url = q.url
-            } else {
+            if (n) {
                 url = n.url
+            } else if(q){
+                url = q.url
             }
         }
 
