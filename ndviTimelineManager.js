@@ -9,6 +9,7 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     //только лишь изменяет функциональность
     this._userRole = userRole;
 
+    this._timelineVisibilityLayerID = params.timelineVisibilityLayerID;
     this._exMap = params.exMap;
     this._layersLegend = params.layers;
 
@@ -353,12 +354,6 @@ NDVITimelineManager.prototype.setWidth = function (width, right) {
     //background color    
     $(".ntTimelineBackground").attr("style", "width:" + frameWidth + "px !important");
 
-    if (this.lmap.getZoom() <= NDVITimelineManager.MIN_ZOOM) {
-        $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 10);
-    } else {
-        $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 125);
-    }
-
     this.setTimeLineYear(this._selectedYear);
 
     $(".ntRightPanel").css("width", width - 422);
@@ -372,8 +367,10 @@ NDVITimelineManager.prototype.setWidth = function (width, right) {
 
     if (!vis) {
         this.timeLine.toggleVisibility(false);
+        $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 10);
     } else {
         this.timeLine.toggleVisibility(true);
+        $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 130);
     }
 };
 
@@ -696,6 +693,33 @@ NDVITimelineManager.prototype._main = function () {
         for (var i in cosmosagro.layersHash) {
             this.layerCollection[i] = cosmosagro.layersHash[i];
         }
+    } else if (cm) {
+        var layersHash = cm.get('layersHash');
+        for (var i in layersHash) {
+            this.layerCollection[i] = layersHash[i];
+        }
+    }
+
+    if (this._timelineVisibilityLayerID) {
+        var that = this;
+        this._timelineVisibilityLayer = that.layerCollection[this._timelineVisibilityLayerID];
+
+        var that = this;
+        this._timelineVisibilityLayer.on("add", function () {
+            //$(".ntAttentionMessage").css("display", "block");
+            that.switcher._element.style.display = "block";
+            that.applyZoomRestriction(that.lmap.getZoom());
+            that.resize();
+            that.switcher.show();
+        });
+
+        this._timelineVisibilityLayer.on("remove", function () {
+            that.switcher.hide();
+            that.applyZoomRestriction(that.lmap.getZoom());
+            that.resize();
+            $(".ntAttentionMessage").css("display", "none");
+            that.switcher._element.style.display = "none";
+        });
     }
 
     this.hideLoading();
@@ -796,6 +820,16 @@ NDVITimelineManager.prototype._main = function () {
     this.startFinishLoading();
 
     this.refreshOptionsDisplay();
+
+    if (this._timelineVisibilityLayerID && !this._timelineVisibilityLayer._map) {
+        that.switcher.hide();
+        that.applyZoomRestriction(that.lmap.getZoom());
+        $(".ntAttentionMessage").css("display", "none");
+        that.switcher._element.style.display = "none";
+        that.resize();
+    } else {
+        that.applyZoomRestriction(that.lmap.getZoom());
+    }
 };
 
 NDVITimelineManager.prototype.resize = function () {
@@ -847,6 +881,8 @@ NDVITimelineManager.prototype._initSwitcher = function () {
                 that._manuallyCollapsed = true;
                 that._manuallyUnfolded = false;
             }
+
+            //that.applyZoomRestriction(that.lmap.getZoom());
 
             if (that.lmap.getZoom() <= NDVITimelineManager.MIN_ZOOM) {
                 that._attDiv.style.display = "block";
@@ -1992,84 +2028,99 @@ NDVITimelineManager.prototype.hodeSelectedLayers = function () {
 };
 
 NDVITimelineManager.prototype.applyHRZoomREstriction = function (zoom) {
-    this.meanNdviNoDataLabel.style.display = "none";
 
-    if (this._combo[this._selectedCombo].resolution == "landsat"/*this._selectedCombo == 1*/) {
-        if (zoom >= NDVITimelineManager.MIN_ZOOM_HR) {
-            this.showSelectedLayers();
+    if (!this._timelineVisibilityLayerID || this._timelineVisibilityLayerID && this._timelineVisibilityLayer._map) {
 
-            this.zoomRestrictionLabel.style.display = "none";
-            $(".ntHelp").removeClass("ntHelpLightOn")
+        this.meanNdviNoDataLabel.style.display = "none";
 
-            this.updateRadioLabelsActivity();
+        if (this._combo[this._selectedCombo].resolution == "landsat") {
+            if (zoom >= NDVITimelineManager.MIN_ZOOM_HR) {
+                this.showSelectedLayers();
 
-        } else {
-            if (zoom >= NDVITimelineManager.MIN_ZOOM) {
-                if (this.selectedDiv && this._combo[this._selectedCombo].rk.length > 1) {
-                    this.zoomRestrictionLabel.style.display = "block";
-                    $(".ntHelp").addClass("ntHelpLightOn")
-                }
-            } else {
                 this.zoomRestrictionLabel.style.display = "none";
                 $(".ntHelp").removeClass("ntHelpLightOn")
-                if (this.selectedDiv) {
-                    //this.hideSelectedLayers();
 
-                    for (var l in this._visibleFieldsLayers) {
-                        var ll = this.layerCollection[l];
-                        if (ll.clearTilePattern) {
-                            ll.clearTilePattern();
+                this.updateRadioLabelsActivity();
+
+            } else {
+                if (zoom >= NDVITimelineManager.MIN_ZOOM) {
+                    if (this.selectedDiv && this._combo[this._selectedCombo].rk.length > 1) {
+                        this.zoomRestrictionLabel.style.display = "block";
+                        $(".ntHelp").addClass("ntHelpLightOn")
+                    }
+                } else {
+                    this.zoomRestrictionLabel.style.display = "none";
+                    $(".ntHelp").removeClass("ntHelpLightOn")
+                    if (this.selectedDiv) {
+                        //this.hideSelectedLayers();
+
+                        for (var l in this._visibleFieldsLayers) {
+                            var ll = this.layerCollection[l];
+                            if (ll.clearTilePattern) {
+                                ll.clearTilePattern();
+                            }
                         }
                     }
                 }
+                this.setRadioLabelActive_grey("ratingRadio", false);
+                this.setRadioLabelActive_grey("ndviRadio_hr", false);
+                this.setRadioLabelActive_grey("ndviMeanRadio", false);
+                this.setRadioLabelActive_grey("inhomogenuityRadio", false);
+                this.setRadioLabelActive_grey("classificationRadio", false);
             }
-            this.setRadioLabelActive_grey("ratingRadio", false);
-            this.setRadioLabelActive_grey("ndviRadio_hr", false);
-            this.setRadioLabelActive_grey("ndviMeanRadio", false);
-            this.setRadioLabelActive_grey("inhomogenuityRadio", false);
-            this.setRadioLabelActive_grey("classificationRadio", false);
+        } else {
+            this.zoomRestrictionLabel.style.display = "none";
+            $(".ntHelp").removeClass("ntHelpLightOn")
         }
-    } else {
-        this.zoomRestrictionLabel.style.display = "none";
-        $(".ntHelp").removeClass("ntHelpLightOn")
     }
+
+    return true;
 };
 
 NDVITimelineManager.prototype.applyZoomRestriction = function (zoom) {
 
-    this.applyHRZoomREstriction(zoom);
-
-    if (zoom > NDVITimelineManager.MIN_ZOOM) {
-
-        this.setFilenameCaption(this.selectedShotFilename);
-        this.removeShading();
-
-        this._attDiv.style.display = "none";
-
-        if (!this._manuallyCollapsed || (this._prevZoom == NDVITimelineManager.MIN_ZOOM)) {
-            this.switcher.show();
-        }
-
-        if (!this._firstTimeCombo[this._selectedCombo]) {
-            this.showLoadingSmall();
-        }
-
-        if (this._prevZoom <= NDVITimelineManager.MIN_ZOOM) {
-            this.bindTimelineCombo(this._selectedCombo);
-        }
-
-        return true;
+    var show = false;
+    if (this._timelineVisibilityLayerID) {
+        this._timelineVisibilityLayer._map && this.applyHRZoomREstriction(zoom);
+        show = (this._timelineVisibilityLayer._map && zoom > NDVITimelineManager.MIN_ZOOM);
     } else {
-        this.setFilenameCaption(NDVITimelineManager.ATTENTION_DIV);
-        this.shadeTimeline();
+        this.applyHRZoomREstriction(zoom);
+        show = (zoom > NDVITimelineManager.MIN_ZOOM);
+    }
 
-        if (this._manuallyCollapsed) {
-            this._attDiv.style.display = "block";
+    if (this._timelineVisibilityLayerID && show || !this._timelineVisibilityLayerID) {
+        if (zoom > NDVITimelineManager.MIN_ZOOM) {
+
+            this.setFilenameCaption(this.selectedShotFilename);
+            this.removeShading();
+
+            this._attDiv.style.display = "none";
+
+            if (!this._manuallyCollapsed || (this._prevZoom == NDVITimelineManager.MIN_ZOOM)) {
+                this.switcher.show();
+            }
+
+            if (!this._firstTimeCombo[this._selectedCombo]) {
+                this.showLoadingSmall();
+            }
+
+            if (this._prevZoom <= NDVITimelineManager.MIN_ZOOM) {
+                this.bindTimelineCombo(this._selectedCombo);
+            }
+
+            return true;
+        } else {
+            this.setFilenameCaption(NDVITimelineManager.ATTENTION_DIV);
+            this.shadeTimeline();
+
+            if (this._manuallyCollapsed) {
+                this._attDiv.style.display = "block";
+            }
+
+            this.switcher.hide();
+
+            return false;
         }
-
-        this.switcher.hide();
-
-        return false;
     }
 };
 
@@ -2842,6 +2893,8 @@ NDVITimelineManager.prototype.refreshSelections = function () {
 };
 
 NDVITimelineManager.prototype.initializeTimeline = function (show) {
+    var that = this;
+
     if (this.timeLine) {
         this.timeLine.toggleVisibility(show);
     } else {
@@ -2849,9 +2902,9 @@ NDVITimelineManager.prototype.initializeTimeline = function (show) {
         this.timeLine = new nsGmx.TimelineControl(lmap, { position: "bottomright" });
         this.timeLine.setMapMode("selected");
         this.timeLine.setTimelineMode("center");
-        if (lmap.getZoom() > NDVITimelineManager.MIN_ZOOM)
+        if (lmap.getZoom() > NDVITimelineManager.MIN_ZOOM) {
             this.timeLine.toggleVisibility(true);
-        else
+        } else
             this.timeLine.toggleVisibility(false);
         this.timeLine.setControlsVisibility({
             "showModeControl": false,
@@ -2870,7 +2923,6 @@ NDVITimelineManager.prototype.initializeTimeline = function (show) {
         //обсерверы на КР, нужно для определения кол-ва снимков,  и окончания загрузки на таймлайн
         this.initializeShotsObserver();
 
-        var that = this;
         this.timeLine.addFilter(function (elem, a, b, layer) {
             return that._filterTimeline(elem, layer);
         });
