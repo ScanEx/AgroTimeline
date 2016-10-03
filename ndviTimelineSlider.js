@@ -228,10 +228,14 @@ var NDVITimelineSlider = function (id, events, lmap) {
 
     pointer.onmouseover = function () {
         mouseOver = true;
+        lmap && lmap.dragging.disable();
     };
 
     pointer.onmouseleave = function () {
         mouseOver = false;
+        if (!slide) {
+            lmap && lmap.dragging.enable();
+        }
     };
 
     this.setPeriodSelector = function (period) {
@@ -336,6 +340,7 @@ var NDVITimelineSlider = function (id, events, lmap) {
             }
             slide = false;
         }
+        lmap && lmap.dragging.enable();
     };
 
     function onMouseDown() {

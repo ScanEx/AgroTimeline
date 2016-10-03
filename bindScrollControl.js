@@ -18,6 +18,7 @@ function bindScrollControl(id, lmap) {
             mouseX = e.clientX;
             scroll = true;
             document.body.classList.add("ntDisselect");
+            lmap && lmap.dragging.disable();
         }
     };
 
@@ -26,6 +27,7 @@ function bindScrollControl(id, lmap) {
     element.onmouseup = function () {
         scroll = false;
         document.body.classList.remove("ntDisselect");
+        lmap && lmap.dragging.enable();
     };
 
     element.onmouseover = function () {
@@ -45,6 +47,7 @@ function bindScrollControl(id, lmap) {
     $(document.body).on("mouseup", function (e) {
         if (scroll) {
             scroll = false;
+            lmap && lmap.dragging.enable();
         }
     });
 
