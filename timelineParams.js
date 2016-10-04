@@ -1,7 +1,6 @@
 ﻿var timelineParams = {
     proxyUrl: '',
     exMap: { host: "maps.kosmosnimki.ru", name: "PLDYO" },
-    timelineVisibilityLayerID: "12DC680F9C4E411D8EFB29C3100730F6",
     layers: {
         "MODIS": {
             viewTimeline: true,
@@ -22,8 +21,7 @@
                     url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg',
                 }
             }
-        },
-        "HR": {
+        }, "HR": {
             name: "2E9D38607BB4456AB9C04E2248ED5015",
             dateColumnName: "acqdate",
             palette: {
@@ -38,9 +36,10 @@
             }
         },
         "SENTINEL": {
-            viewTimeline: true,
+            cloudsMin: 100,
             showQuicklooks: true,
             cloudsField: "clouds",
+            viewTimeline: true,
             name: "58A10C3522764BA69D2EA75B02E8A210",
             dateColumnName: "acqdate"
         },
@@ -54,10 +53,16 @@
                 }
             }
         },
+        "SENTINEL_IR": {
+            showQuicklooks: true,
+            cloudsField: "clouds",
+            name: "12ECA8F4ED7B487A913ADBD4072B605B",
+            dateColumnName: "acqdate"
+        },
         "RGB": {
             showQuicklooks: true,
-            viewTimeline: true,
             cloudsField: "CLOUDS",
+            viewTimeline: true,
             name: "04DDB23F49F84B9A9122CBA6BC26D3ED",
             dateColumnName: "ACQDATE"
         },
@@ -82,18 +87,51 @@
             dateColumnName: "DateTime",
             timelineMode: "screen",
             viewTimeline: true
+        },
+        "MODIS143": {
+            viewTimeline: true,
+            name: "509762F05B0044D8A7CCC9D3C2383365",
+            dateColumnName: "acqdate"
+        },
+        "EVERYDAY250": {
+            viewTimeline: true,
+            name: "02BA2ACF5B26491681EBAD888771FC55",
+            dateColumnName: "date",
+            palette: {
+                ndvi: {
+                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                }
+            }
+        },
+        "EVERYDAY250_QUALITY": {
+            sceneFieldName: "sceneid",
+            name: "94B096994CBA47D889C1077C669BC466",
+            dateColumnName: "date",
+            palette: {
+                quality: {
+                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg',
+                }
+            }
         }
     },
     combo: [{
         resolution: "modis",
-        caption: "Композиты 16 дн",
+        caption: "Композиты/16дн, 250м",
         rk: ["MODIS", "MODIS_QUALITY"]
     }, {
         resolution: "landsat",
         clouds: true,
         cloudsMin: 50,
         caption: "Космосъемка 10-30 м",
-        rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI"]
+        rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI", "SENTINEL_IR"]
+    }, {
+        caption: "Космосъемка 250 м",
+        resolution: "modis",
+        rk: ["MODIS143"]
+    }, {
+        caption: "Композиты/8дн, 250м",
+        resolution: "modis",
+        rk: ["EVERYDAY250", "EVERYDAY250_QUALITY"]
     }, {
         caption: "Пожары",
         rk: ["FIRES"]

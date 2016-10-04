@@ -3372,6 +3372,11 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
 
                 if (that.isSentinel) {
                     that.setRadioLabelActive_grey("rgbRadio2", true);
+                    if (!that.existentShots.rgbRadio && that._selectedOption == "SENTINEL_IR") {
+                        that._selectedOption == "SENTINEL";
+                        that.setActiveRadio("rgbRadio2");
+                        that._showRedraw();
+                    }
                 }
 
                 that.applyHRZoomREstriction(that.lmap.getZoom());
