@@ -59,7 +59,7 @@ ThematicStrategy.prototype._constuctRequestsArray = function (GMX_RasterCatalogI
             (function (ii) {
                 var query = "[SCENEID]='" + sceneIdArr[ii] + "'";
 
-                sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", {
+                sendCrossDomainPostRequest("http://maps.kosmosnimki.ru/VectorLayer/Search.ashx", {
                     'query': query,
                     'geometry': true,
                     'layer': catalog,
@@ -335,7 +335,7 @@ ThematicHandler.prototype._applyLayer = function (layer) {
     var that = this;
 
     //геометрия снимков
-    sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", {
+    sendCrossDomainPostRequest("http://maps.kosmosnimki.ru/VectorLayer/Search.ashx", {
         'query': query,
         'geometry': true,
         'layer': this.katalogName,

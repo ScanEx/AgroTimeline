@@ -76,7 +76,7 @@ MeanVCIManager.prototype.loadBorderFeature = function (feature) {
     (MeanVCIManager.ndviLayer.prodtypeColumnName ? ("AND([" + MeanVCIManager.ndviLayer.prodtypeColumnName + "]='" + MeanVCIManager.ndviLayer.prodtype + "')") : ""));
 
 
-    sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", {
+    sendCrossDomainPostRequest("http://maps.kosmosnimki.ru/VectorLayer/Search.ashx", {
         'border': JSON.stringify(gmxAPI.merc_geometry(feature.geometry)),
         'query': q,
         'geometry': false,

@@ -277,14 +277,14 @@ shared.createPaletteHR = function (palette) {
     }
 };
 
-shared.loadPaletteSync = function (url, callback) {
+shared.loadPaletteSync = function (url, callback, paletteArr) {
     var def = new $.Deferred();
     $.ajax({
         url: url,
         type: 'GET',
         dataType: "xml"
     }).then(function (xml) {
-        var palette = [];
+        var palette = paletteArr || [];
         $(xml).find("ENTRY").each(function () {
             var code = $(this).find('Code').text(),
             partRed = $(this).find('Color > Part_Red').text(),
@@ -309,14 +309,16 @@ shared.getFeatures = function (layerId, sender, callback, errorCallback) {
     if (shared.GeometryCache[layerId] && shared.GeometryBounds[layerId].equals(nsGmx.gmxMap.layersByID[layerId].getBounds())) {
         callback(shared.GeometryCache[layerId]);
     } else {
-        var url = window.serverBase + "VectorLayer/Search.ashx?WrapStyle=func" +
+        var url = "http://maps.kosmosnimki.ru/VectorLayer/Search.ashx?WrapStyle=func" +
                   "&layer=" + layerId +
                   "&geometry=true";
 
         var that = this;
         sendCrossDomainJSONRequest(url, function (response) {
 
-            shared.GeometryBounds[layerId] = nsGmx.gmxMap.layersByID[layerId].getBounds();
+            if (nsGmx && nsGmx.gmxMap) {
+                shared.GeometryBounds[layerId] = nsGmx.gmxMap.layersByID[layerId].getBounds();
+            }
 
             var res = response.Result;
             if (res.values.length < 250) {

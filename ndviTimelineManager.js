@@ -1940,10 +1940,18 @@ NDVITimelineManager.prototype._showRATING = function () {
 NDVITimelineManager.prototype._showNDVI_MEAN = function () {
     if (this.lmap.getZoom() >= NDVITimelineManager.MIN_ZOOM_HR) {
 
-        if (this.isSentinel) {
-            this._themesHandler.katalogName = this._layersLegend.SENTINEL_NDVI.name;
+        if (this._selectedYear == 2016) {
+            if (this.isSentinel) {
+                this._themesHandler.katalogName = this._layersLegend.SENTINEL2016.name;
+            } else {
+                this._themesHandler.katalogName = this._layersLegend.LANDSAT2016.name;
+            }
         } else {
-            this._themesHandler.katalogName = this._layersLegend.HR.name;
+            if (this.isSentinel) {
+                this._themesHandler.katalogName = this._layersLegend.SENTINEL_NDVI.name;
+            } else {
+                this._themesHandler.katalogName = this._layersLegend.HR.name;
+            }
         }
 
         this.hideSelectedLayer();
@@ -3309,8 +3317,16 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                                 sceneids.push(NDVITimelineManager._normalizeFilename(that._comboFilenames[that._selectedCombo][j], NDVITimelineManager._rkId["HR"]));
                             }
 
+                            var name = that._layersLegend[rki].name;
+                            if (this._selectedYear == 2016 && rki == "HR") {
+                                if (this.isSentinel) {
+                                    name = this._layersLegend.SENTINEL2016.name;
+                                } else {
+                                    name = this._layersLegend.LANDSAT2016.name;
+                                }
+                            }
                             params.push({
-                                "name": that._layersLegend[rki].name,
+                                "name": name,
                                 "filenames": filenames,
                                 "radioId": NDVITimelineManager._comboRadios[that._selectedCombo][rki]
                             });
@@ -4803,9 +4819,14 @@ NDVITimelineManager.prototype._setLayerImageProcessing = function (layer, shotTy
         var q = layerPalette.quality,
             n = layerPalette.ndvi,
             c = layerPalette.classification;
-        n && (this._palettes[n.url] = this._palettes[n.url] || shared.loadPaletteSync(n.url));
-        q && (this._palettes[q.url] = this._palettes[q.url] || shared.loadPaletteSync(q.url));
-        c && (this._palettes[c.url] = this._palettes[c.url] || shared.loadPaletteSync(c.url));
+
+        n && (this._palettes[n.url] = []);
+        q && (this._palettes[q.url] = []);
+        c && (this._palettes[c.url] = []);
+
+        n && (shared.loadPaletteSync(n.url, null, this._palettes[n.url]));
+        q && (shared.loadPaletteSync(q.url, null, this._palettes[q.url]));
+        c && (shared.loadPaletteSync(c.url, null, this._palettes[c.url]));
         var that = this;
         layer.setRasterHook(
             function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
@@ -4850,70 +4871,102 @@ NDVITimelineManager.checkGreyImageData = function (data) {
 
 NDVITimelineManager.prototype._applyClassificationPalette = function (url, dstCanvas, srcCanvas, info) {
     var that = this;
-    this._palettes[url] = this._palettes[url] || shared.loadPaletteSync(url);
-    this._palettes[url].then(function (palette) {
-        var canvas = document.createElement("canvas");
-        var w = 256,
-            h = 256;
-        canvas.width = w;
-        canvas.height = h;
-        var context = canvas.getContext('2d');
-        context.drawImage(srcCanvas, 0, 0, w, h);
-        var imgd = context.getImageData(0, 0, w, h);
-        var pix = imgd.data;
+    var palette = this._palettes[url];
+    var canvas = document.createElement("canvas");
+    var w = 256,
+        h = 256;
+    canvas.width = w;
+    canvas.height = h;
+    var context = canvas.getContext('2d');
+    context.drawImage(srcCanvas, 0, 0, w, h);
+    var imgd = context.getImageData(0, 0, w, h);
+    var pix = imgd.data;
 
-        if (NDVITimelineManager.checkGreyImageData(pix)) {
-            shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-               info.destination.x, info.destination.y, that.lmap.getZoom(),
-               dstCanvas,
-               function (r, g, b, a) {
-                   var px = r;
-                   var pal = palette[px];
-                   if (pal !== undefined) {
-                       if (r == 0 && g == 0 && b == 0) {
-                           return [0, 179, 255, 255];
-                       } else {
-                           return [pal.partRed, pal.partGreen, pal.partBlue, 255];
-                       }
+    if (NDVITimelineManager.checkGreyImageData(pix)) {
+        shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
+           info.destination.x, info.destination.y, that.lmap.getZoom(),
+           dstCanvas,
+           function (r, g, b, a) {
+               var px = r;
+               var pal = palette[px];
+               if (pal !== undefined) {
+                   if (r == 0 && g == 0 && b == 0) {
+                       return [0, 179, 255, 255];
+                   } else {
+                       return [pal.partRed, pal.partGreen, pal.partBlue, 255];
                    }
-                   return [0, 0, 0, 255];
-               }, shared.NEAREST);
+               }
+               return [0, 0, 0, 255];
+           }, shared.NEAREST);
 
-        } else {
-            shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-               info.destination.x, info.destination.y, that.lmap.getZoom(),
-               dstCanvas, null, shared.NEAREST);
-        }
-    });
+    } else {
+        shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
+           info.destination.x, info.destination.y, that.lmap.getZoom(),
+           dstCanvas, null, shared.NEAREST);
+    }
+
+    //this._palettes[url] = this._palettes[url] || shared.loadPaletteSync(url);
+    //this._palettes[url].then(function (palette) {
+    //    var canvas = document.createElement("canvas");
+    //    var w = 256,
+    //        h = 256;
+    //    canvas.width = w;
+    //    canvas.height = h;
+    //    var context = canvas.getContext('2d');
+    //    context.drawImage(srcCanvas, 0, 0, w, h);
+    //    var imgd = context.getImageData(0, 0, w, h);
+    //    var pix = imgd.data;
+
+    //    if (NDVITimelineManager.checkGreyImageData(pix)) {
+    //        shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
+    //           info.destination.x, info.destination.y, that.lmap.getZoom(),
+    //           dstCanvas,
+    //           function (r, g, b, a) {
+    //               var px = r;
+    //               var pal = palette[px];
+    //               if (pal !== undefined) {
+    //                   if (r == 0 && g == 0 && b == 0) {
+    //                       return [0, 179, 255, 255];
+    //                   } else {
+    //                       return [pal.partRed, pal.partGreen, pal.partBlue, 255];
+    //                   }
+    //               }
+    //               return [0, 0, 0, 255];
+    //           }, shared.NEAREST);
+
+    //    } else {
+    //        shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
+    //           info.destination.x, info.destination.y, that.lmap.getZoom(),
+    //           dstCanvas, null, shared.NEAREST);
+    //    }
+    //});
 };
 
 NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanvas, shotType, info) {
     //если есть url, значит есть палитра.
     var that = this;
     if (url) {
-        this._palettes[url] = this._palettes[url] || shared.loadPaletteSync(url);
-        this._palettes[url].then(function (palette) {
-            shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-               info.destination.x, info.destination.y, that.lmap.getZoom(),
-               dstCanvas,
-               function (r, g, b, a) {
-                   var pal = palette[r];
-                   if (pal) {
-                       return [pal.partRed, pal.partGreen, pal.partBlue, 255];
-                   } else {
-                       if (r == 0 && g == 0 && b == 0) {
-                           return [0, 179, 255, 255];
-                       }
-                       if (r < 101) {
-                           return [0, 0, 0, 255];
-                       }
-                       if (r > 201) {
-                           return [255, 255, 255, 255];
-                       }
-                       return [0, 0, 0, 255];
-                   }
-               }, shared.NEAREST);
-        });
+        var palette = this._palettes[url];
+        shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
+        info.destination.x, info.destination.y, that.lmap.getZoom(),
+        dstCanvas,
+        function (r, g, b, a) {
+            var pal = palette[r];
+            if (pal) {
+                return [pal.partRed, pal.partGreen, pal.partBlue, 255];
+            } else {
+                if (r == 0 && g == 0 && b == 0) {
+                    return [0, 179, 255, 255];
+                }
+                if (r < 101) {
+                    return [0, 0, 0, 255];
+                }
+                if (r > 201) {
+                    return [255, 255, 255, 255];
+                }
+                return [0, 0, 0, 255];
+            }
+        }, shared.NEAREST);
     } else {
         dstCanvas = srcCanvas;
     }
