@@ -21,8 +21,11 @@
                     url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg',
                 }
             }
-        }, "HR": {
-            name: "2E9D38607BB4456AB9C04E2248ED5015",
+        },
+        "HR": {
+            name: "8288D69C7C0040EFBB7B7EE6671052E3",
+            mask: "A05BB0207AEE4CFD93C045BF71576FDE",
+            //name: "2E9D38607BB4456AB9C04E2248ED5015",
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
@@ -44,7 +47,9 @@
             dateColumnName: "acqdate"
         },
         "SENTINEL_NDVI": {
-            name: "2DFFD2B32C754770BD7D289AB8986CC4",
+            name: "EC68D0C097BE4F0B9E9DE4A0B9F591A2",
+            mask: "14A988CBC5FD424D9EBE23CEC8168150",
+            //name: "2DFFD2B32C754770BD7D289AB8986CC4",
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
@@ -65,6 +70,13 @@
             viewTimeline: true,
             name: "04DDB23F49F84B9A9122CBA6BC26D3ED",
             dateColumnName: "ACQDATE"
+        },
+        "LANDSAT_PREVIEW": {
+            viewTimeline: true,
+            showQuicklooks: false,
+            cloudsField: "clouds",
+            name: "D8CFA7D3A7AA4549B728B37010C051A2",
+            dateColumnName: "acqdate"
         },
         "RGB2": {
             showQuicklooks: true,
@@ -121,9 +133,9 @@
     }, {
         resolution: "landsat",
         clouds: true,
-        cloudsMin: 50,
+        cloudsMin: 100,
         caption: "Космосъемка 10-30 м",
-        rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI", "SENTINEL_IR"]
+        rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI", "SENTINEL_IR", "LANDSAT_PREVIEW"]
     }, {
         caption: "Космосъемка 250 м",
         resolution: "modis",

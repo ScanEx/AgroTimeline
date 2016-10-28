@@ -102,7 +102,8 @@ OptionsMenu.prototype.addItem = function (item) {
     var itemDiv = document.createElement("div");
     itemDiv.classList.add("ntOptionsMenuItemLine");
     item.lineId && (itemDiv.id = item.lineId);
-    item.class && itemDiv.classList.add(item.class);
+
+    item.class && $(itemDiv).addClass(item.class);
 
     if (item.type == "checkbox") {
         var id = (item.id || "nt-menu-item_" + (this.items.length - 1));

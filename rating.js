@@ -1,5 +1,5 @@
 var Rating = function (dataSource) {
-    this.dataSource = dataSource || "F28D06701EF2432DB21BFDB4015EF9CE";
+    this.dataSource = dataSource || "F7BF28C501264773B1E7C236D81E963C";
     this._layers = [];
     this._layersStyleData = {};
 };
@@ -64,16 +64,11 @@ Rating.prototype.start = function (layersArr, dateStr) {
 
     var that = this;
 
-    var useData2016 = false;
+    var useData2016 = true;
     var year = parseInt(dateStr.split('.')[2]);
-    if (year == 2016) {
-        //useData2016 = true;
-        //ÝÒÎ ÓÁÐÀÒÜ ÊÎÃÄÀ ÏÐÈÄÅÒ ÂÅÐÌß!
-        useData2016 = true;
-    }
 
     var url = "http://maps.kosmosnimki.ru/rest/ver1/layers/~/search?api_key=BB3RFQQXTR";
-    var tale = '&tables=[{"LayerName":"' + (useData2016 ? "F7BF28C501264773B1E7C236D81E963C" : that.dataSource) + '","Alias":"n"},{"LayerName":"88903D1BF4334AEBA79E1527EAD27F99","Alias":"f","Join":"Inner","On":"[n].[field_id] = [f].[gmx_id]"}]&' +
+    var tale = '&tables=[{"LayerName":"' +  that.dataSource + '","Alias":"n"},{"LayerName":"88903D1BF4334AEBA79E1527EAD27F99","Alias":"f","Join":"Inner","On":"[n].[field_id] = [f].[gmx_id]"}]&' +
         'columns=[{"Value":"[f].[layer_id]"},{"Value":"[f].[layer_gmx_id]"},' +
         (useData2016 ?
         '{"Value":"[n].[ndvi_mean_clear]"}]' :
@@ -81,7 +76,7 @@ Rating.prototype.start = function (layersArr, dateStr) {
     if (!useData2016) {
         url += "&query=[date]='" + dateStr + "' AND (" + layersStr + ") AND [completeness]>=50.0" + tale;
     } else {
-        url += "&query=[date]='" + dateStr + "' AND (" + layersStr + ") AND [image_cover_pct]>=50.0" + tale;
+        url += "&query=[date]='" + dateStr + "' AND (" + layersStr + ") AND [image_cover_pct]>=50.0 AND [valid_area_pct]>=90" + tale;
     }
 
     $.getJSON(url, function (response) {
