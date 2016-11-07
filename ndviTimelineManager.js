@@ -436,6 +436,11 @@ NDVITimelineManager.addDays = function (date, days) {
 
 NDVITimelineManager.prototype.start = function () {
 
+    //Не загружаем таймлайн если карта по пермалинку имеет такой параметр
+    //if (window.exportMode) {
+    //    return;
+    //}
+
     this.listenForPeramlink();
 
     var that = this;
@@ -817,6 +822,17 @@ NDVITimelineManager.prototype._main = function () {
         that.resize();
     } else {
         that.applyZoomRestriction(that.lmap.getZoom());
+    }
+
+    if (window.exportMode) {
+        $(".leaflet-bottom.leaflet-right").css('display', 'none');
+        $(".ntAttentionMessage").css('display', 'none');
+        $(".switcherControl").css('display', 'none');
+
+        var t = this.timeLine.getTimelineController().getTimeline();
+        t.options.showCurrentTime = false;
+        t.setAutoScale(false);
+        t.options.showCurrentTime = false;
     }
 };
 
@@ -1367,7 +1383,7 @@ NDVITimelineManager.prototype._hideLayers = function () {
 
     this.clearRenderHook();
 
-    this.hideCloudMask();
+    this.hideCloudMask(true);
 };
 
 NDVITimelineManager.prototype._prepareRedraw = function () {
