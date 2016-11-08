@@ -951,7 +951,7 @@ NDVITimelineManager.prototype.clearRenderHook = function () {
     var sentinelNdviLayer = this.layerCollection[this._layersLegend.SENTINEL_NDVI.name];
 
     ndviLayer.removeRenderHook(NDVITimelineManager.kr_hook);
-    classLayer.removeRenderHook(NDVITimelineManager.kr_hook);
+    classLayer && classLayer.removeRenderHook(NDVITimelineManager.kr_hook);
     sentinelNdviLayer.removeRenderHook(NDVITimelineManager.kr_hook);
 
     NDVITimelineManager.tolesBG = {};
@@ -2020,7 +2020,7 @@ NDVITimelineManager.prototype.hideLayers = function () {
         var c = this._comboAsLayers[i];
         for (var j = 0; j < c.length; j++) {
             var l = this.layerCollection[c[j]];
-            l.setFilter(function (item) {
+            l && l.setFilter(function (item) {
                 return false;
             });
         }
@@ -2636,11 +2636,15 @@ NDVITimelineManager.prototype.initializeImageProcessor = function () {
             var lrj = this._layersLegend[rj];
             if (lrj.palette && (lrj.palette.ndvi || lrj.palette.classification)) {
                 var n = lrj.name;
-                this._setLayerImageProcessing(this.layerCollection[n], rj);
-                var layer = this.layerCollection[n];
-                var styles = layer.getStyles();
-                styles[0].HoverStyle.weight = styles[0].RenderStyle.weight;
-                layer.setStyles(styles);
+                if (this.layerCollection[n]) {
+                    this._setLayerImageProcessing(this.layerCollection[n], rj);
+                    var layer = this.layerCollection[n];
+                    var styles = layer.getStyles();
+                    styles[0].HoverStyle.weight = styles[0].RenderStyle.weight;
+                    layer.setStyles(styles);
+                } else {
+                    console.log("layer undefined: " + n);
+                }
             }
         }
     }
