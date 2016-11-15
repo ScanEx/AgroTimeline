@@ -320,44 +320,46 @@ NDVITimelineManager._rkId = {
 };
 
 NDVITimelineManager.prototype.setWidth = function (width, right) {
-    var vis = !(this.timeLine.getContainer()[0].style.display == "none");
+    if (this.timeLine) {
+        var vis = !(this.timeLine.getContainer()[0].style.display == "none");
 
-    var deltaWidth = (right || 20) + 100;
-    //content width
-    $(this.timeLine.getContainer()).attr("style", "width:" + width + "px !important");
+        var deltaWidth = (right || 20) + 100;
+        //content width
+        $(this.timeLine.getContainer()).attr("style", "width:" + width + "px !important");
 
-    //frame width
-    var frameWidth = width - deltaWidth;
-    var t = this.timeLine.getTimelineController().getTimeline();
-    $(t.dom.frame).attr("style", "width:" + frameWidth + "px !important");
-    t.setSize(frameWidth, t.size.frameHeight);
-    t.checkResize();
+        //frame width
+        var frameWidth = width - deltaWidth;
+        var t = this.timeLine.getTimelineController().getTimeline();
+        $(t.dom.frame).attr("style", "width:" + frameWidth + "px !important");
+        t.setSize(frameWidth, t.size.frameHeight);
+        t.checkResize();
 
-    var sliderRatio = frameWidth / this._slider.getContainer().clientWidth;
-    //slider
-    $("#ntSliderBar").attr("style", "width:" + frameWidth + "px !important");
-    this._slider.updatePositions(sliderRatio);
+        var sliderRatio = frameWidth / this._slider.getContainer().clientWidth;
+        //slider
+        $("#ntSliderBar").attr("style", "width:" + frameWidth + "px !important");
+        this._slider.updatePositions(sliderRatio);
 
-    //background color    
-    $(".ntTimelineBackground").attr("style", "width:" + frameWidth + "px !important");
+        //background color    
+        $(".ntTimelineBackground").attr("style", "width:" + frameWidth + "px !important");
 
-    this.setTimeLineYear(this._selectedYear);
+        this.setTimeLineYear(this._selectedYear);
 
-    $(".ntRightPanel").css("width", width - 422);
+        $(".ntRightPanel").css("width", width - 422);
 
-    $(".ntOptionsFieldset").css("width", $("#ntRightPanel").width());
+        $(".ntOptionsFieldset").css("width", $("#ntRightPanel").width());
 
 
-    if (this.selectedDiv) {
-        this._setSliderState(null, this._selectedDate);
-    }
+        if (this.selectedDiv) {
+            this._setSliderState(null, this._selectedDate);
+        }
 
-    if (!vis) {
-        this.timeLine.toggleVisibility(false);
-        $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 10);
-    } else {
-        this.timeLine.toggleVisibility(true);
-        $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 130);
+        if (!vis) {
+            this.timeLine.toggleVisibility(false);
+            $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 10);
+        } else {
+            this.timeLine.toggleVisibility(true);
+            $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 130);
+        }
     }
 };
 
