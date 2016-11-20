@@ -534,7 +534,8 @@ NDVITimelineManager.prototype.loadState = function (data) {
             }
         }
 
-        if (!document.getElementById("chkCut").checked) {
+        if (document.getElementById("chkCut") &&
+            !document.getElementById("chkCut").checked) {
             that.setCutOff(document.getElementById("chkCut"));
         }
 
