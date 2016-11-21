@@ -1944,6 +1944,11 @@ NDVITimelineManager.prototype._showRATING = function () {
             if (fieldsTable2._selectedRows.length <= 1) {
                 this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
             }
+        } else if (window.cosmosagro) {
+            cosmosagro.agroFieldProjectView._ratingHandler.startRating();
+            if (cosmosagro.agroFieldProjectView._selectedFields.length <= 1) {
+                this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
+            }
         } else {
             this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
         }
