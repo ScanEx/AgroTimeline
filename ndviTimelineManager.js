@@ -2265,7 +2265,11 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
     }
 
     if (this._selectedOption == "RATING" && !NDVITimelineManager.equal(that._visibleLayersOnTheDisplay, prevLayers)) {
-        this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
+        if (!window.cosmosagro) {
+            this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
+        } else if (cosmosagro.agroFieldProjectView.getSelectedFields().length) {
+            cosmosagro.agroFieldProjectView._ratingHandler.refreshRatingSelection();
+        }
     }
 
     this.updateRadioLabelsActivity();
