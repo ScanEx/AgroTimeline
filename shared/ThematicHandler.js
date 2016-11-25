@@ -14,8 +14,8 @@ var ThematicStrategy = function (url, colorCallback) {
     this.isClear = true;
     this._applyCallback = null;
 
-    this.returnDataArr = ["Stat"];//["Hist"]
-    this._requestValueCallback = ThematicStrategy.__ndviValue;//ThematicStrategy.__neodnrValue
+    this.returnDataArr = ["Stat"];
+    this._requestValueCallback = ThematicStrategy.__ndviValue;
 
     this._bagSize = 10;
 
@@ -284,7 +284,6 @@ ThematicHandler.prototype.setLayerStyleHook = function (layer) {
     var that = this;
     var layerName = layer.getGmxProperties().LayerID;
 
-
     styleHookManager.addStyleHook(layer, ThematicHandler.__hookId, function (data) {
         if (that._layersStyleData[layerName] && that._layersStyleData[layerName][data.id]) {
             return that._layersStyleData[layerName][data.id];
@@ -292,16 +291,6 @@ ThematicHandler.prototype.setLayerStyleHook = function (layer) {
             return data.style;
         }
     }, 100);
-
-    //layer.setStyleHook(function (data) {
-    //    if (that._layersStyleData[layerName] && that._layersStyleData[layerName][data.id]) {
-    //        return that._layersStyleData[layerName][data.id];
-    //    } else {
-    //        return data.style;
-    //    }
-    //});
-
-
 };
 
 ThematicHandler.shotsGeomeryCache = {};
@@ -310,8 +299,7 @@ ThematicHandler.prototype._applyLayer = function (layer) {
 
     this.setLayerStyleHook(layer);
 
-    var identityField = "layer_gmx_id";//layer.properties.identityField;
-    //var layerName = layer.properties.name;
+    var identityField = "layer_gmx_id";
     var layerName = layer.getGmxProperties().LayerID;
 
     this._layersStyleData[layerName] = {};
@@ -321,13 +309,9 @@ ThematicHandler.prototype._applyLayer = function (layer) {
         query += "[SCENEID]='" + this._sceneIds[i] + (i < this._sceneIds.length - 1 ? "' OR " : "'");
     }
 
-
-    //var b = layer.getBoundsMerc();
     var b = layer.getBounds();
     var min = L.Projection.Mercator.project(b._southWest),
         max = L.Projection.Mercator.project(b._northEast);
-    //var p = [{ "x": b.minX, "y": b.minY }, { "x": b.minX, "y": b.maxY },
-    //    { "x": b.maxX, "y": b.maxY }, { "x": b.maxX, "y": b.minY }];
 
     var p = [{ "x": min.x, "y": min.y }, { "x": min.x, "y": max.y },
              { "x": max.x, "y": max.y }, { "x": max.x, "y": min.y }];
@@ -370,10 +354,28 @@ ThematicHandler.prototype._applyLayer = function (layer) {
         if (!isInside)
             return;
 
+        var useData2016 = true;
+        var year = parseInt(that._dateStr.split('.')[2]);
+        //if (year == 2016 && that.dataSource2016) {
+        //    useData2016 = true;
+        //}
+
+        //var source = useData2016 ? that.dataSource2016 : that.dataSource;
+        var source = that.dataSource;
+
         if (!that.manualOnly) {
             var url = "http://maps.kosmosnimki.ru/rest/ver1/layers/~/search?api_key=BB3RFQQXTR";
-            var tale = '&tables=[{"LayerName":"' + that.dataSource + '","Alias":"n"},{"LayerName":"88903D1BF4334AEBA79E1527EAD27F99","Alias":"f","Join":"Inner","On":"[n].[field_id] = [f].[gmx_id]"}]&columns=[{"Value":"[f].[Farm]"},{"Value":"[f].[Region]"},{"Value":"[f].[Subregion]"},{"Value":"[n].[Value]"},{"Value":"[n].[completeness]"},{"Value":"[f].[layer_id]"},{"Value":"[f].[' + identityField + ']"}]';
-            url += "&query=[date]='" + that._dateStr + "' AND [layer_id]='" + layerName + "' AND [completeness]>=0.0" + tale;
+            var tale = '&tables=[{"LayerName":"' + source + '","Alias":"n"},{"LayerName":"88903D1BF4334AEBA79E1527EAD27F99","Alias":"f","Join":"Inner","On":"[n].[field_id] = [f].[gmx_id]"}]&' +
+                        'columns=[{"Value":"[f].[Farm]"},{"Value":"[f].[Region]"},{"Value":"[f].[Subregion]"},{"Value":"[f].[layer_id]"},{"Value":"[f].[' + identityField + ']"},' +
+                        (!useData2016 ?
+                        '{"Value":"[n].[Value]"},{"Value":"[n].[completeness]"}]' :
+                        '{"Value":"[n].[ndvi_mean_clear]"},{"Value":"[n].[image_cover_pct]"}]');
+
+            if (!useData2016) {
+                url += "&query=[date]='" + that._dateStr + "' AND [layer_id]='" + layerName + "' AND [completeness]>=50.0" + tale;
+            } else {
+                url += "&query=[date]='" + that._dateStr + "' AND [layer_id]='" + layerName + "' AND [image_cover_pct]>=50.0 AND [valid_area_pct]>=90" + tale;
+            }
 
             $.getJSON(url, function (response) {
                 //раскраска по полученным с сервера данным
@@ -386,8 +388,14 @@ ThematicHandler.prototype._applyLayer = function (layer) {
                         var fi = features[i];
                         var prop = fi.properties;
                         var color = shared.RGB2HEX(0, 179, 255);
-                        if (prop.completeness >= 33.3) {
-                            color = that._thematicStrategy.getColor(prop.value);
+                        if (!useData2016) {
+                            if (prop.completeness >= 50.0) {
+                                color = that._thematicStrategy.getColor(prop.value || prop.Value);
+                            }
+                        } else {
+                            if (prop.image_cover_pct >= 50.0) {
+                                color = that._thematicStrategy.getColor(prop.ndvi_mean_clear * 100 + 101);
+                            }
                         }
 
                         that._layersStyleData[layerName][prop[identityField]] = {

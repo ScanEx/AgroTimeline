@@ -1,5 +1,5 @@
 var Rating = function (dataSource) {
-    this.dataSource = dataSource || "F28D06701EF2432DB21BFDB4015EF9CE";
+    this.dataSource = dataSource || "F7BF28C501264773B1E7C236D81E963C";
     this._layers = [];
     this._layersStyleData = {};
 };
@@ -64,15 +64,33 @@ Rating.prototype.start = function (layersArr, dateStr) {
 
     var that = this;
 
+    var useData2016 = true;
+    var year = parseInt(dateStr.split('.')[2]);
+
     var url = "http://maps.kosmosnimki.ru/rest/ver1/layers/~/search?api_key=BB3RFQQXTR";
-    var tale = '&tables=[{"LayerName":"' + that.dataSource + '","Alias":"n"},{"LayerName":"88903D1BF4334AEBA79E1527EAD27F99","Alias":"f","Join":"Inner","On":"[n].[field_id] = [f].[gmx_id]"}]&columns=[{"Value":"[n].[Value]"},{"Value":"[f].[layer_id]"},{"Value":"[f].[layer_gmx_id]"}]';
-    url += "&query=[date]='" + dateStr + "' AND (" + layersStr + ") AND [completeness]>=50.0" + tale;
+    var tale = '&tables=[{"LayerName":"' +  that.dataSource + '","Alias":"n"},{"LayerName":"88903D1BF4334AEBA79E1527EAD27F99","Alias":"f","Join":"Inner","On":"[n].[field_id] = [f].[gmx_id]"}]&' +
+        'columns=[{"Value":"[f].[layer_id]"},{"Value":"[f].[layer_gmx_id]"},' +
+        (useData2016 ?
+        '{"Value":"[n].[ndvi_mean_clear]"}]' :
+        '{"Value":"[n].[Value]"}]');
+    if (!useData2016) {
+        url += "&query=[date]='" + dateStr + "' AND (" + layersStr + ") AND [completeness]>=50.0" + tale;
+    } else {
+        url += "&query=[date]='" + dateStr + "' AND (" + layersStr + ") AND [image_cover_pct]>=50.0 AND [valid_area_pct]>=90" + tale;
+    }
 
     $.getJSON(url, function (response) {
         var features = response.features;
 
+        var value;
+        if (useData2016) {
+            value = "ndvi_mean_clear";
+        } else {
+            value = "Value";
+        }
+
         features.sort(function (a, b) {
-            return a.properties.value - b.properties.value;
+            return a.properties[value] - b.properties[value];
         });
 
         var ratingFeatures = {};
@@ -80,10 +98,12 @@ Rating.prototype.start = function (layersArr, dateStr) {
             minValue = 1000000;
         for (var i = 0; i < features.length; i++) {
             var fi = features[i];
-            if (fi.properties.value > maxValue)
-                maxValue = fi.properties.value;
-            if (fi.properties.value < minValue)
-                minValue = fi.properties.value;
+            if (fi.properties[value] >= 0) {
+                if (fi.properties[value] > maxValue)
+                    maxValue = fi.properties[value];
+                if (fi.properties[value] < minValue)
+                    minValue = fi.properties[value];
+            }
             if (!ratingFeatures[fi.properties.layer_id]) {
                 ratingFeatures[fi.properties.layer_id] = {};
             }
@@ -94,25 +114,26 @@ Rating.prototype.start = function (layersArr, dateStr) {
             minValue = 0;
         }
 
-        for (var i = 0; i < features.length; i++) {
-            var fi = features[i];
-            var k = (Math.floor((ratingFeatures[fi.properties.layer_id][fi.properties.layer_gmx_id].value - minValue) / (maxValue - minValue) * 10) * 10).toString();
-            var color = Rating.palette[k];
-            that._layersStyleData[fi.properties.layer_id][fi.properties.layer_gmx_id] = {
-                "fillOpacity": 1,
-                "fillStyle": "rgb(" + color.r + "," + color.g + "," + color.b + ")"
-            };
+        if (useData2016) {
+            maxValue = maxValue * 100 + 1;
+            minValue = minValue * 100 + 1;
         }
 
-        //for (var i = 0; i < features.length; i++) {
-        //    var fi = features[i];
-        //    var k = (Math.floor(Math.floor(i * 100 / features.length) / 10.0) * 10.0).toString();
-        //    var color = Rating.palette[k];
-        //    that._layersStyleData[fi.properties.layer_id][fi.properties.layer_gmx_id] = {
-        //        "fillOpacity": 1,
-        //        "fillStyle": "rgb(" + color.r + "," + color.g + "," + color.b + ")"
-        //    };
-        //}
+        for (var i = 0; i < features.length; i++) {
+            var fi = features[i];
+            var v = ratingFeatures[fi.properties.layer_id][fi.properties.layer_gmx_id][value];
+            if (useData2016) {
+                v = v * 100 + 1;
+            }
+            if (v >= 0) {
+                var k = (Math.floor((v - minValue) / (maxValue - minValue) * 10) * 10).toString();
+                var color = Rating.palette[k];
+                that._layersStyleData[fi.properties.layer_id][fi.properties.layer_gmx_id] = {
+                    "fillOpacity": 1,
+                    "fillStyle": "rgb(" + color.r + "," + color.g + "," + color.b + ")"
+                };
+            }
+        }
 
         that.redraw();
     });

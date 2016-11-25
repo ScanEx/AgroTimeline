@@ -13,18 +13,6 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     this._exMap = params.exMap;
     this._layersLegend = params.layers;
 
-    //добавочные слои с масками
-    this._layersLegend["LANDSAT2016"] = {
-        name: "8288D69C7C0040EFBB7B7EE6671052E3",
-        mask: "A05BB0207AEE4CFD93C045BF71576FDE",
-        palette: params.layers.HR.palette
-    };
-    this._layersLegend["SENTINEL2016"] = {
-        name: "EC68D0C097BE4F0B9E9DE4A0B9F591A2",
-        mask: "14A988CBC5FD424D9EBE23CEC8168150",
-        palette: params.layers.HR.palette
-    }
-
     this._combo = params.combo;
 
     //addCombo - [{ "caption": "LANDSAT-8", "rk": ["RGB753", "RGB432"] }]
@@ -111,8 +99,7 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
 
     this._themesHandler = new ThematicHandler(ts);
     this._themesHandler.manualOnly = false;
-    this._themesHandler.dataSource = "F28D06701EF2432DB21BFDB4015EF9CE";
-    this._themesHandler.dataSource2016 = "F7BF28C501264773B1E7C236D81E963C";
+    this._themesHandler.dataSource = "F7BF28C501264773B1E7C236D81E963C";
     this._themesHandler.katalogName = this._layersLegend.HR.name;
     var that = this;
     this._themesHandler.errorCallback = function (er) {
@@ -333,44 +320,46 @@ NDVITimelineManager._rkId = {
 };
 
 NDVITimelineManager.prototype.setWidth = function (width, right) {
-    var vis = !(this.timeLine.getContainer()[0].style.display == "none");
+    if (this.timeLine) {
+        var vis = !(this.timeLine.getContainer()[0].style.display == "none");
 
-    var deltaWidth = (right || 20) + 100;
-    //content width
-    $(this.timeLine.getContainer()).attr("style", "width:" + width + "px !important");
+        var deltaWidth = (right || 20) + 100;
+        //content width
+        $(this.timeLine.getContainer()).attr("style", "width:" + width + "px !important");
 
-    //frame width
-    var frameWidth = width - deltaWidth;
-    var t = this.timeLine.getTimelineController().getTimeline();
-    $(t.dom.frame).attr("style", "width:" + frameWidth + "px !important");
-    t.setSize(frameWidth, t.size.frameHeight);
-    t.checkResize();
+        //frame width
+        var frameWidth = width - deltaWidth;
+        var t = this.timeLine.getTimelineController().getTimeline();
+        $(t.dom.frame).attr("style", "width:" + frameWidth + "px !important");
+        t.setSize(frameWidth, t.size.frameHeight);
+        t.checkResize();
 
-    var sliderRatio = frameWidth / this._slider.getContainer().clientWidth;
-    //slider
-    $("#ntSliderBar").attr("style", "width:" + frameWidth + "px !important");
-    this._slider.updatePositions(sliderRatio);
+        var sliderRatio = frameWidth / this._slider.getContainer().clientWidth;
+        //slider
+        $("#ntSliderBar").attr("style", "width:" + frameWidth + "px !important");
+        this._slider.updatePositions(sliderRatio);
 
-    //background color    
-    $(".ntTimelineBackground").attr("style", "width:" + frameWidth + "px !important");
+        //background color    
+        $(".ntTimelineBackground").attr("style", "width:" + frameWidth + "px !important");
 
-    this.setTimeLineYear(this._selectedYear);
+        this.setTimeLineYear(this._selectedYear);
 
-    $(".ntRightPanel").css("width", width - 422);
+        $(".ntRightPanel").css("width", width - 422);
 
-    $(".ntOptionsFieldset").css("width", $("#ntRightPanel").width());
+        $(".ntOptionsFieldset").css("width", $("#ntRightPanel").width());
 
 
-    if (this.selectedDiv) {
-        this._setSliderState(null, this._selectedDate);
-    }
+        if (this.selectedDiv) {
+            this._setSliderState(null, this._selectedDate);
+        }
 
-    if (!vis) {
-        this.timeLine.toggleVisibility(false);
-        $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 10);
-    } else {
-        this.timeLine.toggleVisibility(true);
-        $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 130);
+        if (!vis) {
+            this.timeLine.toggleVisibility(false);
+            $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 10);
+        } else {
+            this.timeLine.toggleVisibility(true);
+            $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 130);
+        }
     }
 };
 
@@ -448,6 +437,11 @@ NDVITimelineManager.addDays = function (date, days) {
 };
 
 NDVITimelineManager.prototype.start = function () {
+
+    //Не загружаем таймлайн если карта по пермалинку имеет такой параметр
+    //if (window.exportMode) {
+    //    return;
+    //}
 
     this.listenForPeramlink();
 
@@ -540,7 +534,8 @@ NDVITimelineManager.prototype.loadState = function (data) {
             }
         }
 
-        if (!document.getElementById("chkCut").checked) {
+        if (document.getElementById("chkCut") &&
+            !document.getElementById("chkCut").checked) {
             that.setCutOff(document.getElementById("chkCut"));
         }
 
@@ -831,6 +826,17 @@ NDVITimelineManager.prototype._main = function () {
     } else {
         that.applyZoomRestriction(that.lmap.getZoom());
     }
+
+    if (window.exportMode) {
+        $(".leaflet-bottom.leaflet-right").css('display', 'none');
+        $(".ntAttentionMessage").css('display', 'none');
+        $(".switcherControl").css('display', 'none');
+
+        var t = this.timeLine.getTimelineController().getTimeline();
+        t.options.showCurrentTime = false;
+        t.setAutoScale(false);
+        t.options.showCurrentTime = false;
+    }
 };
 
 NDVITimelineManager.prototype.resize = function () {
@@ -943,18 +949,12 @@ NDVITimelineManager.prototype.setRenderHook = function (layer, callback, callbac
 };
 
 NDVITimelineManager.prototype.clearRenderHook = function () {
-    var landsat2016Layer = this.layerCollection[this._layersLegend.LANDSAT2016.name];
-    var sentinel2016Layer = this.layerCollection[this._layersLegend.SENTINEL2016.name];
-
     var ndviLayer = this.layerCollection[this._layersLegend.HR.name];
     var classLayer = this.layerCollection[this._layersLegend.CLASSIFICATION.name];
     var sentinelNdviLayer = this.layerCollection[this._layersLegend.SENTINEL_NDVI.name];
 
-    landsat2016Layer.removeRenderHook(NDVITimelineManager.kr_hook);
-    sentinel2016Layer.removeRenderHook(NDVITimelineManager.kr_hook);
-
     ndviLayer.removeRenderHook(NDVITimelineManager.kr_hook);
-    classLayer.removeRenderHook(NDVITimelineManager.kr_hook);
+    classLayer && classLayer.removeRenderHook(NDVITimelineManager.kr_hook);
     sentinelNdviLayer.removeRenderHook(NDVITimelineManager.kr_hook);
 
     NDVITimelineManager.tolesBG = {};
@@ -1386,7 +1386,7 @@ NDVITimelineManager.prototype._hideLayers = function () {
 
     this.clearRenderHook();
 
-    this.hideCloudMask();
+    this.hideCloudMask(true);
 };
 
 NDVITimelineManager.prototype._prepareRedraw = function () {
@@ -1400,6 +1400,8 @@ NDVITimelineManager.prototype._showRedraw = function () {
     if (this._selectedDiv) {
         if (this._selectedType[this._selectedCombo] == NDVITimelineManager.RATING) {
             this._showRATING();
+        } else if (this._isQuicklook) {
+            this._showQUICKLOOK();
         } else if (this.isSentinel) {
             this._showSENTINEL();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.NDVI16) {
@@ -1659,9 +1661,15 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
     var that = this;
     layer.setFilter(function (item) {
         var prop = item.properties;
-        var ql = (prop[GMX_RasterCatalogIDId].length == 0);
 
-        if (that.isSentinel) {
+        if (that._isQuicklook) {
+            var s = that._comboFilenames[that._selectedCombo];
+            for (var i = 0; i < s.length; i++) {
+                if (NDVITimelineManager._normalizeFilename(s[i]) == prop[sceneidIndex]) {
+                    return true;
+                }
+            }
+        } else if (that.isSentinel) {
             var s = that._comboFilenames[that._selectedCombo];
             for (var i = 0; i < s.length; i++) {
                 if (NDVITimelineManager._normalizeFilename(s[i]) == prop[sceneidIndex]) {
@@ -1669,6 +1677,8 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
                 }
             }
         } else {
+            var ql = (prop[GMX_RasterCatalogIDId].length == 0);
+
             if (pathId && prop[pathId] == that._selectedPath && prop[dateId] == that._selectedDateL ||
                 !pathId && prop[dateId] == that._selectedDateL) {
 
@@ -1700,6 +1710,14 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
     this._selectedLayers.push(layer);
 
     this.showCloudMask(this._selectedDate);
+};
+
+NDVITimelineManager.prototype._showQUICKLOOK = function () {
+    var sProd;
+    this.setRadioLabelActive_grey("rgbRadio2", true);
+    document.getElementById("rgbRadio2").checked = true;
+    this._selectedType[this._selectedCombo] = NDVITimelineManager.RGB2_HR;
+    this._showLayer("LANDSAT_PREVIEW");
 };
 
 NDVITimelineManager.prototype._showSENTINEL = function () {
@@ -1763,9 +1781,7 @@ NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
     this._selectedOption = layerTypeName;
 
     var layer = this.layerCollection[this._layersLegend[layerTypeName].name];
-    if (this._selectedYear == 2016) {
-        layer = this.layerCollection[this._layersLegend.SENTINEL2016.name];
-    }
+
     layer.removeFilter();
 
     this.setRenderHook(layer, NDVITimelineManager.kr_hook, NDVITimelineManager.l_hook);
@@ -1801,9 +1817,6 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
 
     var layer = this.layerCollection[this._layersLegend.HR.name];
 
-    if (this._selectedYear == 2016) {
-        layer = this.layerCollection[this._layersLegend.LANDSAT2016.name];
-    }
     layer.removeFilter();
 
     this.setRenderHook(layer, NDVITimelineManager.kr_hook, NDVITimelineManager.l_hook);
@@ -1931,6 +1944,11 @@ NDVITimelineManager.prototype._showRATING = function () {
             if (fieldsTable2._selectedRows.length <= 1) {
                 this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
             }
+        } else if (window.cosmosagro) {
+            cosmosagro.agroFieldProjectView._ratingHandler.startRating();
+            if (cosmosagro.agroFieldProjectView._selectedFields.length <= 1) {
+                this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
+            }
         } else {
             this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
         }
@@ -2010,7 +2028,7 @@ NDVITimelineManager.prototype.hideLayers = function () {
         var c = this._comboAsLayers[i];
         for (var j = 0; j < c.length; j++) {
             var l = this.layerCollection[c[j]];
-            l.setFilter(function (item) {
+            l && l.setFilter(function (item) {
                 return false;
             });
         }
@@ -2113,6 +2131,7 @@ NDVITimelineManager.prototype.applyZoomRestriction = function (zoom) {
 
             if (this._prevZoom <= NDVITimelineManager.MIN_ZOOM) {
                 this.bindTimelineCombo(this._selectedCombo);
+                this._showRedraw();
             }
 
             return true;
@@ -2246,7 +2265,11 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
     }
 
     if (this._selectedOption == "RATING" && !NDVITimelineManager.equal(that._visibleLayersOnTheDisplay, prevLayers)) {
-        this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
+        if (!window.cosmosagro) {
+            this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
+        } else if (cosmosagro.agroFieldProjectView.getSelectedFields().length) {
+            cosmosagro.agroFieldProjectView._ratingHandler.refreshRatingSelection();
+        }
     }
 
     this.updateRadioLabelsActivity();
@@ -2300,7 +2323,10 @@ NDVITimelineManager.prototype.updateRadioLabelsActivity = function () {
         }
     } else {
 
-        if (this._combo[this._selectedCombo].rk.length > 1 && this._combo[this._selectedCombo].resolution == "landsat"/*this._selectedCombo == 1*/ && this.selectedDiv && this.zoomRestrictionLabel.style.display == "none") {
+        if (this._combo[this._selectedCombo].rk.length > 1 &&
+            this._combo[this._selectedCombo].resolution == "landsat" &&
+            this.selectedDiv &&
+            this.zoomRestrictionLabel.style.display == "none") {
             this.radioActiveLabels.style.display = "block";
             $(".ntHelp").addClass("ntHelpLightOn");
         }
@@ -2622,21 +2648,21 @@ NDVITimelineManager.prototype.initializeImageProcessor = function () {
             var lrj = this._layersLegend[rj];
             if (lrj.palette && (lrj.palette.ndvi || lrj.palette.classification)) {
                 var n = lrj.name;
-                this._setLayerImageProcessing(this.layerCollection[n], rj);
-                var layer = this.layerCollection[n];
-                var styles = layer.getStyles();
-                styles[0].HoverStyle.weight = styles[0].RenderStyle.weight;
-                layer.setStyles(styles);
+                if (this.layerCollection[n]) {
+                    this._setLayerImageProcessing(this.layerCollection[n], rj);
+                    var layer = this.layerCollection[n];
+                    var styles = layer.getStyles();
+                    styles[0].HoverStyle.weight = styles[0].RenderStyle.weight;
+                    layer.setStyles(styles);
+                } else {
+                    console.log("layer undefined: " + n);
+                }
             }
         }
     }
 
-    this._setLayerImageProcessing(this.layerCollection[this._layersLegend.LANDSAT2016.name], "LANDSAT2016");
-    this._setLayerImageProcessing(this.layerCollection[this._layersLegend.SENTINEL2016.name], "SENTINEL2016");
-
-    this.landsatCloudMask = this.layerCollection["A05BB0207AEE4CFD93C045BF71576FDE"];
-    this.landsatCloudMask.disable
-    this.sentinelCloudMask = this.layerCollection["14A988CBC5FD424D9EBE23CEC8168150"];
+    this.landsatCloudMask = this.layerCollection[this._layersLegend.HR.mask];
+    this.sentinelCloudMask = this.layerCollection[this._layersLegend.SENTINEL_NDVI.mask];
     this.landsatCloudMask.setRasterHook(function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
         applyMask(dstCanvas, srcImage, info);
     });
@@ -2790,7 +2816,7 @@ NDVITimelineManager.prototype.refreshSelections = function () {
 
     var layerNames = this.getViewTimelineLayers(this._selectedCombo);
 
-    if (this._combo[this._selectedCombo].resolution == "landsat"/*this._selectedCombo == 1*/ && this._currentSelection) {
+    if (this._combo[this._selectedCombo].resolution == "landsat" && this._currentSelection) {
 
         this.selectedDiv = null;
 
@@ -3010,7 +3036,7 @@ NDVITimelineManager.prototype.redrawTimelineLinks = function () {
                         var prop = ii.obj.properties;
 
                         if (dom && dom.childNodes.length == 0) {
-                            if (!prop[gmxRKid].length && isQl) {
+                            if (!gmxRKid && isQl || gmxRKid && !prop[gmxRKid].length && isQl) {
                                 dom.classList.add("ntQl");
                             }
 
@@ -3079,6 +3105,7 @@ NDVITimelineManager.prototype.redrawTimelineLinks = function () {
 
 NDVITimelineManager.prototype.onChangeSelection = function (x) {
 
+    this._isQuicklook = false;
     this.isSentinel = false;
 
     this.meanNdviNoDataLabel.style.display = "none";
@@ -3215,7 +3242,9 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
 
                 var _GMX_RasterCatalogID = this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["GMX_RasterCatalogID"];
                 //это облачныйснимок
-                if (!this.isSentinel && !prop[_GMX_RasterCatalogID].length) {
+                if (!_GMX_RasterCatalogID || _GMX_RasterCatalogID && !this.isSentinel && !prop[_GMX_RasterCatalogID].length) {
+                    this._isQuicklook = true;
+
                     var _CLOUDS = this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["CLOUDS"];
                     clouds = prop[_CLOUDS];
                     that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB_HR;
@@ -3234,7 +3263,8 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                 }
 
                 date = prop[this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes[dcln]] ||
-                    prop[this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["ACQDATE"]];
+                    prop[this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["ACQDATE"]] ||
+                    prop[this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes[this._layerConfigs[selectedLayer].dateColumnName]];
 
                 if (date) {
                     that._selectedDateL = date;
@@ -3245,7 +3275,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                     if (that._switchYearCallback)
                         that._switchYearCallback(that._selectedDate);
 
-                    if (that._combo[that._selectedCombo].resolution != "modis"/*that._selectedCombo == 1*/) {
+                    if (that._combo[that._selectedCombo].resolution != "modis") {
                         for (var i in layerItems) {
                             var lip = layerItems[i].obj.properties;
 
@@ -3258,7 +3288,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                                 var geom = lip[lip.length - 1];
                                 if (NDVITimelineManager.isPointInGeometry(geom, center)) {
                                     if (document.getElementById("chkQl").checked ||
-                                        !document.getElementById("chkQl").checked && lip[_GMX_RasterCatalogID].length) {
+                                        _GMX_RasterCatalogID && !document.getElementById("chkQl").checked && lip[_GMX_RasterCatalogID].length) {
                                         filenames.push(getFilename(lip, this.layerCollection[selectedLayer]));
                                         that._currentRKIdArr.push(lip[_GMX_RasterCatalogID]);
                                     }
@@ -3280,107 +3310,111 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
             if (isDefault || this._activatePermalink) {
                 that._showRedraw();
             }
+            if (!this._isQuicklook) {
 
-            //выключаем "неопознанные" продукты
-            that.deactivateUnknownRadios();
+                //выключаем "неопознанные" продукты
+                that.deactivateUnknownRadios();
 
-            //и включаем снимки
-            this.setRadioLabelActive_grey("rgbRadio", true);
-            this.setRadioLabelActive_grey("ndviRadio_modis", true);
-            this.setRadioLabelActive_grey("qualityRadio", true);
+                //и включаем снимки
+                this.setRadioLabelActive_grey("rgbRadio", true);
+                this.setRadioLabelActive_grey("ndviRadio_modis", true);
+                this.setRadioLabelActive_grey("qualityRadio", true);
 
-            this.setRadioLabelActive_grey("conditionsOfVegetationRadio", true);
+                this.setRadioLabelActive_grey("conditionsOfVegetationRadio", true);
 
-            //params = [{"name":<имя слоя>,"filename":<имя файла>, "id":<radio element id>} ]
-            var params = [];
-            var rk = that._combo[that._selectedCombo].rk;
-            for (var i = 0; i < rk.length; i++) {
-                var rki = rk[i];
-                //пропускаем каталог RGB high resolution
-                if (this.isSentinel || !this.isSentinel && !(rki == "SENTINEL_IR" || rki == "SENTINEL_NDVI"))
-                    if (!this._layersLegend[rki].viewTimeline) {
-                        if (NDVITimelineManager._comboRadios[that._selectedCombo]) {
+                //params = [{"name":<имя слоя>,"filename":<имя файла>, "id":<radio element id>} ]
+                var params = [];
+                var rk = that._combo[that._selectedCombo].rk;
+                for (var i = 0; i < rk.length; i++) {
+                    var rki = rk[i];
+                    //пропускаем каталог RGB high resolution
+                    if (this.isSentinel || !this.isSentinel && !(rki == "SENTINEL_IR" || rki == "SENTINEL_NDVI"))
+                        if (!this._layersLegend[rki].viewTimeline) {
+                            if (NDVITimelineManager._comboRadios[that._selectedCombo]) {
 
-                            var filenames = [];
-                            var sceneids = [];
+                                var filenames = [];
+                                var sceneids = [];
 
-                            for (var j = 0; j < that._comboFilenames[that._selectedCombo].length; j++) {
-                                filenames.push(NDVITimelineManager._normalizeFilename(that._comboFilenames[that._selectedCombo][j], NDVITimelineManager._rkId[rki]));
-                                sceneids.push(NDVITimelineManager._normalizeFilename(that._comboFilenames[that._selectedCombo][j], NDVITimelineManager._rkId["HR"]));
-                            }
+                                for (var j = 0; j < that._comboFilenames[that._selectedCombo].length; j++) {
+                                    filenames.push(NDVITimelineManager._normalizeFilename(that._comboFilenames[that._selectedCombo][j], NDVITimelineManager._rkId[rki]));
+                                    sceneids.push(NDVITimelineManager._normalizeFilename(that._comboFilenames[that._selectedCombo][j], NDVITimelineManager._rkId["HR"]));
+                                }
 
-                            params.push({
-                                "name": that._layersLegend[rki].name,
-                                "filenames": filenames,
-                                "radioId": NDVITimelineManager._comboRadios[that._selectedCombo][rki]
-                            });
+                                var name = that._layersLegend[rki].name;
 
-                            //запоминаем filenames(sceneid) для снимков ndvi
-                            if (rki == "HR") {
-                                that._currentFnIdArr.length = 0;
-                                that._currentFnIdArr = [];
-                                that._currentFnIdArr.push.apply(that._currentFnIdArr, filenames);
-                            }
-                            if (rki == "CLASSIFICATION") {
-                                that._currentClassificationFnIdArr.length = 0;
-                                that._currentClassificationFnIdArr = [];
-                                that._currentClassificationFnIdArr.push.apply(that._currentClassificationFnIdArr, sceneids);
+                                params.push({
+                                    "name": name,
+                                    "filenames": filenames,
+                                    "radioId": NDVITimelineManager._comboRadios[that._selectedCombo][rki]
+                                });
+
+                                //запоминаем filenames(sceneid) для снимков ndvi
+                                if (rki == "HR") {
+                                    that._currentFnIdArr.length = 0;
+                                    that._currentFnIdArr = [];
+                                    that._currentFnIdArr.push.apply(that._currentFnIdArr, filenames);
+                                }
+                                if (rki == "CLASSIFICATION") {
+                                    that._currentClassificationFnIdArr.length = 0;
+                                    that._currentClassificationFnIdArr = [];
+                                    that._currentClassificationFnIdArr.push.apply(that._currentClassificationFnIdArr, sceneids);
+                                }
                             }
                         }
-                    }
-            }
-
-            //that._currentRKIdArr = [];
-            that._setExistentProds(params, function (rkArr) {
-                for (var i in that.existentShots) {
-
-                    if (i == "classificationRadio" && that._selectedDate >= new Date(2015, 10, 1)) {
-                        continue;
-                    }
-
-                    that.setRadioLabelActive_grey(i, that.existentShots[i]);
-                    that.setProductAvailability(i, that.existentShots[i]);
-
-                    if (i == "classificationRadio") {
-                        that.setRadioLabelActive_grey("inhomogenuityRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
-                        that.setRadioLabelActive_grey("classificationRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
-
-                        that.setProductAvailability("inhomogenuityRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
-                        that.setProductAvailability("classificationRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
-
-                        that._currentClassificationRKIdArr = [].concat(rkArr["classificationRadio"]);
-                    }
-
-                    if (i == "ndviRadio_hr" && that.existentShots["ndviRadio_hr"]) {
-                        that.setRadioLabelActive("ndviMeanRadio", that.existentShots[i]);
-                        that.setProductAvailability("ndviMeanRadio", that.existentShots[i]);
-                        that.setRadioLabelActive("ratingRadio", that.existentShots[i]);
-                        that.setProductAvailability("ratingRadio", that.existentShots[i]);
-
-                        that._currentRKIdArr = [].concat(rkArr["ndviRadio_hr"]);
-                    }
                 }
 
-                if (!isDefault) {
-                    that._showRedraw();
-                }
+                //that._currentRKIdArr = [];
+                that._setExistentProds(params, function (rkArr) {
+                    for (var i in that.existentShots) {
 
-                if (that.lmap.getZoom() >= NDVITimelineManager.MIN_ZOOM_HR) {
-                    that._themesHandler.addLayers(that._visibleLayersOnTheDisplayPtr, that._currentRKIdArr, that._currentFnIdArr);
-                    that._neodnrHandler.addLayers(that._visibleLayersOnTheDisplayPtr, that._currentClassificationRKIdArr, that._currentClassificationFnIdArr);
-                }
+                        if (i == "classificationRadio" && that._selectedDate >= new Date(2015, 10, 1)) {
+                            continue;
+                        }
 
-                if (that.isSentinel) {
-                    that.setRadioLabelActive_grey("rgbRadio2", true);
-                    if (!that.existentShots.rgbRadio && that._selectedOption == "SENTINEL_IR") {
-                        that._selectedOption == "SENTINEL";
-                        that.setActiveRadio("rgbRadio2");
+                        that.setRadioLabelActive_grey(i, that.existentShots[i]);
+                        that.setProductAvailability(i, that.existentShots[i]);
+
+                        if (i == "classificationRadio") {
+                            that.setRadioLabelActive_grey("inhomogenuityRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
+                            that.setRadioLabelActive_grey("classificationRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
+
+                            that.setProductAvailability("inhomogenuityRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
+                            that.setProductAvailability("classificationRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
+
+                            that._currentClassificationRKIdArr = [].concat(rkArr["classificationRadio"]);
+                        }
+
+                        if (i == "ndviRadio_hr" && that.existentShots["ndviRadio_hr"]) {
+                            that.setRadioLabelActive("ndviMeanRadio", that.existentShots[i]);
+                            that.setProductAvailability("ndviMeanRadio", that.existentShots[i]);
+                            that.setRadioLabelActive("ratingRadio", that.existentShots[i]);
+                            that.setProductAvailability("ratingRadio", that.existentShots[i]);
+
+                            that._currentRKIdArr = [].concat(rkArr["ndviRadio_hr"]);
+                        }
+                    }
+
+                    if (!isDefault) {
                         that._showRedraw();
                     }
-                }
 
-                that.applyHRZoomREstriction(that.lmap.getZoom());
-            });
+                    if (that.lmap.getZoom() >= NDVITimelineManager.MIN_ZOOM_HR) {
+                        that._themesHandler.addLayers(that._visibleLayersOnTheDisplayPtr, that._currentRKIdArr, that._currentFnIdArr);
+                        that._neodnrHandler.addLayers(that._visibleLayersOnTheDisplayPtr, that._currentClassificationRKIdArr, that._currentClassificationFnIdArr);
+                    }
+
+                    if (that.isSentinel) {
+                        that.setRadioLabelActive_grey("rgbRadio2", true);
+                        if (!that.existentShots.rgbRadio && that._selectedOption == "SENTINEL_IR") {
+                            that._selectedOption == "SENTINEL";
+                            that.setActiveRadio("rgbRadio2");
+                            that._showRedraw();
+                        }
+                    }
+
+                    that.applyHRZoomREstriction(that.lmap.getZoom());
+                });
+            }
         }
 
         if (that._selectedPeriod) {
@@ -3409,17 +3443,17 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
 
         that.selectedShotFilename = "";
         if (!(that.shiftNext || that.shiftPrev || that.shiftZero)) {
-            if (selectedItems && selectedItems.length == 1 && that._combo[that._selectedCombo].resolution == "landsat"/* that._selectedCombo == 1*/) {
-                that.selectedShotFilename = that.hoverShotFilename.substr(0, that.hoverShotFilename.length - 0);//а было - 5 потому что _NDVI
+            if (selectedItems && selectedItems.length == 1 && that._combo[that._selectedCombo].resolution == "landsat") {
+                that.selectedShotFilename = that.hoverShotFilename.substr(0, that.hoverShotFilename.length - 0);
             }
         } else {
             if (that.shiftZero) {
                 that.selectedShotFilename = $("#ntFilenameCaption").text();
             } else {
                 var files = that._comboFilenames[that._selectedCombo];
-                if (files && selectedItems && selectedItems.length == 1 && that._combo[that._selectedCombo].resolution == "landsat"/*that._selectedCombo == 1*/) {
+                if (files && selectedItems && selectedItems.length == 1 && that._combo[that._selectedCombo].resolution == "landsat") {
                     var fn = files[0];
-                    that.selectedShotFilename = date + " - " + fn.substr(0, fn.length - 5);//а было - 5 потому что _NDVI
+                    //that.selectedShotFilename = date + " - " + fn.substr(0, fn.length - 5);
                     that._setSliderState(x.attributes.range, that._selectedDate, true);
                 }
             }
@@ -3513,14 +3547,16 @@ NDVITimelineManager.prototype.setRadioLabelActive = function (id, active) {
 };
 
 NDVITimelineManager.prototype.setRadioLabelActive_grey = function (id, active) {
-    var lbl = this._radioButtonLabels[id].label;
-    var div = this._radioButtonLabels[id].parent;
-    if (active) {
-        lbl.classList.remove("ntDisabledLabel");
-        document.getElementById(lbl.for).disabled = false;
-    } else {
-        lbl.classList.add("ntDisabledLabel");
-        document.getElementById(lbl.for).disabled = true;
+    if (this._radioButtonLabels[id]) {
+        var lbl = this._radioButtonLabels[id].label;
+        var div = this._radioButtonLabels[id].parent;
+        if (active) {
+            lbl.classList.remove("ntDisabledLabel");
+            document.getElementById(lbl.for).disabled = false;
+        } else {
+            lbl.classList.add("ntDisabledLabel");
+            document.getElementById(lbl.for).disabled = true;
+        }
     }
 };
 
@@ -3979,10 +4015,10 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         that._redrawShots();
     }, true);
 
-    this.addRadio("thirdPanel_1", "Состояние полей", "shotsOptions", "classificationRadio", 1, true, function (r) {
-        that._selectedType[that._selectedCombo] = NDVITimelineManager.CLASSIFICATION;
-        that._redrawShots();
-    }, true);
+    //this.addRadio("thirdPanel_1", "Состояние полей", "shotsOptions", "classificationRadio", 1, true, function (r) {
+    //    that._selectedType[that._selectedCombo] = NDVITimelineManager.CLASSIFICATION;
+    //    that._redrawShots();
+    //}, true);
 
     this.addRadio("thirdPanel_1", "Однородность", "shotsOptions", "inhomogenuityRadio", 1, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.INHOMOGENUITY;
@@ -4607,6 +4643,7 @@ NDVITimelineManager.prototype.setCutOff = function (e) {
     if (this.selectedDiv) {
         if (!e.checked) {
             this.hideCloudMask(true);
+            this.clearRenderHook();
         }
         this._prepareRedraw();
         this._showRedraw();
@@ -4761,7 +4798,16 @@ NDVITimelineManager.prototype._filterTimeline = function (elem, layer) {
     } else if (this._combo[this._selectedCombo].resolution === "landsat") {
         var isQl = $("#chkQl").is(':checked');
         var gmxRKid = layer._gmx.tileAttributeIndexes['GMX_RasterCatalogID'];
-        var ql = (prop[gmxRKid].length == 0);
+        var ql;
+        if (gmxRKid) {
+            ql = (prop[gmxRKid].length == 0);
+        } else {
+            if (isQl) {
+                return true;
+            }
+            return false;
+            //ql = true;
+        }
         var showQuicklooks = this._layerConfigs[layer.options.layerID].showQuicklooks;
 
         if (isQl && showQuicklooks && ql) {
@@ -4777,7 +4823,7 @@ NDVITimelineManager.prototype._filterTimeline = function (elem, layer) {
                 return true;
             } else if (isQl && showQuicklooks && !ql) {
                 return true;
-            } else if (prop[cloudsId] <= this._combo[this._selectedCombo].cloudsMin || prop[cloudsId] <= this._layerConfigs[layer.options.layerID].cloudsMin) {
+            } else if (showQuicklooks && (prop[cloudsId] <= this._combo[this._selectedCombo].cloudsMin || prop[cloudsId] <= this._layerConfigs[layer.options.layerID].cloudsMin)) {
                 return true;
             } else {
                 return false;
@@ -4792,20 +4838,20 @@ NDVITimelineManager.prototype._filterTimeline = function (elem, layer) {
     return false;
 };
 
-/* 
- =====================================================
- * Блок инициализации палитр и расскраски тайлов
- =====================================================
- */
 NDVITimelineManager.prototype._setLayerImageProcessing = function (layer, shotType) {
     if (this._layersLegend[shotType].palette) {
         var layerPalette = this._layersLegend[shotType].palette;
         var q = layerPalette.quality,
             n = layerPalette.ndvi,
             c = layerPalette.classification;
-        n && (this._palettes[n.url] = this._palettes[n.url] || shared.loadPaletteSync(n.url));
-        q && (this._palettes[q.url] = this._palettes[q.url] || shared.loadPaletteSync(q.url));
-        c && (this._palettes[c.url] = this._palettes[c.url] || shared.loadPaletteSync(c.url));
+
+        n && (this._palettes[n.url] = []);
+        q && (this._palettes[q.url] = []);
+        c && (this._palettes[c.url] = []);
+
+        n && (shared.loadPaletteSync(n.url, null, this._palettes[n.url]));
+        q && (shared.loadPaletteSync(q.url, null, this._palettes[q.url]));
+        c && (shared.loadPaletteSync(c.url, null, this._palettes[c.url]));
         var that = this;
         layer.setRasterHook(
             function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
@@ -4850,70 +4896,66 @@ NDVITimelineManager.checkGreyImageData = function (data) {
 
 NDVITimelineManager.prototype._applyClassificationPalette = function (url, dstCanvas, srcCanvas, info) {
     var that = this;
-    this._palettes[url] = this._palettes[url] || shared.loadPaletteSync(url);
-    this._palettes[url].then(function (palette) {
-        var canvas = document.createElement("canvas");
-        var w = 256,
-            h = 256;
-        canvas.width = w;
-        canvas.height = h;
-        var context = canvas.getContext('2d');
-        context.drawImage(srcCanvas, 0, 0, w, h);
-        var imgd = context.getImageData(0, 0, w, h);
-        var pix = imgd.data;
+    var palette = this._palettes[url];
+    var canvas = document.createElement("canvas");
+    var w = 256,
+        h = 256;
+    canvas.width = w;
+    canvas.height = h;
+    var context = canvas.getContext('2d');
+    context.drawImage(srcCanvas, 0, 0, w, h);
+    var imgd = context.getImageData(0, 0, w, h);
+    var pix = imgd.data;
 
-        if (NDVITimelineManager.checkGreyImageData(pix)) {
-            shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-               info.destination.x, info.destination.y, that.lmap.getZoom(),
-               dstCanvas,
-               function (r, g, b, a) {
-                   var px = r;
-                   var pal = palette[px];
-                   if (pal !== undefined) {
-                       if (r == 0 && g == 0 && b == 0) {
-                           return [0, 179, 255, 255];
-                       } else {
-                           return [pal.partRed, pal.partGreen, pal.partBlue, 255];
-                       }
+    if (NDVITimelineManager.checkGreyImageData(pix)) {
+        shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
+           info.destination.x, info.destination.y, that.lmap.getZoom(),
+           dstCanvas,
+           function (r, g, b, a) {
+               var px = r;
+               var pal = palette[px];
+               if (pal !== undefined) {
+                   if (r == 0 && g == 0 && b == 0) {
+                       return [0, 179, 255, 255];
+                   } else {
+                       return [pal.partRed, pal.partGreen, pal.partBlue, 255];
                    }
-                   return [0, 0, 0, 255];
-               }, shared.NEAREST);
+               }
+               return [0, 0, 0, 255];
+           }, shared.NEAREST);
 
-        } else {
-            shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-               info.destination.x, info.destination.y, that.lmap.getZoom(),
-               dstCanvas, null, shared.NEAREST);
-        }
-    });
+    } else {
+        shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
+           info.destination.x, info.destination.y, that.lmap.getZoom(),
+           dstCanvas, null, shared.NEAREST);
+    }
 };
 
 NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanvas, shotType, info) {
     //если есть url, значит есть палитра.
     var that = this;
     if (url) {
-        this._palettes[url] = this._palettes[url] || shared.loadPaletteSync(url);
-        this._palettes[url].then(function (palette) {
-            shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-               info.destination.x, info.destination.y, that.lmap.getZoom(),
-               dstCanvas,
-               function (r, g, b, a) {
-                   var pal = palette[r];
-                   if (pal) {
-                       return [pal.partRed, pal.partGreen, pal.partBlue, 255];
-                   } else {
-                       if (r == 0 && g == 0 && b == 0) {
-                           return [0, 179, 255, 255];
-                       }
-                       if (r < 101) {
-                           return [0, 0, 0, 255];
-                       }
-                       if (r > 201) {
-                           return [255, 255, 255, 255];
-                       }
-                       return [0, 0, 0, 255];
-                   }
-               }, shared.NEAREST);
-        });
+        var palette = this._palettes[url];
+        shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
+        info.destination.x, info.destination.y, that.lmap.getZoom(),
+        dstCanvas,
+        function (r, g, b, a) {
+            var pal = palette[r];
+            if (pal) {
+                return [pal.partRed, pal.partGreen, pal.partBlue, 255];
+            } else {
+                if (r == 0 && g == 0 && b == 0) {
+                    return [0, 179, 255, 255];
+                }
+                if (r < 101) {
+                    return [0, 0, 0, 255];
+                }
+                if (r > 201) {
+                    return [255, 255, 255, 255];
+                }
+                return [0, 0, 0, 255];
+            }
+        }, shared.NEAREST);
     } else {
         dstCanvas = srcCanvas;
     }

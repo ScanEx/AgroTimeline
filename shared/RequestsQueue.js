@@ -46,7 +46,7 @@ RequestsQueue.prototype.loadRequestData = function (request) {
     this.counter++;
 
     var that = this;
-    sendCrossDomainPostRequest(window.serverBase + 'plugins/getrasterhist.ashx', {
+    sendCrossDomainPostRequest('http://maps.kosmosnimki.ru/plugins/getrasterhist.ashx', {
         'WrapStyle': 'window',
         'Request': JSON.stringify(request)
     }, function (response) {
