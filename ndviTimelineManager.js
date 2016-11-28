@@ -4653,10 +4653,12 @@ NDVITimelineManager.prototype.setCutOff = function (e) {
 };
 
 NDVITimelineManager.prototype.setActiveRadio = function (radioId) {
-    var prod = NDVITimelineManager.radioProduct[radioId].prodId;
-    var selectedCombo = NDVITimelineManager.radioProduct[radioId].numCombo;
-    this._selectedType[selectedCombo] = prod;
-    document.getElementById(radioId).checked = true;
+    if (NDVITimelineManager.radioProduct[radioId]) {
+        var prod = NDVITimelineManager.radioProduct[radioId].prodId;
+        var selectedCombo = NDVITimelineManager.radioProduct[radioId].numCombo;
+        this._selectedType[selectedCombo] = prod;
+        document.getElementById(radioId).checked = true;
+    }
 };
 
 NDVITimelineManager.prototype.qlCheckClick = function (e, data) {
