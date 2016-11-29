@@ -477,49 +477,52 @@ NDVITimelineManager.prototype.listenForPeramlink = function () {
     window._mapHelper && _mapHelper.customParamsManager.addProvider({
         name: "AgroNDVITimelineProvider",
         saveState: function () {
-
-            var optionsMenu = {};
-            $(".ntOptionsMenu").find("input[type='checkbox']").each(function (e, v) {
-                optionsMenu[v.id] = v.checked;
-            });
-
-            var rad = $('input[name=shotsOptions_' + that._selectedCombo + ']').filter(':checked');
-            var radioId = null;
-            if (rad.length) {
-                radioId = rad[0].id;
-            }
-
-            var selectedDate0, selectedDate1;
-            if (that._selectedDate0 && that._selectedDate1) {
-                selectedDate0 = {
-                    "d": that._selectedDate0.getDate(), "m": that._selectedDate0.getMonth() + 1,
-                    "y": that._selectedDate1.getFullYear(), "dxdw": that._slider.getOffsetLeft0() / that._slider.getContainer().clientWidth
-                }
-                selectedDate1 = {
-                    "d": that._selectedDate1.getDate(), "m": that._selectedDate1.getMonth() + 1,
-                    "y": that._selectedDate0.getFullYear(), "dxdw": that._slider.getOffsetLeft1() / that._slider.getContainer().clientWidth
-                }
-            }
-            var selectedDate = null;
-            if (that._selectedDate) {
-                selectedDate = { "d": that._selectedDate.getDate(), "m": that._selectedDate.getMonth() + 1, "y": that._selectedDate.getFullYear() }
-            }
-            return {
-                "selectedYear": that._selectedYear,
-                "selectedDate": selectedDate,
-                "selectedDate0": selectedDate0,
-                "selectedDate1": selectedDate1,
-                "selectedDiv": (that.selectedDiv ? true : false),
-                "selectedCombo": that._selectedCombo,
-                "radioId": radioId,
-                "chkQl": document.getElementById("chkQl").checked,
-                "optionsMenu": optionsMenu
-            };
+            return that.getState();
         },
         loadState: function (data) {
             that.loadState(data);
         }
     });
+};
+
+NDVITimelineManager.prototype.getState = function () {
+    var optionsMenu = {};
+    $(".ntOptionsMenu").find("input[type='checkbox']").each(function (e, v) {
+        optionsMenu[v.id] = v.checked;
+    });
+
+    var rad = $('input[name=shotsOptions_' + this._selectedCombo + ']').filter(':checked');
+    var radioId = null;
+    if (rad.length) {
+        radioId = rad[0].id;
+    }
+
+    var selectedDate0, selectedDate1;
+    if (this._selectedDate0 && this._selectedDate1) {
+        selectedDate0 = {
+            "d": this._selectedDate0.getDate(), "m": this._selectedDate0.getMonth() + 1,
+            "y": this._selectedDate1.getFullYear(), "dxdw": this._slider.getOffsetLeft0() / this._slider.getContainer().clientWidth
+        }
+        selectedDate1 = {
+            "d": this._selectedDate1.getDate(), "m": this._selectedDate1.getMonth() + 1,
+            "y": this._selectedDate0.getFullYear(), "dxdw": this._slider.getOffsetLeft1() / this._slider.getContainer().clientWidth
+        }
+    }
+    var selectedDate = null;
+    if (this._selectedDate) {
+        selectedDate = { "d": this._selectedDate.getDate(), "m": this._selectedDate.getMonth() + 1, "y": this._selectedDate.getFullYear() }
+    }
+    return {
+        "selectedYear": this._selectedYear,
+        "selectedDate": selectedDate,
+        "selectedDate0": selectedDate0,
+        "selectedDate1": selectedDate1,
+        "selectedDiv": (this.selectedDiv ? true : false),
+        "selectedCombo": this._selectedCombo,
+        "radioId": radioId,
+        "chkQl": document.getElementById("chkQl").checked,
+        "optionsMenu": optionsMenu
+    };
 };
 
 NDVITimelineManager.prototype.loadState = function (data) {
@@ -569,6 +572,7 @@ NDVITimelineManager.prototype.loadState = function (data) {
             $(".ntOptionsHR").css("display", "none");
             $(".ntOptionsMODIS").css("display", "none");
         }
+        return true;
     }
 
     //этот пермалинк активируется для периода, который доступен только для пожаров.
@@ -592,6 +596,7 @@ NDVITimelineManager.prototype.loadState = function (data) {
             that._slider.setCaption1(data.selectedDate1.d + "." + data.selectedDate1.m + "." + data.selectedDate1.y);
 
             that.refreshSliderPeriod();
+            return true;
         }
     }
 
@@ -623,7 +628,7 @@ NDVITimelineManager.prototype.loadState = function (data) {
                 if (itemDate.getDate() == that._selectedDate.getDate() &&
                 itemDate.getFullYear() == that._selectedDate.getFullYear() &&
                 itemDate.getMonth() == that._selectedDate.getMonth()) {
-                    currItem = item;
+                    currItem = item;                    
                     break;
                 }
             }
@@ -638,7 +643,9 @@ NDVITimelineManager.prototype.loadState = function (data) {
                     that.timeLine.shiftActiveItem(0);
                     that.setTimeLineYear(that._selectedYear);
                 }
+                return true;
             }
+            return false;
         };
     }
 }
@@ -1146,9 +1153,14 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
 
             if (that._activatePermalink) {
                 setTimeout(function () {
-                    that._activatePermalink();
-                    that._activatePermalink = null;
-                    that.refreshOptionsDisplay();
+                    function successPermalink() {
+                        if (that._activatePermalink()) {
+                            that._activatePermalink = null;
+                            that.refreshOptionsDisplay();
+                            clearInterval(successPermalinkHandler);
+                        }
+                    };
+                    var successPermalinkHandler = setInterval(successPermalink, 1000);
                 }, 2000);
             }
 
