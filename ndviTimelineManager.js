@@ -459,8 +459,6 @@ NDVITimelineManager.prototype.start = function () {
         });
         cr.setStyles(styles);
 
-        //var layersTool = new LayersTool("Адм.границы", [h.layersByID["3BCCB0F1ACFB4A56BAC87ECA31ADA199"], h.layersByID["035A32EDA95D4D2BBBF6E44AF3FA21DD"]]);
-
         for (var i in h.layersByID) {
             if (nsGmx && nsGmx.widgets && nsGmx.widgets.commonCalendar) {
                 nsGmx.widgets.commonCalendar.unbindLayer(i);
