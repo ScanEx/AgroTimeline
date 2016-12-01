@@ -1154,8 +1154,13 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
             if (that._activatePermalink) {
                 setTimeout(function () {
                     function successPermalink() {
-                        if (that._activatePermalink()) {
-                            that._activatePermalink = null;
+                        if (that._activatePermalink) {
+                            if (that._activatePermalink()) {
+                                that._activatePermalink = null;
+                                that.refreshOptionsDisplay();
+                                clearInterval(successPermalinkHandler);
+                            }
+                        } else {
                             that.refreshOptionsDisplay();
                             clearInterval(successPermalinkHandler);
                         }
