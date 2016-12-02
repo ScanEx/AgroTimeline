@@ -71,12 +71,13 @@ Rating.prototype.start = function (layersArr, dateStr) {
     var tale = '&tables=[{"LayerName":"' +  that.dataSource + '","Alias":"n"},{"LayerName":"88903D1BF4334AEBA79E1527EAD27F99","Alias":"f","Join":"Inner","On":"[n].[field_id] = [f].[gmx_id]"}]&' +
         'columns=[{"Value":"[f].[layer_id]"},{"Value":"[f].[layer_gmx_id]"},' +
         (useData2016 ?
-        '{"Value":"[n].[ndvi_mean_clear]"}]' :
+        '{"Value":"[n].[ndvi_mean_clear]"},{"Value":"[n].[valid_area_pct]"}]' :
         '{"Value":"[n].[Value]"}]');
     if (!useData2016) {
         url += "&query=[date]='" + dateStr + "' AND (" + layersStr + ") AND [completeness]>=50.0" + tale;
     } else {
-        url += "&query=[date]='" + dateStr + "' AND (" + layersStr + ") AND [image_cover_pct]>=50.0 AND [valid_area_pct]>=90" + tale;
+        //url += "&query=[date]='" + dateStr + "' AND (" + layersStr + ") AND [image_cover_pct]>=50.0 AND [valid_area_pct]>=90" + tale;
+        url += "&query=[date]='" + dateStr + "' AND (" + layersStr + ") AND [image_cover_pct]>=50.0" + tale;
     }
 
     $.getJSON(url, function (response) {
@@ -98,7 +99,7 @@ Rating.prototype.start = function (layersArr, dateStr) {
             minValue = 1000000;
         for (var i = 0; i < features.length; i++) {
             var fi = features[i];
-            if (fi.properties[value] >= 0) {
+            if (fi.properties[value] >= 0 && fi.properties.valid_area_pct >= 90) {
                 if (fi.properties[value] > maxValue)
                     maxValue = fi.properties[value];
                 if (fi.properties[value] < minValue)
@@ -125,7 +126,12 @@ Rating.prototype.start = function (layersArr, dateStr) {
             if (useData2016) {
                 v = v * 100 + 1;
             }
-            if (v >= 0) {
+            if (fi.properties.valid_area_pct < 90) {
+                that._layersStyleData[fi.properties.layer_id][fi.properties.layer_gmx_id] = {
+                    "fillOpacity": 1,
+                    "fillStyle": "rgb(0,179,255)"
+                };
+            }else if (v >= 0) {
                 var k = (Math.floor((v - minValue) / (maxValue - minValue) * 10) * 10).toString();
                 var color = Rating.palette[k];
                 that._layersStyleData[fi.properties.layer_id][fi.properties.layer_gmx_id] = {
