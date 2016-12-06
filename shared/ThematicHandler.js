@@ -59,12 +59,12 @@ ThematicStrategy.prototype._constuctRequestsArray = function (GMX_RasterCatalogI
             (function (ii) {
                 var query = "[SCENEID]='" + sceneIdArr[ii] + "'";
 
-                sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", {
+                nsGmx.Auth.getResourceServer('geomixer').sendPostRequest("VectorLayer/Search.ashx", {
                     'query': query,
                     'geometry': true,
                     'layer': catalog,
                     'WrapStyle': "window"
-                }, function (result) {
+                }).then(function (result) {
                     var res = result.Result;
                     var values = res.values;
 
@@ -319,12 +319,12 @@ ThematicHandler.prototype._applyLayer = function (layer) {
     var that = this;
 
     //геометрия снимков
-    sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", {
+    nsGmx.Auth.getResourceServer('geomixer').sendPostRequest("VectorLayer/Search.ashx", {
         'query': query,
         'geometry': true,
         'layer': this.katalogName,
         'WrapStyle': "window"
-    }, function (result) {
+    }).then(function (result) {
 
         var res = result.Result;
         var values = res.values;
