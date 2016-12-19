@@ -8,6 +8,7 @@ StyleHookManager.prototype._renderStyles = function (layerName, data) {
     //объединение стилей
     var res = {};//data.style;
     for (var i = 0; i < callbacks.length; i++) {
+        data.layerId = layerName;
         var s = callbacks[i].callback(data);
         res = shared.mergeRecursive(res, s);
     }

@@ -304,24 +304,25 @@ shared.loadPaletteSync = function (url, callback, paletteArr) {
 //Кеш загруженной геометрии
 shared.GeometryCache = {};
 shared.GeometryBounds = {};
+shared.MAX_FEATURES = 250;
 
 shared.getFeatures = function (layerId, sender, callback, errorCallback) {
     if (shared.GeometryCache[layerId] && shared.GeometryBounds[layerId].equals(nsGmx.gmxMap.layersByID[layerId].getBounds())) {
         callback(shared.GeometryCache[layerId]);
     } else {
-        var url = "http://maps.kosmosnimki.ru/VectorLayer/Search.ashx?WrapStyle=func" +
+        var url = "/VectorLayer/Search.ashx?WrapStyle=func" +
                   "&layer=" + layerId +
                   "&geometry=true";
 
         var that = this;
-        sendCrossDomainJSONRequest(url, function (response) {
+        nsGmx.Auth.getResourceServer('geomixer').sendGetRequest(url).then(function (response) {
 
             if (nsGmx && nsGmx.gmxMap) {
                 shared.GeometryBounds[layerId] = nsGmx.gmxMap.layersByID[layerId].getBounds();
             }
 
             var res = response.Result;
-            if (res.values.length < 250) {
+            if (res.values.length < shared.MAX_FEATURES) {
                 if (!response.Result.values.length) {
                     errorCallback && errorCallback({ "err": "There's no fields" });
                     return;

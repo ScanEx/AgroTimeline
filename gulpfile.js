@@ -5,9 +5,10 @@ var footer = require('gulp-footer');
 var streamqueue = require('streamqueue');
 var html2jsobject = require('gulp-html2jsobject');
 
-var styles = ['style.css'];
+var styles = ['style.css', 'agroLegend/agroLegend.css'];
 
 var scripts = ['shared/shared.js', 'shared/RequestsQueue.js', 'shared/ThematicHandler.js', 'shared/styleHookManager.js',
+    'agroLegend/agroLegend.js',
     'timelineParams.js', 'timelineProxyLayer.js', 'switchControl.js', 'optionsMenu.js', 'ndviTimelineSlider.js', 'ndviTimelineManager.js',
     'meanVCIManager.js', 'bindScrollControl.js', 'agroWarning.js', 'rating.js', 'ajax.js', 'L.Control.gmxAgroTimeline.js'];
 
