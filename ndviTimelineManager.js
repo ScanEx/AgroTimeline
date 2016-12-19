@@ -628,7 +628,7 @@ NDVITimelineManager.prototype.loadState = function (data) {
                 if (itemDate.getDate() == that._selectedDate.getDate() &&
                 itemDate.getFullYear() == that._selectedDate.getFullYear() &&
                 itemDate.getMonth() == that._selectedDate.getMonth()) {
-                    currItem = item;                    
+                    currItem = item;
                     break;
                 }
             }
