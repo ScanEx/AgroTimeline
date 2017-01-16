@@ -59,12 +59,7 @@ ThematicStrategy.prototype._constuctRequestsArray = function (GMX_RasterCatalogI
             (function (ii) {
                 var query = "[SCENEID]='" + sceneIdArr[ii] + "'";
 
-                nsGmx.Auth.getResourceServer('geomixer').sendPostRequest("VectorLayer/Search.ashx", {
-                    'query': query,
-                    'geometry': true,
-                    'layer': catalog,
-                    'WrapStyle': "window"
-                }).then(function (result) {
+                function _success(result) {
                     var res = result.Result;
                     var values = res.values;
 
@@ -80,7 +75,24 @@ ThematicStrategy.prototype._constuctRequestsArray = function (GMX_RasterCatalogI
 
                     ThematicHandler.shotsGeomeryCache[sceneId] = { "GMX_RasterCatalogID": gmxId, "geometry": geom };
                     dArr[ii].resolve();
-                });
+                };
+
+                var data = {
+                    'query': query,
+                    'geometry': true,
+                    'layer': catalog,
+                    'WrapStyle': "window"
+                };
+
+                if (nsGmx.Auth && nsGmx.Auth.getResourceServer) {
+                    nsGmx.Auth.getResourceServer('geomixer').sendPostRequest("VectorLayer/Search.ashx", data).then(function (result) {
+                        _success(result);
+                    });
+                } else {
+                    sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", data, function (result) {
+                        _success(result);
+                    });
+                }
             }(i));
         }
     }
@@ -318,14 +330,7 @@ ThematicHandler.prototype._applyLayer = function (layer) {
 
     var that = this;
 
-    //геометрия снимков
-    nsGmx.Auth.getResourceServer('geomixer').sendPostRequest("VectorLayer/Search.ashx", {
-        'query': query,
-        'geometry': true,
-        'layer': this.katalogName,
-        'WrapStyle': "window"
-    }).then(function (result) {
-
+    function _success(result) {
         var res = result.Result;
         var values = res.values;
 
@@ -354,7 +359,6 @@ ThematicHandler.prototype._applyLayer = function (layer) {
         if (!isInside)
             return;
 
-        var useData2016 = true;
         var year = parseInt(that._dateStr.split('.')[2]);
         var source = that.dataSource;
 
@@ -362,9 +366,8 @@ ThematicHandler.prototype._applyLayer = function (layer) {
             var url = "http://maps.kosmosnimki.ru/rest/ver1/layers/~/search?api_key=BB3RFQQXTR";
             var tale = '&tables=[{"LayerName":"' + source + '","Alias":"n"},{"LayerName":"88903D1BF4334AEBA79E1527EAD27F99","Alias":"f","Join":"Inner","On":"[n].[field_id] = [f].[gmx_id]"}]&' +
                         'columns=[{"Value":"[f].[Farm]"},{"Value":"[f].[Region]"},{"Value":"[f].[Subregion]"},{"Value":"[f].[layer_id]"},{"Value":"[f].[' + identityField + ']"},' +
-                        '{"Value":"[n].[ndvi_mean_clear]"},{"Value":"[n].[image_cover_pct]"},{"Value":"[n].[valid_area_pct]"}]';
+                        '{"Value":"[n].[ndvi_mean_clear]"},{"Value":"[n].[ndvi_std_clear]"},{"Value":"[n].[ndvi_min_clear]"},{"Value":"[n].[ndvi_max_clear]"},{"Value":"[n].[image_cover_pct]"},{"Value":"[n].[valid_area_pct]"}]';
 
-            //url += "&query=[date]='" + that._dateStr + "' AND [layer_id]='" + layerName + "' AND [image_cover_pct]>=50.0 AND [valid_area_pct]>=90" + tale;
             url += "&query=[date]='" + that._dateStr + "' AND [layer_id]='" + layerName + "' AND [image_cover_pct]>=50.0" + tale;
 
             $.getJSON(url, function (response) {
@@ -379,7 +382,7 @@ ThematicHandler.prototype._applyLayer = function (layer) {
                         var prop = fi.properties;
                         var color = shared.RGB2HEX(0, 179, 255);
                         if (prop.valid_area_pct >= 90.0) {
-                            color = that._thematicStrategy.getColor(prop.ndvi_mean_clear * 100 + 101);
+                            color = that._thematicStrategy.getColor(prop);
                         }
 
                         that._layersStyleData[layerName][prop[identityField]] = {
@@ -397,7 +400,24 @@ ThematicHandler.prototype._applyLayer = function (layer) {
             //рассчет вручную
             that._manualLayerHandler(layer);
         }
-    });
+    };
+
+    var data = {
+        'query': query,
+        'geometry': true,
+        'layer': this.katalogName,
+        'WrapStyle': "window"
+    };
+
+    if(nsGmx.Auth && nsGmx.Auth.getResourceServer){
+        nsGmx.Auth.getResourceServer('geomixer').sendPostRequest("VectorLayer/Search.ashx", data).then(function (result) {
+            _success(result);
+        });
+    }else{
+        sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", data, function (result) {
+            _success(result);
+        });
+    }
 };
 
 ThematicHandler.prototype._manualLayerHandler = function (layer) {

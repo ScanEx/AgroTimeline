@@ -81,7 +81,8 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     this._visibleLayersOnTheDisplayPtr = [];
 
     //инициализация модуля посторения тематики по средним NDVI
-    var ts = new ThematicStrategy(params.layers.HR.palette.ndvi.url, function (val) {
+    var ts = new ThematicStrategy(params.layers.HR.palette.ndvi.url, function (prop) {
+        var val = prop.ndvi_mean_clear * 100 + 101;
         var color;
         val = Math.round(val);
         if (val == 0 || val == -100) {
@@ -111,32 +112,43 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     this._doubleClick = false;
 
     //инициализация тематического модуля посторения тематики неоднородности
-    var tsneondn = new ThematicStrategy(null, function (val) {
-        if (val >= 0) {
-            var color = this.palette[10 * Math.floor(val / 10)];
-            return shared.RGB2HEX(color.r, color.g, color.b);
+    var tsneondn = new ThematicStrategy(null, function (prop) {
+        var val = this.__getNeodnValue[this.funcType](prop);
+        var c = "c0";
+        if (val < 0.02) {
+            c = "c1";
+        } else if (val >= 0.02 && val < 0.04) {
+            c = "c2";
+        } else if (val >= 0.04 && val < 0.06) {
+            c = "c3";
+        } else if (val >= 0.06 && val < 0.08) {
+            c = "c4";
+        } else if (val >= 0.08) {
+            c = "c5";
         }
-        return shared.RGB2HEX(0, 179, 255);
+        return shared.RGB2HEX(this.palette[c].r, this.palette[c].g, this.palette[c].b);
     });
+    tsneondn.funcType = 0;
+    tsneondn.__getNeodnValue = [
+        function (prop) {
+            return prop.ndvi_std_clear;
+        }, function (prop) {
+            return prop.ndvi_max_clear - prop.ndvi_min_clear;
+        }];
     tsneondn._requestValueCallback = ThematicStrategy.__neodnrValue;
-    tsneondn.returnDataArr = ["Hist"];
     tsneondn.palette = {
-        "0": { "r": 0, "g": 0, "b": 0 },
-        "10": { "r": 245, "g": 12, "b": 50 },
-        "20": { "r": 245, "g": 12, "b": 50 },
-        "30": { "r": 245, "g": 12, "b": 50 },
-        "40": { "r": 227, "g": 145, "b": 57 },
-        "50": { "r": 230, "g": 200, "b": 78 },
-        "60": { "r": 240, "g": 240, "b": 24 },
-        "70": { "r": 223, "g": 237, "b": 92 },
-        "80": { "r": 179, "g": 214, "b": 109 },
-        "90": { "r": 125, "g": 235, "b": 21 },
-        "100": { "r": 30, "g": 163, "b": 18 }
+        "c5": { "r": 245, "g": 12, "b": 50 },
+        "c4": { "r": 227, "g": 145, "b": 57 },
+        "c3": { "r": 240, "g": 240, "b": 24 },
+        "c2": { "r": 125, "g": 235, "b": 21 },
+        "c1": { "r": 30, "g": 163, "b": 18 },
+        "c0": { "r": 0, "g": 179, "b": 255 }
     };
     this._neodnrHandler = new ThematicHandler(tsneondn);
     this._neodnrHandler.manualOnly = false;
-    this._neodnrHandler.dataSource = "1F7E5026D73447D09897217CE737F565";
-    this._neodnrHandler.katalogName = this._layersLegend.CLASSIFICATION.name;
+    this._neodnrHandler.dataSource = "F7BF28C501264773B1E7C236D81E963C";
+    //В данном случае каталог нужен только для определения границ снимка, который совпадает со снимками ndvi
+    this._neodnrHandler.katalogName = this._layersLegend.HR.name;
 
     this._ratingHandler = new Rating();
 
@@ -1749,6 +1761,8 @@ NDVITimelineManager.prototype._showSENTINEL = function () {
         this._showLayerNDVI_HR("SENTINEL_NDVI");
     } else if (document.getElementById("ndviMeanRadio").checked) {
         this._showNDVI_MEAN();
+    } else if (document.getElementById("inhomogenuityRadio").checked) {
+        this._showINHOMOGENUITY();
     }
 };
 
@@ -1994,6 +2008,13 @@ NDVITimelineManager.prototype._hideNDVI_MEAN = function () {
 
 NDVITimelineManager.prototype._showINHOMOGENUITY = function () {
     if (this.lmap.getZoom() >= NDVITimelineManager.MIN_ZOOM_HR) {
+
+        if (this.isSentinel) {
+            this._neodnrHandler.katalogName = this._layersLegend.SENTINEL_NDVI.name;
+        } else {
+            this._neodnrHandler.katalogName = this._layersLegend.HR.name;
+        }
+
         this.hideSelectedLayer();
         this._selectedOption = "INHOMOGENUITY";
         this._neodnrHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true), this._currentClassificationRKIdArr, this._currentClassificationFnIdArr);
@@ -3382,19 +3403,19 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                 that._setExistentProds(params, function (rkArr) {
                     for (var i in that.existentShots) {
 
-                        if (i == "classificationRadio" && that._selectedDate >= new Date(2015, 10, 1)) {
-                            continue;
-                        }
+                        //if (i == "classificationRadio" && that._selectedDate >= new Date(2015, 10, 1)) {
+                        //    continue;
+                        //}
 
                         that.setRadioLabelActive_grey(i, that.existentShots[i]);
                         that.setProductAvailability(i, that.existentShots[i]);
 
                         if (i == "classificationRadio") {
-                            that.setRadioLabelActive_grey("inhomogenuityRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
-                            that.setRadioLabelActive_grey("classificationRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
+                            //that.setRadioLabelActive_grey("inhomogenuityRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
+                            //that.setRadioLabelActive_grey("classificationRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
 
-                            that.setProductAvailability("inhomogenuityRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
-                            that.setProductAvailability("classificationRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
+                            //that.setProductAvailability("inhomogenuityRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
+                            //that.setProductAvailability("classificationRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
 
                             that._currentClassificationRKIdArr = [].concat(rkArr["classificationRadio"]);
                         }
@@ -3404,6 +3425,8 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                             that.setProductAvailability("ndviMeanRadio", that.existentShots[i]);
                             that.setRadioLabelActive("ratingRadio", that.existentShots[i]);
                             that.setProductAvailability("ratingRadio", that.existentShots[i]);
+                            that.setRadioLabelActive("inhomogenuityRadio", that.existentShots[i]);
+                            that.setProductAvailability("inhomogenuityRadio", that.existentShots[i]);
 
                             that._currentRKIdArr = [].concat(rkArr["ndviRadio_hr"]);
                         }
@@ -4350,8 +4373,8 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         };
     }
 
-    //выключим гомогенность на время
-    NDVITimelineManager.disableHomogenuity();
+    ////выключим гомогенность на время
+    //NDVITimelineManager.disableHomogenuity();
 
     var items =
     [{
@@ -4403,6 +4426,19 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
                     that._redrawShots();
                 }
             }
+        }
+    }, {
+        "id": "neodnFuncType",
+        "class": "ntOptionsHR",
+        "type": "checkbox",
+        "text": "<Неодн.> = ndvi_max_clear - ndvi_min_clear",
+        "click": function (e) {
+            if (e.checked) {
+                that._neodnrHandler._thematicStrategy.funcType = 1;
+            } else {
+                that._neodnrHandler._thematicStrategy.funcType = 0;
+            }
+            that._redrawShots();
         }
     }];
 
@@ -4546,10 +4582,10 @@ NDVITimelineManager.prototype.setTimelineCombo = function (index) {
     that._currentZoom = that.lmap.getZoom();
     that.applyZoomRestriction(that._currentZoom);
 
-    //выключим гомогенность на время
-    if (index) {
-        NDVITimelineManager.disableHomogenuity();
-    }
+    ////выключим гомогенность на время
+    //if (index) {
+    //    NDVITimelineManager.disableHomogenuity();
+    //}
 
     //выключаем "неопознанные" продукты
     that.deactivateUnknownRadios();

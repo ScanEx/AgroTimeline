@@ -195,9 +195,9 @@ shared.dateToString = function (date, inv) {
     return yyyy + "." + (mm[1] ? mm : "0" + mm[0]) + "." + (dd[1] ? dd : "0" + dd[0]);
 };
 
-shared.formatDate = function (d, m, y) {
-    return shared.strpad(d.toString(), 2) + '.' +
-        shared.strpad(m.toString(), 2) + '.' +
+shared.formatDate = function (d, m, y, sep) {
+    return shared.strpad(d.toString(), 2) + (sep || '.') +
+        shared.strpad(m.toString(), 2) + (sep || '.') +
         shared.strpad(y.toString(), 4);
 }
 
@@ -310,13 +310,8 @@ shared.getFeatures = function (layerId, sender, callback, errorCallback) {
     if (shared.GeometryCache[layerId] && shared.GeometryBounds[layerId].equals(nsGmx.gmxMap.layersByID[layerId].getBounds())) {
         callback(shared.GeometryCache[layerId]);
     } else {
-        var url = "/VectorLayer/Search.ashx?WrapStyle=func" +
-                  "&layer=" + layerId +
-                  "&geometry=true";
-
         var that = this;
-        nsGmx.Auth.getResourceServer('geomixer').sendGetRequest(url).then(function (response) {
-
+        function _success(response) {
             if (nsGmx && nsGmx.gmxMap) {
                 shared.GeometryBounds[layerId] = nsGmx.gmxMap.layersByID[layerId].getBounds();
             }
@@ -334,7 +329,20 @@ shared.getFeatures = function (layerId, sender, callback, errorCallback) {
                 errorCallback && errorCallback({ "err": "Too much fields" });
                 return;
             }
-        });
+        };
+
+        var url = "/VectorLayer/Search.ashx?WrapStyle=func" +
+                  "&layer=" + layerId +
+                  "&geometry=true";
+        if (nsGmx.Auth && nsGmx.Auth.getResourceServer) {
+            nsGmx.Auth.getResourceServer('geomixer').sendGetRequest(url).then(function (response) {
+                _success(response);
+            });
+        } else {
+            sendCrossDomainJSONRequest(window.serverBase + url, function (response) {
+                _success(response);
+            });
+        }
     }
 };
 
@@ -603,4 +611,18 @@ shared.clearDate = function (currentTime) {
     var millisInDay = 60 * 60 * 24 * 1000;
     var dateOnly = Math.floor(currentTime / millisInDay) * millisInDay;
     return dateOnly;
+};
+
+shared.subDates = function (d1, d0) {
+    return Math.round(Math.abs((d1.getTime() - d0.getTime()) / (24 * 60 * 60 * 1000)));
+};
+
+shared.addDays = function (date, days) {
+    var result = new Date(date);
+    result.setDate(date.getDate() + days);
+    return result;
+};
+
+shared.equalDates = function (d1, d2) {
+    return d1.getDate() == d2.getDate() && d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear();
 };

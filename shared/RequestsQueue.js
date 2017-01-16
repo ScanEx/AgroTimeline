@@ -46,10 +46,8 @@ RequestsQueue.prototype.loadRequestData = function (request) {
     this.counter++;
 
     var that = this;
-    sendCrossDomainPostRequest('http://maps.kosmosnimki.ru/plugins/getrasterhist.ashx', {
-        'WrapStyle': 'window',
-        'Request': JSON.stringify(request)
-    }, function (response) {
+
+    function _success(response) {
         if (response && response.Result) {
 
             if (that._callback)
@@ -57,7 +55,22 @@ RequestsQueue.prototype.loadRequestData = function (request) {
 
             that.dequeueRequest();
         }
-    });
+    };
+
+    var data = {
+        'WrapStyle': 'window',
+        'Request': JSON.stringify(request)
+    };
+
+    if (nsGmx.Auth && nsGmx.Auth.getResourceServer) {
+        nsGmx.Auth.getResourceServer('geomixer').sendPostRequest("VectorLayer/Search.ashx", data).then(function (response) {
+            _success(response);
+        });
+    } else {
+        sendCrossDomainPostRequest('http://maps.kosmosnimki.ru/plugins/getrasterhist.ashx', data, function (response) {
+            _success(response);
+        });
+    }
 };
 
 RequestsQueue.prototype.dequeueRequest = function () {
