@@ -456,10 +456,10 @@ AgroLegend.start = function () {
     //Легенда для неоднородности
     if (!AgroLegend.legendInhomogenuity) {
         AgroLegend.legendInhomogenuity = new AgroLegend({
-            "caption": "Неоднородность", "width": 168, "height": 100,
+            "caption": "Однородность", "width": 168, "height": 100,
             "sortField": "class",
             "sort": true,
-            "description": "Неоднородность",
+            "description": "Однородность",
             "continuousTable": true,
             "horizontal": true,
             "colorWidth": 30,

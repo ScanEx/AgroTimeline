@@ -4058,7 +4058,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
     //    that._redrawShots();
     //}, true);
 
-    this.addRadio("thirdPanel_1", "Неоднородность", "shotsOptions", "inhomogenuityRadio", 1, true, function (r) {
+    this.addRadio("thirdPanel_1", "Однородность", "shotsOptions", "inhomogenuityRadio", 1, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.INHOMOGENUITY;
         that._redrawShots();
     }, true);
