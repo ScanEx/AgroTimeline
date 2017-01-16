@@ -456,22 +456,23 @@ AgroLegend.start = function () {
     //Легенда для неоднородности
     if (!AgroLegend.legendInhomogenuity) {
         AgroLegend.legendInhomogenuity = new AgroLegend({
-            "caption": "Однородность", "width": 156, "height": 256,
+            "caption": "Неоднородность", "width": 168, "height": 100,
             "sortField": "class",
-            "sort": false,
-            "description": "Однородность"
+            "sort": true,
+            "description": "Неоднородность",
+            "continuousTable": true,
+            "horizontal": true,
+            "colorWidth": 30,
+            "useDescription": false,
+            "alternateDescriptionHTML": '<div style="float:left">высокая</div><div style="float:right">низкая</div>'
         });
 
         var inhomogenuityLegend = [
-            { "class": 1, "r": 0, g: 179, b: 255, "description": 'облака и тени' },
-            { "class": 3, r: 245, g: 12, b: 50, "description": "30%" },
-            { "class": 4, r: 227, g: 145, b: 57, "description": "40%" },
-            { "class": 5, r: 230, g: 200, b: 78, "description": "50%" },
-            { "class": 6, r: 240, g: 240, b: 24, "description": "60%" },
-            { "class": 7, r: 223, g: 237, b: 92, "description": "70%" },
-            { "class": 8, r: 179, g: 214, b: 109, "description": "80%" },
-            { "class": 9, r: 125, g: 235, b: 21, "description": "90%" },
-            { "class": 10, r: 30, g: 163, b: 18, "description": "100%" }
+            { "class": 1, "r": 245, "g": 12, "b": 50, "description": "" },
+            { "class": 2, "r": 227, "g": 145, "b": 57, "description": "" },
+            { "class": 3, "r": 240, "g": 240, "b": 24, "description": "" },
+            { "class": 4, "r": 125, "g": 235, "b": 21, "description": "" },
+            { "class": 5, "r": 30, "g": 163, "b": 18, "description": "" }
         ];
 
         AgroLegend.legendInhomogenuity.applyLegend(inhomogenuityLegend, AgroLegend.AGRO);
