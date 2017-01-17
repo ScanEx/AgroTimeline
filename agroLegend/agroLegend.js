@@ -464,7 +464,7 @@ AgroLegend.start = function () {
             "horizontal": true,
             "colorWidth": 30,
             "useDescription": false,
-            "alternateDescriptionHTML": '<div style="float:left">высокая</div><div style="float:right">низкая</div>'
+            "alternateDescriptionHTML": '<div style="float:left">низкая</div><div style="float:right">высокая</div>'
         });
 
         var inhomogenuityLegend = [

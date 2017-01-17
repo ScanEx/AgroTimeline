@@ -4431,7 +4431,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         "id": "neodnFuncType",
         "class": "ntOptionsHR",
         "type": "checkbox",
-        "text": "<Неодн.> = ndvi_max_clear - ndvi_min_clear",
+        "text": "Однородность = ndvi_max - ndvi_min",
         "click": function (e) {
             if (e.checked) {
                 that._neodnrHandler._thematicStrategy.funcType = 1;
