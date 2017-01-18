@@ -39,14 +39,16 @@
             }
         },
         "SENTINEL": {
+            isSentinel: true,
             cloudsMin: 100,
             showQuicklooks: true,
             cloudsField: "clouds",
             viewTimeline: true,
-            name: "58A10C3522764BA69D2EA75B02E8A210",
+            name: "636CBFF5155F4F299254EAF54079040C",
             dateColumnName: "acqdate"
         },
         "SENTINEL_NDVI": {
+            isSentinel: true,
             name: "EC68D0C097BE4F0B9E9DE4A0B9F591A2",
             mask: "14A988CBC5FD424D9EBE23CEC8168150",
             //name: "2DFFD2B32C754770BD7D289AB8986CC4",
@@ -59,6 +61,7 @@
             }
         },
         "SENTINEL_IR": {
+            isSentinel: true,
             showQuicklooks: true,
             cloudsField: "clouds",
             name: "12ECA8F4ED7B487A913ADBD4072B605B",

@@ -3252,9 +3252,8 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
             var qldate = "";
             var date = "";
 
-            if (selectedLayer == "58A10C3522764BA69D2EA75B02E8A210") {
-                this.isSentinel = true;
-            }
+            this.isSentinel = this._layerConfigs[selectedLayer].isSentinel;
+
             var comboArr = that._combo[that._selectedCombo].rk;
             var q;
             //TODO: вынести индекс слоя в группе в какой нибудь параметр.
@@ -3363,40 +3362,39 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                 var rk = that._combo[that._selectedCombo].rk;
                 for (var i = 0; i < rk.length; i++) {
                     var rki = rk[i];
-                    //пропускаем каталог RGB high resolution
-                    if (this.isSentinel || !this.isSentinel && !(rki == "SENTINEL_IR" || rki == "SENTINEL_NDVI"))
-                        if (!this._layersLegend[rki].viewTimeline) {
-                            if (NDVITimelineManager._comboRadios[that._selectedCombo]) {
+                    //пропускаем каталоги на таймлайне
+                    if (this.isSentinel == this._layersLegend[rki].isSentinel && !this._layersLegend[rki].viewTimeline) {
+                        if (NDVITimelineManager._comboRadios[that._selectedCombo]) {
 
-                                var filenames = [];
-                                var sceneids = [];
+                            var filenames = [];
+                            var sceneids = [];
 
-                                for (var j = 0; j < that._comboFilenames[that._selectedCombo].length; j++) {
-                                    filenames.push(NDVITimelineManager._normalizeFilename(that._comboFilenames[that._selectedCombo][j], NDVITimelineManager._rkId[rki]));
-                                    sceneids.push(NDVITimelineManager._normalizeFilename(that._comboFilenames[that._selectedCombo][j], NDVITimelineManager._rkId["HR"]));
-                                }
+                            for (var j = 0; j < that._comboFilenames[that._selectedCombo].length; j++) {
+                                filenames.push(NDVITimelineManager._normalizeFilename(that._comboFilenames[that._selectedCombo][j], NDVITimelineManager._rkId[rki]));
+                                sceneids.push(NDVITimelineManager._normalizeFilename(that._comboFilenames[that._selectedCombo][j], NDVITimelineManager._rkId["HR"]));
+                            }
 
-                                var name = that._layersLegend[rki].name;
+                            var name = that._layersLegend[rki].name;
 
-                                params.push({
-                                    "name": name,
-                                    "filenames": filenames,
-                                    "radioId": NDVITimelineManager._comboRadios[that._selectedCombo][rki]
-                                });
+                            params.push({
+                                "name": name,
+                                "filenames": filenames,
+                                "radioId": NDVITimelineManager._comboRadios[that._selectedCombo][rki]
+                            });
 
-                                //запоминаем filenames(sceneid) для снимков ndvi
-                                if (rki == "HR") {
-                                    that._currentFnIdArr.length = 0;
-                                    that._currentFnIdArr = [];
-                                    that._currentFnIdArr.push.apply(that._currentFnIdArr, filenames);
-                                }
-                                if (rki == "CLASSIFICATION") {
-                                    that._currentClassificationFnIdArr.length = 0;
-                                    that._currentClassificationFnIdArr = [];
-                                    that._currentClassificationFnIdArr.push.apply(that._currentClassificationFnIdArr, sceneids);
-                                }
+                            //запоминаем filenames(sceneid) для снимков ndvi
+                            if (rki == "HR") {
+                                that._currentFnIdArr.length = 0;
+                                that._currentFnIdArr = [];
+                                that._currentFnIdArr.push.apply(that._currentFnIdArr, filenames);
+                            }
+                            if (rki == "CLASSIFICATION") {
+                                that._currentClassificationFnIdArr.length = 0;
+                                that._currentClassificationFnIdArr = [];
+                                that._currentClassificationFnIdArr.push.apply(that._currentClassificationFnIdArr, sceneids);
                             }
                         }
+                    }
                 }
 
                 //that._currentRKIdArr = [];
