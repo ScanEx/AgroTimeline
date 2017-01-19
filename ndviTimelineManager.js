@@ -192,12 +192,6 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     //count - указатель на элемент идентификатор кол-ва снимков NDVI за этот год
     this._yearsPanel = [];
 
-    //для каждого снимка по ogc_fid хранит состояние видимости на экране и дату
-    //this._observedItems = [];
-
-    //for (var i = 0; i < this._combo.length; i++) {
-    //    this._observedItems[i] = [];
-    //}
     //текущий год активный
     this.defaultYear = (new Date()).getFullYear();
     this._selectedYear = this.defaultYear;
@@ -1130,7 +1124,8 @@ NDVITimelineManager.prototype.setVisibleYear = function (year) {
         this._proxyLayers[l].setDateInterval(new Date(this._selectedYear, 0, 1), new Date(this._selectedYear, 11, 31));
     }
 
-    this.timeLine.updateFilters();
+    //this.lmap.fire("moveend");
+    this.timeLine.getTimelineController().setDateInterval(new Date(this._selectedYear, 0, 1), new Date(this._selectedYear, 11, 31));
 };
 
 NDVITimelineManager.prototype.switchYear = function (year) {
@@ -2787,16 +2782,33 @@ NDVITimelineManager.prototype.bindTimelineCombo = function (selectedCombo) {
         var timelineLayerName = timelineLayerNames[i];
         //Вобщем такая бага, приходится все время создавать прокси слой при переключении, если использовать 
         //один и тот же такое ощущение, что теряются риски на таймлайне.
-        if (this.isProxyLayer(timelineLayerName) /*&& !this._proxyLayers[timelineLayerName]*/) {
+        if (this.isProxyLayer(timelineLayerName)) {
             this._proxyLayers[timelineLayerName] = new TimelineProxyLayer(this, this.layerCollection[timelineLayerName], this.lmap);
             this._proxyLayers[timelineLayerName].setDateInterval(new Date(this._selectedYear, 0, 1), new Date(this._selectedYear, 11, 31));
             this.timeLine.bindLayer(this._proxyLayers[timelineLayerName].localLayer, { trackVisibility: false });
             this.layerCollection[this._proxyLayers[timelineLayerName].name] = this._proxyLayers[timelineLayerName].localLayer;
-            //} else if (this.isProxyLayer(timelineLayerName) && this._proxyLayers[timelineLayerName]) {
-            //    this._proxyLayers[timelineLayerName].setDateInterval(new Date(this._selectedYear, 0, 1), new Date(this._selectedYear, 11, 31));
-            //    this.timeLine.bindLayer(this._proxyLayers[timelineLayerName].localLayer, { trackVisibility: false });
         } else {
-            this.timeLine.bindLayer(this.layerCollection[timelineLayerName], { trackVisibility: false });
+            var that = this;
+            (function (layerName) {
+                var layer = that.layerCollection[layerName];
+                var filters = ['clipFilter', 'TemporalFilter'];
+                var dateCn = that._layerConfigs[layerName].dateColumnName;
+                if (dateCn) {
+                    dateCn = layer._gmx.tileAttributeIndexes[dateCn];
+                    filters.push(function (item) {
+                        var t = that.timeLine.getTimelineController().getTimeline();
+                        var date = item.properties[dateCn] * 1000;
+                        if (date >= t.start.getTime() && date <= t.end.getTime()) {
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+                that.timeLine.bindLayer(layer, {
+                    trackVisibility: false,
+                    observerFilters: filters
+                });
+            })(timelineLayerName);
         }
     }
 };
