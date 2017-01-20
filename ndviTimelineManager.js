@@ -1124,8 +1124,9 @@ NDVITimelineManager.prototype.setVisibleYear = function (year) {
         this._proxyLayers[l].setDateInterval(new Date(this._selectedYear, 0, 1), new Date(this._selectedYear, 11, 31));
     }
 
-    //this.lmap.fire("moveend");
     this.timeLine.getTimelineController().setDateInterval(new Date(this._selectedYear, 0, 1), new Date(this._selectedYear, 11, 31));
+
+    this._refreshTimeline();
 };
 
 NDVITimelineManager.prototype.switchYear = function (year) {
@@ -1632,6 +1633,7 @@ NDVITimelineManager.prototype._showFIRES_POINTS = function () {
             this.lmap.addLayer(layer);
             this._selectedLayers.push(layer);
         }
+        this.refreshSelections();
     } else {
         this.hideSelectedLayer();
         this._selectedOption = "FIRES";
@@ -2401,6 +2403,18 @@ NDVITimelineManager.prototype.onMoveEnd = function () {
     setTimeout(function () {
         that.refreshSelections();
     }, 500);
+
+    this._refreshTimeline();
+};
+
+NDVITimelineManager.prototype._refreshTimeline = function () {
+    if (this._selectedOption != "FIRES") {
+        this.__yearRefreshHandler && clearTimeout(this.__yearRefreshHandler);
+        var that = this;
+        this.__yearRefreshHandler = setTimeout(function () {
+            that.timeLine.getTimelineController().update();
+        }, 1500);
+    }
 };
 
 //кеш геометрий слоев
@@ -3191,6 +3205,11 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
     that._currentSelection = x.changed.selection;
 
     var selection = x.changed.selection;
+
+    if (!selection) {
+        return;
+    }
+
     var selectedLayer;
     for (var sel in selection) {
         selectedLayer = sel;
