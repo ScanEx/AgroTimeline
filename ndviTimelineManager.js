@@ -1,5 +1,7 @@
 var NDVITimelineManager = function (lmap, params, userRole, container) {
 
+    this.events = new Events(["changeselection", "clearselection"]);
+
     //leaflet map
     this.lmap = lmap;
 
@@ -251,6 +253,8 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
 
     this._proxyOptions = ["F2840D287CD943C4B1122882C5B92565"];
     this._proxyLayers = {};
+
+    this.legendControl = new LegendControl(this);
 };
 
 var AgroShared = {};
@@ -848,6 +852,8 @@ NDVITimelineManager.prototype._main = function () {
         t.setAutoScale(false);
         t.options.showCurrentTime = false;
     }
+
+    this.timeLine.getContainer().append(this.legendControl.getContainer());
 };
 
 NDVITimelineManager.prototype.resize = function () {
@@ -1450,6 +1456,8 @@ NDVITimelineManager.prototype._showRedraw = function () {
         } else {
             this._showLayer(NDVITimelineManager.prodTypes[this._selectedType[this._selectedCombo]]);
         }
+
+        this.events.dispatch(this.events.changeselection, this);
     }
 };
 
@@ -3241,6 +3249,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
         this._selectedDates = [];
         that._selectedDate0 = null;
         that._SelectedDate1 = null;
+        this.events.dispatch(this.events.clearselection, this);
     } else {
 
         var c = this.timeLine.getTimelineController();
@@ -3398,11 +3407,9 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                         if (NDVITimelineManager._comboRadios[that._selectedCombo]) {
 
                             var filenames = [];
-                            var sceneids = [];
 
                             for (var j = 0; j < that._comboFilenames[that._selectedCombo].length; j++) {
                                 filenames.push(NDVITimelineManager._normalizeFilename(that._comboFilenames[that._selectedCombo][j], NDVITimelineManager._rkId[rki]));
-                                sceneids.push(NDVITimelineManager._normalizeFilename(that._comboFilenames[that._selectedCombo][j], NDVITimelineManager._rkId["HR"]));
                             }
 
                             var name = that._layersLegend[rki].name;
@@ -3414,15 +3421,10 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                             });
 
                             //запоминаем filenames(sceneid) для снимков ndvi
-                            if (rki == "HR") {
+                            if (rki == "HR" || rki == "SENTINEL_NDVI") {
                                 that._currentFnIdArr.length = 0;
                                 that._currentFnIdArr = [];
                                 that._currentFnIdArr.push.apply(that._currentFnIdArr, filenames);
-                            }
-                            if (rki == "CLASSIFICATION") {
-                                that._currentClassificationFnIdArr.length = 0;
-                                that._currentClassificationFnIdArr = [];
-                                that._currentClassificationFnIdArr.push.apply(that._currentClassificationFnIdArr, sceneids);
                             }
                         }
                     }
@@ -4713,9 +4715,9 @@ NDVITimelineManager.prototype._updateFiresSelection = function (forced) {
 };
 
 NDVITimelineManager.prototype.clearSelection = function () {
-    //this.onChangeSelection({ changed: { selection: {} } });
     this.timeLine.getTimelineController().getTimeline().setSelection([]);
     this.timeLine.shiftActiveItem(0);
+    this.events.dispatch(this.events.clearselection, this);
 };
 
 NDVITimelineManager.prototype.setCutOff = function (e) {
