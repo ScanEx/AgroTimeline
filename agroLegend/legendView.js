@@ -1,7 +1,5 @@
 var LegendView = function (legend) {
-    this.template = 
-        '<div class="legendBar">\
-        </div>';
+    this.template = "";
 
     this.el = null;
     this.$el = null;

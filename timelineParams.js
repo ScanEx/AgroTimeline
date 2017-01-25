@@ -68,6 +68,7 @@
             dateColumnName: "acqdate"
         },
         "RGB": {
+            cloudsMin: 100,
             showQuicklooks: true,
             cloudsField: "CLOUDS",
             viewTimeline: true,
