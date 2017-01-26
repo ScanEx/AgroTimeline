@@ -84,20 +84,13 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
 
     //инициализация модуля посторения тематики по средним NDVI
     var ts = new ThematicStrategy(params.layers.HR.palette.ndvi.url, function (prop) {
-        var val = prop.ndvi_mean_clear * 100 + 101;
-        var color;
-        val = Math.round(val);
+        var color = that.legendControl.getNDVIColor(prop.ndvi_mean_clear);
+        val = prop.ndvi_mean_clear * 100 + 101;
         if (val == 0 || val == -100) {
-            color = shared.RGB2HEX(0, 179, 255);
-        } else if (val < 101) {
-            color = shared.RGB2HEX(0, 0, 0);
-        } else if (val > 201) {
-            color = shared.RGB2HEX(255, 255, 255);
+            return shared.RGB2HEX(0, 179, 255);
         } else {
-            var c = this.palette[val];
-            color = shared.RGB2HEX(c.partRed, c.partGreen, c.partBlue);
+            return shared.RGB2HEX(color[0], color[1], color[2]);
         }
-        return color;
     });
 
     this._themesHandler = new ThematicHandler(ts);
@@ -160,8 +153,6 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
 
     this._currentRKIdArr = []; //для ndvi
     this._currentFnIdArr = []; //для ndvi
-    this._currentClassificationFnIdArr = [];
-    this._currentClassificationRKIdArr = []; //для неоднородности
     this._selectedDate = null;
     this._selectedDateStr = null;
     this._selectedDateL = null;
@@ -306,11 +297,18 @@ NDVITimelineManager.getLayerBounds = function (layersArr) {
     return L.polygon([L.latLng(minLat, minLng), L.latLng(maxLat, minLng), L.latLng(maxLat, maxLng), L.latLng(minLat, maxLng), L.latLng(minLat, minLng)]);
 };
 
+NDVITimelineManager.prototype.repaint = function () {
+    if (this._selectedOption == "MEAN_NDVI") {
+        this._themesHandler.repaint();
+        this.repaintVisibleLayers();
+    } else {
+        this.repaintSelectedLayers();
+    }
+};
+
 NDVITimelineManager.prototype.repaintVisibleLayers = function (hash) {
     for (var i = 0; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
-        if (!$.isEmptyObject(hash)) {
-            this._visibleLayersOnTheDisplayPtr[i].repaint(hash);
-        }
+        this._visibleLayersOnTheDisplayPtr[i].repaint(hash);
     }
 };
 
@@ -980,12 +978,12 @@ NDVITimelineManager.prototype.clearRenderHook = function () {
         this._visibleLayersOnTheDisplayPtr[i].removePreRenderHook(NDVITimelineManager.l_hook);
     }
 
-    this.redrawSelectedLayers();
+    this.repaintSelectedLayers();
 };
 
-NDVITimelineManager.prototype.redrawSelectedLayers = function () {
+NDVITimelineManager.prototype.repaintSelectedLayers = function () {
     for (var i = 0; i < this._selectedLayers.length; i++) {
-        this._selectedLayers[i].redraw();
+        this._selectedLayers[i].repaint();
     }
 };
 
@@ -1245,43 +1243,6 @@ NDVITimelineManager.prototype.createOptionsPanel = function () {
 };
 
 
-NDVITimelineManager._legendCallback = {};
-NDVITimelineManager._legendCallback["qualityRadio"] = function () {
-    AgroLegend.toggleLegend(AgroLegend.legendQuality);
-};
-
-NDVITimelineManager._legendCallback["classificationRadio"] = function () {
-    AgroLegend.toggleLegend(AgroLegend.legendClassification);
-};
-
-NDVITimelineManager._legendCallback["ndviRadio_modis"] = function () {
-    AgroLegend.toggleLegend(AgroLegend.legendNdvi);
-};
-
-NDVITimelineManager._legendCallback["ndviRadio_hr"] = function () {
-    AgroLegend.toggleLegend(AgroLegend.legendNdvi);
-};
-
-NDVITimelineManager._legendCallback["ratingRadio"] = function () {
-    AgroLegend.toggleLegend(AgroLegend.legendRating);
-};
-
-NDVITimelineManager._legendCallback["ndviMeanRadio"] = function () {
-    AgroLegend.toggleLegend(AgroLegend.legendNdvi);
-};
-
-NDVITimelineManager._legendCallback["conditionsOfVegetationRadio"] = function () {
-    AgroLegend.toggleLegend(AgroLegend.legendConditionsOfVegetation);
-};
-
-NDVITimelineManager._legendCallback["inhomogenuityRadio"] = function () {
-    AgroLegend.toggleLegend(AgroLegend.legendInhomogenuity);
-};
-
-NDVITimelineManager._legendCallback["meanVCIRadio"] = function () {
-    AgroLegend.toggleLegend(AgroLegend.legendConditionsOfVegetation);
-};
-
 /**
  * text - текст радио кнопки
  * tag - название группы
@@ -1358,19 +1319,6 @@ NDVITimelineManager.prototype.addRadio = function (elementId, text, tag, id, com
             callback.call(that, input);
         }
     };
-
-    if (NDVITimelineManager._legendCallback[id]) {
-        var btnLegend = document.createElement('span');
-        div.appendChild(btnLegend);
-        btnLegend.classList.add("layerInfoButton");
-        btnLegend.style.color = "blue";
-        btnLegend.style.fontWeight = "normal";
-        btnLegend.style.fontFamily = "serif";
-        btnLegend.onclick = NDVITimelineManager._legendCallback[id];
-        btnLegend.ontouchstart = NDVITimelineManager._legendCallback[id];
-        btnLegend.title = "Легенда";
-        btnLegend.innerHTML = "i";
-    }
 
     this._radioButtonLabels[id] = { "label": label, "parent": div };
 };
@@ -2022,14 +1970,14 @@ NDVITimelineManager.prototype._showINHOMOGENUITY = function () {
 
         this.hideSelectedLayer();
         this._selectedOption = "INHOMOGENUITY";
-        this._neodnrHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true), this._currentClassificationRKIdArr, this._currentClassificationFnIdArr);
+        this._neodnrHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true), this._currentRKIdArr, this._currentFnIdArr);
     }
 };
 
 NDVITimelineManager.prototype._hideINHOMOGENUITY = function () {
-    if (!this._currentClassificationRKIdArr.length) {
-        this.setRadioLabelActive("inhomogenuityRadio", false)
-    }
+    //if (!this._currentClassificationRKIdArr.length) {
+    //    this.setRadioLabelActive("inhomogenuityRadio", false)
+    //}
     this._neodnrHandler.clear();
 };
 
@@ -2283,7 +2231,7 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
 
     if (this.lmap.getZoom() >= NDVITimelineManager.MIN_ZOOM_HR) {
         that._themesHandler.addLayers(that._visibleLayersOnTheDisplayPtr, that._currentRKIdArr, that._currentFnIdArr);
-        that._neodnrHandler.addLayers(that._visibleLayersOnTheDisplayPtr, that._currentClassificationRKIdArr, that._currentClassificationFnIdArr);
+        that._neodnrHandler.addLayers(that._visibleLayersOnTheDisplayPtr, that._currentRKIdArr, that._currentFnIdArr);
     }
 
     if (this._selectedLayers.length && !NDVITimelineManager.equal(that._visibleLayersOnTheDisplay, prevLayers)) {
@@ -3434,10 +3382,6 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                 that._setExistentProds(params, function (rkArr) {
                     for (var i in that.existentShots) {
 
-                        //if (i == "classificationRadio" && that._selectedDate >= new Date(2015, 10, 1)) {
-                        //    continue;
-                        //}
-
                         that.setRadioLabelActive_grey(i, that.existentShots[i]);
                         that.setProductAvailability(i, that.existentShots[i]);
 
@@ -3448,7 +3392,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                             //that.setProductAvailability("inhomogenuityRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
                             //that.setProductAvailability("classificationRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
 
-                            that._currentClassificationRKIdArr = [].concat(rkArr["classificationRadio"]);
+                            //that._currentClassificationRKIdArr = [].concat(rkArr["classificationRadio"]);
                         }
 
                         if (i == "ndviRadio_hr" && that.existentShots["ndviRadio_hr"]) {
@@ -3469,7 +3413,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
 
                     if (that.lmap.getZoom() >= NDVITimelineManager.MIN_ZOOM_HR) {
                         that._themesHandler.addLayers(that._visibleLayersOnTheDisplayPtr, that._currentRKIdArr, that._currentFnIdArr);
-                        that._neodnrHandler.addLayers(that._visibleLayersOnTheDisplayPtr, that._currentClassificationRKIdArr, that._currentClassificationFnIdArr);
+                        that._neodnrHandler.addLayers(that._visibleLayersOnTheDisplayPtr, that._currentRKIdArr, that._currentFnIdArr);
                     }
 
                     if (that.isSentinel) {
@@ -4715,6 +4659,7 @@ NDVITimelineManager.prototype._updateFiresSelection = function (forced) {
 };
 
 NDVITimelineManager.prototype.clearSelection = function () {
+    //this.onChangeSelection({ changed: { selection: {} } });
     this.timeLine.getTimelineController().getTimeline().setSelection([]);
     this.timeLine.shiftActiveItem(0);
     this.events.dispatch(this.events.clearselection, this);
@@ -5024,20 +4969,10 @@ NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanva
         info.destination.x, info.destination.y, that.lmap.getZoom(),
         dstCanvas,
         function (r, g, b, a) {
-            var pal = palette[r];
-            if (pal) {
-                return [pal.partRed, pal.partGreen, pal.partBlue, 255];
+            if (r == 0 && g == 0 && b == 0) {
+                return [0, 179, 255, 255];
             } else {
-                if (r == 0 && g == 0 && b == 0) {
-                    return [0, 179, 255, 255];
-                }
-                if (r < 101) {
-                    return [0, 0, 0, 255];
-                }
-                if (r > 201) {
-                    return [255, 255, 255, 255];
-                }
-                return [0, 0, 0, 255];
+                return that.legendControl.getNDVIColor((r - 101) / 100);
             }
         }, shared.NEAREST);
     } else {

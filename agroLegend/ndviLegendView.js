@@ -1,7 +1,7 @@
 var NDVILegendView = function () {
     inheritance.base(this, new NDVILegend({
         'name': "Цветовая шкала NDVI",
-        'width': 510,
+        'width': 480,
         'height': 220,
         'palettes': [{
             'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml",
@@ -46,11 +46,11 @@ var NDVILegendView = function () {
         this.el = this.$el[0];
 
         var that = this;
-
         var radios = this.el.querySelectorAll('input[type=radio][name="alpRadio"]');
         Array.prototype.forEach.call(radios, function (radio) {
             radio.addEventListener('change', function () {
-                that.events.dispatch(that.events.changepalette, parseInt(this.value));
+                that.model._selectedPaletteIndex = parseInt(this.value);
+                that.events.dispatch(that.events.changepalette, that.model._selectedPaletteIndex);
             });
         });
 
@@ -134,15 +134,10 @@ var NDVILegendView = function () {
         this.$el.find(".alpV-" + i + " .alpValues").html(valueLine);
     };
 
-    this._renderPalettes = function () {
-        this._renderStaticPalettes();
-        this._renderRangedPalette();
+    this.rebindEvents = function () {
+        var p = this.model.palettes[1];
         var inpMin = this.$el.find(".alpV-1 .alpMin"),
             inpMax = this.$el.find(".alpV-1 .alpMax");
-        inpMin.attr('value', 0);
-        inpMax.attr('value', 1);
-
-        var p = this.model.palettes[1];
 
         function _checkValue(evt, min, max) {
             var c = String.fromCharCode(evt.charCode != null ? evt.charCode : evt.keyCode);
@@ -171,7 +166,7 @@ var NDVILegendView = function () {
         });
 
         inpMax.keypress(function (evt) {
-            var v = _checkValue.call(this, evt, p.min, 2);
+            var v = _checkValue.call(this, evt, p.min, 1);
             if (v) {
                 if (!isNaN(v)) {
                     p.max = parseFloat(v);
@@ -184,6 +179,14 @@ var NDVILegendView = function () {
             }
             return false;
         });
+    };
+
+    this._renderPalettes = function () {
+        this._renderStaticPalettes();
+        this._renderRangedPalette();
+        this.$el.find(".alpV-1 .alpMin").attr('value', 0);
+        this.$el.find(".alpV-1 .alpMax").attr('value', 1);
+        this.rebindEvents();
     };
 };
 

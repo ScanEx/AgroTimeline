@@ -65,11 +65,20 @@ var LegendControl = function (agroTimeline) {
         this._dialog.setPositionRightBottom(_RIGHT, _BOTTOM);
     };
 
+    this._ndviLegendView.events.on("changepalette", null, function () {
+        agroTimeline.repaint();
+    });
+
+    this._ndviLegendView.events.on("changerange", null, function () {
+        agroTimeline.repaint();
+    });
+
     agroTimeline.events.on("changeselection", null, function (t) {
         var so = t._selectedOption;
         if (so == "HR" || so == "MEAN_NDVI" || so == "SENTINEL_NDVI") {
             that.showButton();
             that.applyLegend(that._ndviLegendView);
+            that._ndviLegendView.rebindEvents();
         } else if (so == "RATING") {
             that.showButton();
             that.applyLegend(that._ratingLegendView);
@@ -82,4 +91,8 @@ var LegendControl = function (agroTimeline) {
     agroTimeline.events.on("clearselection", null, function (t) {
         that.hideButton();
     });
+
+    this.getNDVIColor = function (ndviValue) {
+        return this._ndviLegendView.model.getNDVIColor(ndviValue);
+    };
 };

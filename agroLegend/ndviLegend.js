@@ -5,6 +5,8 @@ var NDVILegend = function (options) {
 
     this.palettes = [];
 
+    this._selectedPaletteIndex = 0;
+
     var defArr = [],
         that = this;
     for (var i = 0; i < options.palettes.length; i++) {
@@ -12,7 +14,15 @@ var NDVILegend = function (options) {
             var def = new $.Deferred();
             defArr.push(def);
             shared.loadPaletteSync(options.palettes[ii].url).then(function (pal) {
+                var startIndex = 0;
+                for (var i = 0; i < pal.length; i++) {
+                    if (pal[i]) {
+                        startIndex = i;
+                        break;
+                    }
+                }
                 that.palettes[ii] = {
+                    'startIndex': startIndex,
                     'min': options.palettes[ii].min || 0.0,
                     'max': options.palettes[ii].max || 1.0,
                     'scale': pal,
@@ -26,6 +36,18 @@ var NDVILegend = function (options) {
     $.when.apply($, defArr).then(function () {
         that.events.dispatch(that.events.loadend, that);
     });
+
+    this.getNDVIColor = function (ndviValue) {
+        var p = this.palettes[this._selectedPaletteIndex];
+        var index = Math.round((p.scale.length - p.startIndex) * (ndviValue - p.min) / (p.max - p.min) + p.startIndex);
+        if (index < p.startIndex) {
+            index = p.startIndex;
+        } else if (index >= p.scale.length) {
+            index = p.scale.length - 1;
+        }
+        var c = p.scale[index];
+        return [c.partRed, c.partGreen, c.partBlue, 255];
+    };
 };
 
 inheritance.extend(NDVILegend, Legend);

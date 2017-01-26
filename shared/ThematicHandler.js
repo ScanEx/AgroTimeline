@@ -245,6 +245,7 @@ var ThematicHandler = function (thematicStrategy) {
     this.sourceLayersArr = {};
     this._thematicStrategy = thematicStrategy;
     this._layersStyleData = {};
+    this._layersFeatures = {};
 
     //выбранная дата
     this._dateStr = null;
@@ -257,7 +258,7 @@ var ThematicHandler = function (thematicStrategy) {
     this._counter = 0;
     this._pendingsQueue = [];
     this.dataSource = "";
-    this.layerCollection = null;
+    //this.layerCollection = null;
 
     //Вызывается если произошла ошибка, когда слишком много полей для раскраски в ручном режиме.
     this.errorCallback = null;
@@ -267,9 +268,14 @@ ThematicHandler.prototype.clearLayersStyleData = function () {
     this._layersStyleData = {};
 };
 
+ThematicHandler.prototype.repaint = function () {
+    for (var l in this._layersFeatures) {
+        this._applyStrategy(this._layersFeatures[l], l);
+    }
+};
+
 ThematicHandler.prototype.removeStyleHooks = function () {
     for (var l in this.sourceLayersArr) {
-        //this.sourceLayersArr[l].removeStyleHook();
         styleHookManager.removeStyleHook(this.sourceLayersArr[l], ThematicHandler.__hookId);
         this.sourceLayersArr[l].repaint();
     }
@@ -303,6 +309,24 @@ ThematicHandler.prototype.setLayerStyleHook = function (layer) {
             return data.style;
         }
     }, 100);
+};
+
+ThematicHandler.prototype._applyStrategy = function (features, layerName) {
+    this._layersStyleData[layerName] = {};
+    var identityField = "layer_gmx_id";
+    for (var i = 0; i < features.length; i++) {
+        var fi = features[i];
+        var prop = fi.properties;
+        var color = shared.RGB2HEX(0, 179, 255);
+        if (prop.valid_area_pct >= 90.0) {
+            color = this._thematicStrategy.getColor(prop);
+        }
+
+        this._layersStyleData[layerName][prop[identityField]] = {
+            fillStyle: shared.DEC2RGB(color),
+            fillOpacity: 1.0
+        };
+    }
 };
 
 ThematicHandler.shotsGeomeryCache = {};
@@ -377,19 +401,8 @@ ThematicHandler.prototype._applyLayer = function (layer) {
                 }
                 var features = response.features;
                 if (features.length) {
-                    for (var i = 0; i < features.length; i++) {
-                        var fi = features[i];
-                        var prop = fi.properties;
-                        var color = shared.RGB2HEX(0, 179, 255);
-                        if (prop.valid_area_pct >= 90.0) {
-                            color = that._thematicStrategy.getColor(prop);
-                        }
-
-                        that._layersStyleData[layerName][prop[identityField]] = {
-                            fillStyle: shared.DEC2RGB(color),
-                            fillOpacity: 1.0
-                        };
-                    }
+                    that._layersFeatures[layerName] = features;
+                    that._applyStrategy(features, layerName);
                     layer.repaint();
                 } else {
                     //рассчет вручную
