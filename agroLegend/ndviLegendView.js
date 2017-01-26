@@ -54,6 +54,95 @@ var NDVILegendView = function () {
             });
         });
 
+        var inpMin = this.el.querySelector(".alpV-1 .alpMin"),
+            inpMax = this.el.querySelector(".alpV-1 .alpMax");
+
+        function _checkValue(evt) {
+            var c = String.fromCharCode(evt.keyCode);
+            var val;
+            if (evt.keyCode == 8) {
+                val = this.value.substr(0, this.value.length - 1);
+            } else {
+                if (evt.keyCode == 190) {
+                    c = ".";
+                }
+                val = this.value + c;
+            }
+            return val;
+        };
+
+        function _checkNumber(evt) {
+            if (evt.keyCode == 8 || evt.keyCode == 190 || event.keyCode >= 48 && event.keyCode <= 57) {
+                return true;
+            }
+            return false;
+        };
+
+        inpMin.addEventListener('keydown', function (evt) {
+
+            if (evt.keyCode == 37 || evt.keyCode == 39) {
+                return;
+            }
+
+            if (!_checkNumber(evt)) {
+                evt.preventDefault();
+                return;
+            }
+
+            var p = that.model.palettes[1];
+            var v = _checkValue.call(this, evt);
+
+            if (!isNaN(v)) {
+                v = parseFloat(v);
+                if (v >= p.max) {
+                    evt.preventDefault();
+                    return;
+                }
+                p.min = v;
+                if (p.min < p.max) {
+                    that._renderRangedPalette();
+                    that.events.dispatch(that.events.changerange, this);
+                }
+            } else {
+                evt.preventDefault();
+            }
+        });
+
+        inpMax.addEventListener('keydown', function (evt) {
+
+            if (evt.keyCode == 37 || evt.keyCode == 39) {
+                return;
+            }
+
+            if (!_checkNumber(evt)) {
+                evt.preventDefault();
+                return;
+            }
+
+            var p = that.model.palettes[1];
+            var v = _checkValue.call(this, evt);
+
+            if (!isNaN(v)) {
+                v = parseFloat(v);
+                if (v > 1) {
+                    evt.preventDefault();
+                    return;
+                }
+                if (v > 0 && v < p.min) {
+                    evt.preventDefault();
+                    return;
+                }
+                p.max = v;
+                if (p.min < p.max) {
+                    that._renderRangedPalette();
+                    that.events.dispatch(that.events.changerange, this);
+                }
+            } else {
+                evt.preventDefault();
+            }
+        });
+
+
         return this;
     };
 
@@ -134,59 +223,59 @@ var NDVILegendView = function () {
         this.$el.find(".alpV-" + i + " .alpValues").html(valueLine);
     };
 
-    this.rebindEvents = function () {
-        var p = this.model.palettes[1];
-        var inpMin = this.$el.find(".alpV-1 .alpMin"),
-            inpMax = this.$el.find(".alpV-1 .alpMax");
+    //this.rebindEvents = function () {
+    //    var p = this.model.palettes[1];
+    //    var inpMin = this.$el.find(".alpV-1 .alpMin"),
+    //        inpMax = this.$el.find(".alpV-1 .alpMax");
 
-        function _checkValue(evt, min, max) {
-            var c = String.fromCharCode(evt.charCode != null ? evt.charCode : evt.keyCode);
-            var val = this.value + c;
-            if (val == "0" || val == "0." || !isNaN(val) && parseFloat(val) >= min && parseFloat(val) <= max) {
-                return val;
-            }
-            return null;
-        };
+    //    function _checkValue(evt, min, max) {
+    //        var c = String.fromCharCode(evt.charCode != null ? evt.charCode : evt.keyCode);
+    //        var val = this.value + c;
+    //        if (val == "0" || val == "0." || !isNaN(val) && parseFloat(val) >= min && parseFloat(val) <= max) {
+    //            return val;
+    //        }
+    //        return null;
+    //    };
 
-        var that = this;
+    //    var that = this;
 
-        inpMin.keypress(function (evt) {
-            var v = _checkValue.call(this, evt, 0, p.max);
-            if (v) {
-                if (!isNaN(v)) {
-                    p.min = parseFloat(v);
-                    if (p.min != p.max) {
-                        that._renderRangedPalette();
-                        that.events.dispatch(that.events.changerange, this);
-                    }
-                }
-                return true;
-            }
-            return false;
-        });
+    //    inpMin.keypress(function (evt) {
+    //        var v = _checkValue.call(this, evt, 0, p.max);
+    //        if (v) {
+    //            if (!isNaN(v)) {
+    //                p.min = parseFloat(v);
+    //                if (p.min != p.max) {
+    //                    that._renderRangedPalette();
+    //                    that.events.dispatch(that.events.changerange, this);
+    //                }
+    //            }
+    //            return true;
+    //        }
+    //        return false;
+    //    });
 
-        inpMax.keypress(function (evt) {
-            var v = _checkValue.call(this, evt, p.min, 1);
-            if (v) {
-                if (!isNaN(v)) {
-                    p.max = parseFloat(v);
-                    if (p.min != p.max) {
-                        that._renderRangedPalette();
-                        that.events.dispatch(that.events.changerange, this);
-                    }
-                }
-                return true;
-            }
-            return false;
-        });
-    };
+    //    inpMax.keypress(function (evt) {
+    //        var v = _checkValue.call(this, evt, p.min, 1);
+    //        if (v) {
+    //            if (!isNaN(v)) {
+    //                p.max = parseFloat(v);
+    //                if (p.min != p.max) {
+    //                    that._renderRangedPalette();
+    //                    that.events.dispatch(that.events.changerange, this);
+    //                }
+    //            }
+    //            return true;
+    //        }
+    //        return false;
+    //    });
+    //};
 
     this._renderPalettes = function () {
         this._renderStaticPalettes();
         this._renderRangedPalette();
         this.$el.find(".alpV-1 .alpMin").attr('value', 0);
         this.$el.find(".alpV-1 .alpMax").attr('value', 1);
-        this.rebindEvents();
+        //this.rebindEvents();
     };
 };
 

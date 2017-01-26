@@ -1,8 +1,8 @@
 var Legend = function (options) {
     this.name = options.name || "";
     this._palette = [];
-    this.width = options.width || 190;
-    this.height = options.height || 93;
+    this.width = options.width || 480;
+    this.height = options.height || 220;
 };
 
 Legend.RGBToString = function (r, g, b) {

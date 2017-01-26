@@ -1,11 +1,12 @@
 var RatingLegendView = function () {
     inheritance.base(this, new Legend({
         'name': "Рейтинг",
-        'width': 255
+        'width': 480,
+        'height': 220,
     }));
 
     this.template =
-    '<div style="width: 216px;">\
+    '<div style="top:50%; left: 50%; margin-left:-108px; margin-top: -30px; position: absolute; width: 216px;">\
        <div style="float:left">низкий</div>\
        <div style="float:right">высокий</div>\
        <table class="legendTable">\

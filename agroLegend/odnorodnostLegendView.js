@@ -1,10 +1,12 @@
 var OdnorodnostLegendView = function () {
     inheritance.base(this, new Legend({
+        'width': 480,
+        'height': 220,
         'name': "Однородность"
     }));
 
     this.template =
-    '<div style="width: 152px">\
+    '<div style="top:50%; left: 50%; margin-left:-76px; margin-top: -30px; position: absolute; width: 152px">\
        <div style="float:left">низкая</div>\
        <div style="float:right">высокая</div>\
        <table class="legendTable">\

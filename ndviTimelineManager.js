@@ -4402,19 +4402,6 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
                 }
             }
         }
-    }, {
-        "id": "neodnFuncType",
-        "class": "ntOptionsHR",
-        "type": "checkbox",
-        "text": "Однородность = ndvi_max - ndvi_min",
-        "click": function (e) {
-            if (e.checked) {
-                that._neodnrHandler._thematicStrategy.funcType = 1;
-            } else {
-                that._neodnrHandler._thematicStrategy.funcType = 0;
-            }
-            that._redrawShots();
-        }
     }];
 
 

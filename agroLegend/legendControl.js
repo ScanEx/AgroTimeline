@@ -78,7 +78,7 @@ var LegendControl = function (agroTimeline) {
         if (so == "HR" || so == "MEAN_NDVI" || so == "SENTINEL_NDVI" || so == "NDVI16") {
             that.showButton();
             that.applyLegend(that._ndviLegendView);
-            that._ndviLegendView.rebindEvents();
+            //that._ndviLegendView.rebindEvents();
         } else if (so == "RATING") {
             that.showButton();
             that.applyLegend(that._ratingLegendView);
