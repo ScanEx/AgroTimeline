@@ -75,7 +75,7 @@ var LegendControl = function (agroTimeline) {
 
     agroTimeline.events.on("changeselection", null, function (t) {
         var so = t._selectedOption;
-        if (so == "HR" || so == "MEAN_NDVI" || so == "SENTINEL_NDVI") {
+        if (so == "HR" || so == "MEAN_NDVI" || so == "SENTINEL_NDVI" || so == "NDVI16") {
             that.showButton();
             that.applyLegend(that._ndviLegendView);
             that._ndviLegendView.rebindEvents();
@@ -85,6 +85,8 @@ var LegendControl = function (agroTimeline) {
         } else if (so == "INHOMOGENUITY") {
             that.showButton();
             that.applyLegend(that._odnorodnostLegendView);
+        } else {
+            that.hideButton();
         }
     });
 
