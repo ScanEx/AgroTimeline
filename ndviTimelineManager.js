@@ -617,6 +617,8 @@ NDVITimelineManager.prototype.loadState = function (data) {
 
             restoreOptionsMenu();
 
+            that.setVisibleYear(that._selectedYear);
+
             if (that._combo[data.selectedCombo].rk[0] == "FIRES") {
                 document.getElementById("ntPeriodSelectOption").style.display = "block";
                 $(".ntOptionsHR").css("display", "none");
@@ -642,7 +644,6 @@ NDVITimelineManager.prototype.loadState = function (data) {
             }
 
             if (currItem) {
-                that.setTimeLineYear(that._selectedYear);
                 if (data.chkQl) {
                     document.getElementById("chkQl").checked = true;
                     that.qlCheckClick(document.getElementById("chkQl"), data);
@@ -1270,7 +1271,7 @@ NDVITimelineManager.prototype.addRadio = function (elementId, text, tag, id, com
         div0.appendChild(div);
     } else {
         div = div0;
-        div0.style.marginTop = "3px";
+        div0.style.marginTop = "0px";
         div0.style.marginRight = "8px";
         div0.style.marginLeft = "7px";
     }
@@ -1282,7 +1283,8 @@ NDVITimelineManager.prototype.addRadio = function (elementId, text, tag, id, com
     overDiv1.appendChild(input);
     div.appendChild(overDiv1);
     input["comboIndex"] = comboIndex;
-    input.style.height = "18px";
+    input.style.height = "17px";
+    input.style.marginTop = "1px";
     input.type = "radio";
     input.name = tag + "_" + comboIndex;
     input.id = id;
