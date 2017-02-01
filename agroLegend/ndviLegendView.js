@@ -223,59 +223,17 @@ var NDVILegendView = function () {
         this.$el.find(".alpV-" + i + " .alpValues").html(valueLine);
     };
 
-    //this.rebindEvents = function () {
-    //    var p = this.model.palettes[1];
-    //    var inpMin = this.$el.find(".alpV-1 .alpMin"),
-    //        inpMax = this.$el.find(".alpV-1 .alpMax");
-
-    //    function _checkValue(evt, min, max) {
-    //        var c = String.fromCharCode(evt.charCode != null ? evt.charCode : evt.keyCode);
-    //        var val = this.value + c;
-    //        if (val == "0" || val == "0." || !isNaN(val) && parseFloat(val) >= min && parseFloat(val) <= max) {
-    //            return val;
-    //        }
-    //        return null;
-    //    };
-
-    //    var that = this;
-
-    //    inpMin.keypress(function (evt) {
-    //        var v = _checkValue.call(this, evt, 0, p.max);
-    //        if (v) {
-    //            if (!isNaN(v)) {
-    //                p.min = parseFloat(v);
-    //                if (p.min != p.max) {
-    //                    that._renderRangedPalette();
-    //                    that.events.dispatch(that.events.changerange, this);
-    //                }
-    //            }
-    //            return true;
-    //        }
-    //        return false;
-    //    });
-
-    //    inpMax.keypress(function (evt) {
-    //        var v = _checkValue.call(this, evt, p.min, 1);
-    //        if (v) {
-    //            if (!isNaN(v)) {
-    //                p.max = parseFloat(v);
-    //                if (p.min != p.max) {
-    //                    that._renderRangedPalette();
-    //                    that.events.dispatch(that.events.changerange, this);
-    //                }
-    //            }
-    //            return true;
-    //        }
-    //        return false;
-    //    });
-    //};
-
     this._renderPalettes = function () {
         this._renderStaticPalettes();
+        this._refreshRangedPalette();
+    };
+
+    this._refreshRangedPalette = function () {
+        this.$el.find(".alpV-1 .alpMin").attr('value', this.model.palettes[1].min);
+        this.$el.find(".alpV-1 .alpMax").attr('value', this.model.palettes[1].max);
+        var index = this.model.getSelectedPaletteIndex();
+        this.el.querySelector('input[value="' + index + '"]').checked = true;
         this._renderRangedPalette();
-        this.$el.find(".alpV-1 .alpMin").attr('value', 0);
-        this.$el.find(".alpV-1 .alpMax").attr('value', 1);
-        //this.rebindEvents();
     };
 };
 

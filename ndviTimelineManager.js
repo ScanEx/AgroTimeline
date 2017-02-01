@@ -520,6 +520,10 @@ NDVITimelineManager.prototype.getState = function () {
     if (this._selectedDate) {
         selectedDate = { "d": this._selectedDate.getDate(), "m": this._selectedDate.getMonth() + 1, "y": this._selectedDate.getFullYear() }
     }
+
+    var palIndex = this.legendControl._ndviLegendView.model.getSelectedPaletteIndex();
+    var pal = this.legendControl._ndviLegendView.model.palettes[palIndex];
+
     return {
         "selectedYear": this._selectedYear,
         "selectedDate": selectedDate,
@@ -529,7 +533,13 @@ NDVITimelineManager.prototype.getState = function () {
         "selectedCombo": this._selectedCombo,
         "radioId": radioId,
         "chkQl": document.getElementById("chkQl").checked,
-        "optionsMenu": optionsMenu
+        "optionsMenu": optionsMenu,
+        "ndviLegend": {
+            'selectedPalette': palIndex,
+            'minNdvi': pal.min,
+            'maxNdvi': pal.max,
+            'visibility': this.legendControl._dialog.getVisibility()
+        }
     };
 };
 
@@ -539,7 +549,8 @@ NDVITimelineManager.prototype.loadState = function (data) {
     function restoreOptionsMenu() {
         if (data.optionsMenu) {
             for (var i in data.optionsMenu) {
-                document.getElementById(i).checked = data.optionsMenu[i];
+                if (document.getElementById(i))
+                    document.getElementById(i).checked = data.optionsMenu[i];
             }
         }
 
@@ -558,6 +569,15 @@ NDVITimelineManager.prototype.loadState = function (data) {
 
         data.optionsMenu = null;
     };
+
+    if (data.ndviLegend) {
+        this.legendControl._ndviLegendView.model.events.on("loadend", this.legendControl._ndviLegendView, function () {
+            this.model.palettes[1].min = parseFloat(data.ndviLegend.minNdvi);
+            this.model.palettes[1].max = parseFloat(data.ndviLegend.maxNdvi);
+            this.model._selectedPaletteIndex = parseInt(data.ndviLegend.selectedPalette);
+            this._refreshRangedPalette();
+        });
+    }
 
     //эти параметры применяются до того как произойдет инициализация таймлайна
     that._selectedCombo = data.selectedCombo;
@@ -644,6 +664,7 @@ NDVITimelineManager.prototype.loadState = function (data) {
             }
 
             if (currItem) {
+                data.ndviLegend && that.legendControl.setVisibility(data.ndviLegend.visibility);
                 if (data.chkQl) {
                     document.getElementById("chkQl").checked = true;
                     that.qlCheckClick(document.getElementById("chkQl"), data);

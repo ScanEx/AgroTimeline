@@ -46,7 +46,17 @@ var NDVILegend = function (options) {
             index = p.scale.length - 1;
         }
         var c = p.scale[index];
-        return [c.partRed, c.partGreen, c.partBlue, 255];
+        if (c)
+            return [c.partRed, c.partGreen, c.partBlue, 255];
+        return [0, 0, 0, 0];
+    };
+
+    this.setSelectedPaletteIndex = function (index) {
+        this._selectedPaletteIndex = index;
+    };
+
+    this.getSelectedPaletteIndex = function () {
+        return this._selectedPaletteIndex;
     };
 };
 
