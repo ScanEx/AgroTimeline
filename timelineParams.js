@@ -25,7 +25,6 @@
         "HR": {
             name: "8288D69C7C0040EFBB7B7EE6671052E3",
             mask: "A05BB0207AEE4CFD93C045BF71576FDE",
-            //name: "2E9D38607BB4456AB9C04E2248ED5015",
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
@@ -62,14 +61,12 @@
         },
         "SENTINEL_IR": {
             isSentinel: true,
-            showQuicklooks: true,
             cloudsField: "clouds",
             name: "12ECA8F4ED7B487A913ADBD4072B605B",
             dateColumnName: "acqdate"
         },
         "RGB": {
             cloudsMin: 100,
-            showQuicklooks: true,
             cloudsField: "CLOUDS",
             viewTimeline: true,
             name: "04DDB23F49F84B9A9122CBA6BC26D3ED",
@@ -77,13 +74,20 @@
         },
         "LANDSAT_PREVIEW": {
             viewTimeline: true,
-            showQuicklooks: false,
             cloudsField: "clouds",
+            isPreview: true,
             name: "D8CFA7D3A7AA4549B728B37010C051A2",
             dateColumnName: "acqdate"
         },
+        "SENTINEL_PREVIEW": {
+            viewTimeline: true,
+            isSentinel: true,
+            isPreview: true,
+            cloudsField: "clouds",
+            name: "61F54CF35EC44536B527A2168BE6F5A0",
+            dateColumnName: "acqdate"
+        },
         "RGB2": {
-            showQuicklooks: true,
             cloudsField: "CLOUDS",
             name: "47A9D4E5E5AE497A8A1A7EA49C7FC336",
             dateColumnName: "ACQDATE"
@@ -137,9 +141,8 @@
     }, {
         resolution: "landsat",
         clouds: true,
-        cloudsMin: 100,
         caption: "Космосъемка 10-30 м",
-        rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI", "SENTINEL_IR", "LANDSAT_PREVIEW"]
+        rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI", "SENTINEL_IR", "LANDSAT_PREVIEW", "SENTINEL_PREVIEW"]
     }, {
         caption: "Космосъемка 250 м",
         resolution: "modis",

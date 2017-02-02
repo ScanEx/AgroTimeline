@@ -27,6 +27,9 @@ var OptionsMenu = function (elementId, params) {
         <div>';
     document.body.appendChild(_optionsMenu);
 
+    L.DomEvent.disableClickPropagation(_optionsMenu);
+    L.DomEvent.disableScrollPropagation(_optionsMenu);
+
     var that = this;
 
     document.getElementById("ntOptionsCloseBtn").onclick = function () {

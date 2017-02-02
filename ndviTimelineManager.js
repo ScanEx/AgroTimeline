@@ -220,9 +220,6 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     //слой и стили которые будем раскрашивать по средним vci
     this._meanVCILayer = null;
 
-    //выбран квиклук
-    this._quicklookSelected = false;
-
     this._firstTimeCombo = [false, false];
 
     //списки проинициализированных хуков и кликов слоев
@@ -377,7 +374,6 @@ NDVITimelineManager._comboRadios = [{
 }, {
     "HR": "ndviRadio_hr",
     "RGB2": "rgbRadio2",
-    "CLASSIFICATION": "classificationRadio",
     "SENTINEL_NDVI": "ndviRadio_hr",
     "SENTINEL_IR": "rgbRadio"
 }];
@@ -390,7 +386,6 @@ NDVITimelineManager.radioProduct = {
     "ndviRadio_hr": { "prodId": NDVITimelineManager.NDVI_HR, "numCombo": 1 },
     "ndviMeanRadio": { "prodId": NDVITimelineManager.NDVI_MEAN, "numCombo": 1 },
     "inhomogenuityRadio": { "prodId": NDVITimelineManager.INHOMOGENUITY, "numCombo": 1 },
-    "classificationRadio": { "prodId": NDVITimelineManager.CLASSIFICATION, "numCombo": 1 },
     "ratingRadio": { "prodId": NDVITimelineManager.RATING, "numCombo": 1 },
     "ndviRadio_modis": { "prodId": NDVITimelineManager.NDVI16, "numCombo": 0 },
     "qualityRadio": { "prodId": NDVITimelineManager.QUALITY16, "numCombo": 0 },
@@ -1109,19 +1104,41 @@ NDVITimelineManager.prototype.initializeIntegralScheme = function () {
 
 NDVITimelineManager.prototype.setVisibleYear = function (year) {
 
+    this.setTimeLineYear(year);
+    this._selectedYear = year;
+
+    document.getElementById('ntYear').innerHTML = year;
+
+    var d0 = new Date(year, 0, 1),
+        d1 = new Date(year, 11, 31);
+
+    for (var l in this._proxyLayers) {
+        this._proxyLayers[l].setDateInterval(d0, d1);
+    }
+
+    this.timeLine.getTimelineController().setDateInterval(d0, d1);
+
     function _normalTime(date) {
         return new Date("2000", date.getMonth(), date.getDate()).getTime();
     };
 
-    this.setTimeLineYear(year);
-    this._selectedYear = year;
+    if (this._visibleYearInterval) {
+        clearInterval(this._visibleYearInterval);
+        this._visibleYearInterval = null;
+    }
 
-    if (this._combo[this._selectedCombo].resolution == "modis" && this.selectedDiv) {
+    var tl = this.timeLine.getTimelineController().getTimeline(),
+        curr2000;
+
+    var selectItem = function () {
         var start = new Date(year, 0, 1);
-        var end = new Date(year + 1, 1, 9);
-        var tl = this.timeLine.getTimelineController().getTimeline();
-        var currIndex = tl.getItemIndex(this.selectedDiv);
-        var curr2000 = _normalTime(tl.items[currIndex].start);
+        var end = new Date(year, 11, 31);
+
+        if (new Date(tl.items[0].center) > end) {
+            return;
+        }
+
+        clearInterval(this._visibleYearInterval);
 
         var minItem = null;
         var minDeltaTime = 100000000000;
@@ -1138,19 +1155,20 @@ NDVITimelineManager.prototype.setVisibleYear = function (year) {
                 }
             }
         }
+        if (minItem) {
+            tl.setSelection([{ "row": tl.getItemIndex(minItem.dom) }]);
+            this.timeLine.shiftActiveItem(0);
+            this.setTimeLineYear(year);
+        }
+    };
 
-        tl.setSelection([{ "row": tl.getItemIndex(minItem.dom) }]);
-        this.timeLine.shiftActiveItem(0);
-        this.setTimeLineYear(year);
-
+    var that = this;
+    if (this._combo[this._selectedCombo].resolution == "modis" && this.selectedDiv) {
+        curr2000 = _normalTime(this._selectedDate);
+        this._visibleYearInterval = setInterval(function () {
+            selectItem.call(that);
+        }, 30);
     }
-    document.getElementById('ntYear').innerHTML = year;
-
-    for (var l in this._proxyLayers) {
-        this._proxyLayers[l].setDateInterval(new Date(this._selectedYear, 0, 1), new Date(this._selectedYear, 11, 31));
-    }
-
-    this.timeLine.getTimelineController().setDateInterval(new Date(this._selectedYear, 0, 1), new Date(this._selectedYear, 11, 31));
 
     this._refreshTimeline();
 };
@@ -1400,8 +1418,8 @@ NDVITimelineManager.prototype._showRedraw = function () {
     if (this._selectedDiv) {
         if (this._selectedType[this._selectedCombo] == NDVITimelineManager.RATING) {
             this._showRATING();
-        } else if (this._isQuicklook) {
-            this._showQUICKLOOK();
+        } else if (this._isPreview) {
+            this._showPREVIEW();
         } else if (this.isSentinel) {
             this._showSENTINEL();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.NDVI16) {
@@ -1656,16 +1674,15 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
 
     var sceneidIndex = layer._gmx.tileAttributeIndexes["sceneid"] || layer._gmx.tileAttributeIndexes["SCENEID"];
 
-    var showQuicklooks = this._layerConfigs[this._layersLegend[layerTypeName].name].showQuicklooks;
+    var isPreview = this._layerConfigs[this._layersLegend[layerTypeName].name].isPreview;
     var cloudsId = this._layerConfigs[layer.options.layerID].cloudsField && (layer._gmx.tileAttributeIndexes[this._layerConfigs[layer.options.layerID].cloudsField.toUpperCase()] ||
         layer._gmx.tileAttributeIndexes[this._layerConfigs[layer.options.layerID].cloudsField.toLowerCase()]);
-    var cloudsMin = this._combo[this._selectedCombo].cloudsMin;
 
     var that = this;
     layer.setFilter(function (item) {
         var prop = item.properties;
 
-        if (that._isQuicklook) {
+        if (that._isPreview) {
             var s = that._comboFilenames[that._selectedCombo];
             for (var i = 0; i < s.length; i++) {
                 if (NDVITimelineManager._normalizeFilename(s[i]) == prop[sceneidIndex]) {
@@ -1680,28 +1697,9 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
                 }
             }
         } else {
-            var ql = (prop[GMX_RasterCatalogIDId].length == 0);
-
             if (pathId && prop[pathId] == that._selectedPath && prop[dateId] == that._selectedDateL ||
                 !pathId && prop[dateId] == that._selectedDateL) {
-
-                if (isQl && showQuicklooks && ql) {
-                    return true;
-                }
-
-                if (cloudsId) {
-                    if (isQl && !showQuicklooks && !ql) {
-                        return true;
-                    } else if (isQl && showQuicklooks && !ql) {
-                        return true;
-                    } else if (prop[cloudsId] <= cloudsMin) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -1715,16 +1713,18 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
     this.showCloudMask(this._selectedDate);
 };
 
-NDVITimelineManager.prototype._showQUICKLOOK = function () {
-    var sProd;
+NDVITimelineManager.prototype._showPREVIEW = function () {
     this.setRadioLabelActive_grey("rgbRadio2", true);
     document.getElementById("rgbRadio2").checked = true;
     this._selectedType[this._selectedCombo] = NDVITimelineManager.RGB2_HR;
-    this._showLayer("LANDSAT_PREVIEW");
+    if (this.isSentinel) {
+        this._showLayer("SENTINEL_PREVIEW");
+    } else {
+        this._showLayer("LANDSAT_PREVIEW");
+    }
 };
 
 NDVITimelineManager.prototype._showSENTINEL = function () {
-    var sProd;
     this.setRadioLabelActive_grey("rgbRadio2", true);
 
     if (document.getElementById("rgbRadio").checked) {
@@ -2081,7 +2081,7 @@ NDVITimelineManager.prototype.applyHRZoomREstriction = function (zoom) {
 
             } else {
                 if (zoom >= NDVITimelineManager.MIN_ZOOM) {
-                    if (this.selectedDiv && this._combo[this._selectedCombo].rk.length > 1) {
+                    if (this.selectedDiv && !this._isPreview && this._combo[this._selectedCombo].rk.length > 1) {
                         this.zoomRestrictionLabel.style.display = "block";
                         $(".ntHelp").addClass("ntHelpLightOn")
                     }
@@ -2103,7 +2103,6 @@ NDVITimelineManager.prototype.applyHRZoomREstriction = function (zoom) {
                 this.setRadioLabelActive_grey("ndviRadio_hr", false);
                 this.setRadioLabelActive_grey("ndviMeanRadio", false);
                 this.setRadioLabelActive_grey("inhomogenuityRadio", false);
-                this.setRadioLabelActive_grey("classificationRadio", false);
             }
         } else {
             this.zoomRestrictionLabel.style.display = "none";
@@ -2179,7 +2178,7 @@ NDVITimelineManager.prototype._setExistentProds = function (params, success) {
         var identField = that._layerConfigs[layerName].sceneFieldName;
         if (!identField) {
             var identField = ((radioId == "rgbRadio2" || radioId == "rgbRadio") ? "SCENEID" : "filename");
-            identField = (radioId == "ndviRadio_hr" || radioId == "classificationRadio" ? "sceneid" : identField);
+            identField = (radioId == "ndviRadio_hr" ? "sceneid" : identField);
         }
 
         var query = "";
@@ -2325,7 +2324,6 @@ NDVITimelineManager.prototype.updateRadioLabelsActivity = function () {
     if (this.selectedDiv && this._visibleLayersOnTheDisplay.length) {
         if (this.lmap.getZoom() >= NDVITimelineManager.MIN_ZOOM_HR) {
             this.getProductAvailability("ndviRadio_hr") && this.setRadioLabelActive_grey("ndviRadio_hr", true);
-            this.getProductAvailability("classificationRadio") && this.setRadioLabelActive_grey("classificationRadio", true);
             if (this.getProductAvailability("ndviMeanRadio")) {
                 this.setRadioLabelActive_grey("ndviMeanRadio", true);
                 this.setRadioLabelActive_grey("ratingRadio", true);
@@ -2344,7 +2342,6 @@ NDVITimelineManager.prototype.updateRadioLabelsActivity = function () {
         }
 
         this.setRadioLabelActive_grey("ndviRadio_hr", false);
-        this.setRadioLabelActive_grey("classificationRadio", false);
 
         this.setRadioLabelActive_grey("ratingRadio", false);
         this.setRadioLabelActive_grey("ndviMeanRadio", false);
@@ -2353,9 +2350,7 @@ NDVITimelineManager.prototype.updateRadioLabelsActivity = function () {
 
     if (!this._cutOff) {
         this.getProductAvailability("ndviRadio_hr") && this.setRadioLabelActive_grey("ndviRadio_hr", true);
-        this.getProductAvailability("classificationRadio") && this.setRadioLabelActive_grey("classificationRadio", true);
         $("#light_ndviRadio_hr").removeClass("ntHelpLightOn");
-        $("#light_classificationRadio").removeClass("ntHelpLightOn");
     }
 };
 
@@ -3054,8 +3049,7 @@ NDVITimelineManager.prototype.redrawTimelineLinks = function () {
 
     var layerNames = that.getViewTimelineLayers(that._selectedCombo);
 
-    if (that._combo[that._selectedCombo].clouds/*that._combo[that._selectedCombo].rk[0] == "HR" ||
-        that._combo[that._selectedCombo].rk[0] == "RGB753"*/) {
+    if (that._combo[that._selectedCombo].clouds) {
 
         var isQl = $("#chkQl").is(':checked');
 
@@ -3146,7 +3140,7 @@ NDVITimelineManager.prototype.redrawTimelineLinks = function () {
 
 NDVITimelineManager.prototype.onChangeSelection = function (x) {
 
-    this._isQuicklook = false;
+    this._isPreview = false;
     this.isSentinel = false;
 
     this.meanNdviNoDataLabel.style.display = "none";
@@ -3173,8 +3167,6 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
     };
 
     var that = this;
-
-    that._quicklookSelected = false;
 
     //снимаем выделения
     $(".timeline-event.timeline-event-line").removeClass("timeline-event-selected");
@@ -3288,10 +3280,13 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
 
                 var _GMX_RasterCatalogID = this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["GMX_RasterCatalogID"];
                 //это облачныйснимок
-                if (!_GMX_RasterCatalogID || _GMX_RasterCatalogID && !this.isSentinel && !prop[_GMX_RasterCatalogID].length) {
-                    this._isQuicklook = true;
+                if (!_GMX_RasterCatalogID || this._layerConfigs[selectedLayer].isPreview) {
+                    this._isPreview = true;
 
-                    var _CLOUDS = this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["CLOUDS"];
+                    var cloudsId = this._layerConfigs[selectedLayer].cloudsField;
+                    var _CLOUDS = this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes[cloudsId] ||
+                        this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["CLOUDS"] ||
+                        this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["clouds"];
                     clouds = prop[_CLOUDS];
                     that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB_HR;
                     document.getElementById("rgbRadio").checked = true;
@@ -3299,13 +3294,11 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                     this.setRadioLabelActive_grey("ratingRadio", false);
                     this.setRadioLabelActive_grey("ndviMeanRadio", false);
                     this.setRadioLabelActive_grey("inhomogenuityRadio", false);
-                    this.setRadioLabelActive_grey("classificationRadio", false);
 
                     this.setProductAvailability("ndviRadio_hr", false);
                     this.setProductAvailability("ratingRadio", false);
                     this.setProductAvailability("ndviMeanRadio", false);
                     this.setProductAvailability("inhomogenuityRadio", false);
-                    this.setProductAvailability("classificationRadio", false);
                 }
 
                 date = prop[this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes[dcln]] ||
@@ -3356,7 +3349,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
             if (isDefault || this._activatePermalink) {
                 that._showRedraw();
             }
-            if (!this._isQuicklook) {
+            if (!this._isPreview) {
 
                 //выключаем "неопознанные" продукты
                 that.deactivateUnknownRadios();
@@ -3407,16 +3400,6 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
 
                         that.setRadioLabelActive_grey(i, that.existentShots[i]);
                         that.setProductAvailability(i, that.existentShots[i]);
-
-                        if (i == "classificationRadio") {
-                            //that.setRadioLabelActive_grey("inhomogenuityRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
-                            //that.setRadioLabelActive_grey("classificationRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
-
-                            //that.setProductAvailability("inhomogenuityRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
-                            //that.setProductAvailability("classificationRadio", that.existentShots[i] && that.existentShots["ndviRadio_hr"]);
-
-                            //that._currentClassificationRKIdArr = [].concat(rkArr["classificationRadio"]);
-                        }
 
                         if (i == "ndviRadio_hr" && that.existentShots["ndviRadio_hr"]) {
                             that.setRadioLabelActive("ndviMeanRadio", that.existentShots[i]);
@@ -4051,11 +4034,6 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         that._redrawShots();
     }, true);
 
-    //this.addRadio("thirdPanel_1", "Состояние полей", "shotsOptions", "classificationRadio", 1, true, function (r) {
-    //    that._selectedType[that._selectedCombo] = NDVITimelineManager.CLASSIFICATION;
-    //    that._redrawShots();
-    //}, true);
-
     this.addRadio("thirdPanel_1", "Однородность", "shotsOptions", "inhomogenuityRadio", 1, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.INHOMOGENUITY;
         that._redrawShots();
@@ -4389,7 +4367,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         "id": "chkQl",
         "class": "ntOptionsHR",
         "type": "checkbox",
-        "text": "Показать превью облачных снимков (облачность>50%)",
+        "text": "Показать превью",
         "click": function (e) {
             that.qlCheckClick(e);
         }
@@ -4836,39 +4814,19 @@ NDVITimelineManager.prototype._filterTimeline = function (elem, layer) {
         }
     } else if (this._combo[this._selectedCombo].resolution === "landsat") {
         var isQl = $("#chkQl").is(':checked');
-        var gmxRKid = layer._gmx.tileAttributeIndexes['GMX_RasterCatalogID'];
-        var ql;
-        if (gmxRKid) {
-            ql = (prop[gmxRKid].length == 0);
-        } else {
-            if (isQl) {
-                return true;
-            }
-            return false;
-            //ql = true;
-        }
-        var showQuicklooks = this._layerConfigs[layer.options.layerID].showQuicklooks;
-
-        if (isQl && showQuicklooks && ql) {
-            return true;
-        }
-
-        var cloudsId = this._layerConfigs[layer.options.layerID].cloudsField && (
-            layer._gmx.tileAttributeIndexes[this._layerConfigs[layer.options.layerID].cloudsField.toUpperCase()] ||
-            layer._gmx.tileAttributeIndexes[this._layerConfigs[layer.options.layerID].cloudsField.toLowerCase()]);
-
-        if (cloudsId) {
-            if (isQl && !showQuicklooks && !ql) {
-                return true;
-            } else if (isQl && showQuicklooks && !ql) {
-                return true;
-            } else if (showQuicklooks && (prop[cloudsId] <= this._combo[this._selectedCombo].cloudsMin || prop[cloudsId] <= this._layerConfigs[layer.options.layerID].cloudsMin)) {
+        var isPreview = this._layerConfigs[layer.options.layerID].isPreview;
+        if (isQl) {
+            if (isPreview) {
                 return true;
             } else {
                 return false;
             }
         } else {
-            return true;
+            if (isPreview) {
+                return false
+            } else {
+                return true;
+            }
         }
     } else {
         return true;
