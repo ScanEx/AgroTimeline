@@ -56,6 +56,11 @@
     border: none !important;
     box-shadow: rgba(144, 141, 141, 0.0) 0px 0px !important;
     background-position: 4px 5.5px !important;
+    margin-top: -62px !important;
+    right: 17px !important;
+    background-size: 14px 14px !important;
+    width: 24px !important;
+    height: 24px !important;
 }
 
 .legendControlButton {
@@ -142,6 +147,10 @@
     margin-left: -4px;
     cursor: pointer;
     background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAOCAYAAAASVl2WAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAc0lEQVQoU62QsQ3AIAwEPROwBg09FT07MwAl9UfviCgBK0qR4iTrD7AeAfCKlFLgnIP3/gEzOlnFyrcDIYRNzOyHFVaDCZ3WtCTRmtbn3JGUknmb0ElrDTHGTTKj02d678g5X5IzM10xd40xUGtVOJ855AB8K+QZ7IiqFAAAAABJRU5ErkJggg==');
+}
+
+.alpSliderInactive {
+    opacity: 0.2;
 }
 
 

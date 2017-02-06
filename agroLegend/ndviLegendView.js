@@ -127,8 +127,10 @@ var NDVILegendView = function () {
             if (this.model.getSelectedPaletteIndex() === i) {
                 var rp = this.sliders[i].getPixelRange();
                 this._applyPaletteShade(i, rp[0], rp[1]);
+                this.$el.find(".alpS-" + i + " .alpSlider").removeClass("alpSliderInactive");
             } else {
                 this._applyPaletteShade(i, SLIDER_CONTAINER_SIZE, 0);
+                this.$el.find(".alpS-" + i + " .alpSlider").addClass("alpSliderInactive");
             }
         }
     };

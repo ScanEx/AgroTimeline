@@ -6,12 +6,15 @@ var LegendControl = function (agroTimeline) {
 
     var _visibility = false;
 
+    this._manual = false;
+
     this.timeline = agroTimeline;
 
     this._dialog = new LegendDialog();
     this._dialog.setPositionRightBottom(_RIGHT, _BOTTOM);
     this._dialog.onclose = function () {
         that.setVisibility(false);
+        that._manual = true;
     };
 
     window.addEventListener('resize', function (e) {
@@ -26,6 +29,7 @@ var LegendControl = function (agroTimeline) {
     this._btn.classList.add("legendControlButton");
     this._btn.style.display = "none";
     this._btn.onclick = function () {
+        that._manual = true;
         if (that._dialog.getVisibility()) {
             that.setVisibility(false);
         } else {
@@ -78,7 +82,9 @@ var LegendControl = function (agroTimeline) {
         if (so == "HR" || so == "MEAN_NDVI" || so == "SENTINEL_NDVI" || so == "NDVI16") {
             that.showButton();
             that.applyLegend(that._ndviLegendView);
-            //that._ndviLegendView.rebindEvents();
+            if (!that._manual) {
+                that.setVisibility(true);
+            }
         } else if (so == "RATING") {
             that.showButton();
             that.applyLegend(that._ratingLegendView);
