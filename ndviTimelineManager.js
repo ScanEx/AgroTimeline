@@ -517,7 +517,12 @@ NDVITimelineManager.prototype.getState = function () {
     }
 
     var palIndex = this.legendControl._ndviLegendView.model.getSelectedPaletteIndex();
-    var pal = this.legendControl._ndviLegendView.model.palettes[palIndex];
+    var palettes = this.legendControl._ndviLegendView.model.palettes;
+    var pal = palettes[palIndex];
+    var palettesBands = [];
+    for (var i = 0; i < palettes.length; i++) {
+        palettesBands.push([palettes[i].min, palettes[i].max]);
+    }
 
     return {
         "selectedYear": this._selectedYear,
@@ -531,8 +536,7 @@ NDVITimelineManager.prototype.getState = function () {
         "optionsMenu": optionsMenu,
         "ndviLegend": {
             'selectedPalette': palIndex,
-            'minNdvi': pal.min,
-            'maxNdvi': pal.max,
+            'palettesBands': palettesBands,
             'visibility': this.legendControl._dialog.getVisibility()
         }
     };
@@ -567,10 +571,17 @@ NDVITimelineManager.prototype.loadState = function (data) {
 
     if (data.ndviLegend) {
         this.legendControl._ndviLegendView.model.events.on("loadend", this.legendControl._ndviLegendView, function () {
-            this.model.palettes[1].min = parseFloat(data.ndviLegend.minNdvi);
-            this.model.palettes[1].max = parseFloat(data.ndviLegend.maxNdvi);
+            var bands = data.ndviLegend.palettesBands;
+            var palettes = this.model.palettes;
+            for (var i = 0; i < palettes.length; i++) {
+                var min = parseFloat(bands[i][0]),
+                    max = parseFloat(bands[i][1]);
+                this.sliders[i].setRange(min, max);
+                this.model.palettes[i].min = min;
+                this.model.palettes[i].max = max;
+            }
             this.model._selectedPaletteIndex = parseInt(data.ndviLegend.selectedPalette);
-            this._refreshRangedPalette();
+            this._refreshPaletteShades();
         });
     }
 
