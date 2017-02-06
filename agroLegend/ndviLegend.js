@@ -39,16 +39,19 @@ var NDVILegend = function (options) {
 
     this.getNDVIColor = function (ndviValue) {
         var p = this.palettes[this._selectedPaletteIndex];
-        var index = Math.round((p.scale.length - p.startIndex) * (ndviValue - p.min) / (p.max - p.min) + p.startIndex);
-        if (index < p.startIndex) {
-            index = p.startIndex;
-        } else if (index >= p.scale.length) {
-            index = p.scale.length - 1;
+        if (ndviValue >= p.min && ndviValue <= p.max) {
+            var index = Math.round((p.scale.length - p.startIndex) * ndviValue + p.startIndex);
+            if (index < p.startIndex) {
+                index = p.startIndex;
+            } else if (index >= p.scale.length) {
+                index = p.scale.length - 1;
+            }
+            var c = p.scale[index];
+            if (c)
+                return [c.partRed, c.partGreen, c.partBlue, 255];
+        } else {
+            return [0, 0, 0, 0];
         }
-        var c = p.scale[index];
-        if (c)
-            return [c.partRed, c.partGreen, c.partBlue, 255];
-        return [0, 0, 0, 0];
     };
 
     this.setSelectedPaletteIndex = function (index) {
@@ -58,6 +61,11 @@ var NDVILegend = function (options) {
     this.getSelectedPaletteIndex = function () {
         return this._selectedPaletteIndex;
     };
+
+    this.setRange = function (index, min, max) {
+        this.palettes[index].min = min;
+        this.palettes[index].max = max;
+    }
 };
 
 inheritance.extend(NDVILegend, Legend);

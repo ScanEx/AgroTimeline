@@ -2333,7 +2333,7 @@ NDVITimelineManager.prototype.updateRadioLabelsActivity = function () {
         }
     } else {
 
-        if (this._combo[this._selectedCombo].rk.length > 1 &&
+        if (!this._isPreview && this._combo[this._selectedCombo].rk.length > 1 &&
             this._combo[this._selectedCombo].resolution == "landsat" &&
             this.selectedDiv &&
             this.zoomRestrictionLabel.style.display == "none") {
