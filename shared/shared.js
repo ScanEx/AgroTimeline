@@ -185,6 +185,13 @@ shared.DEC2RGB = function (color) {
     return "rgb(" + r + "," + g + "," + b + ")";
 };
 
+shared.DEC2RGBA = function (color, opacity) {
+    var r = (color & 0xff0000) >> 16,
+        g = (color & 0x00ff00) >> 8,
+        b = (color & 0x0000ff);
+    return "rgba(" + r + "," + g + "," + b + "," + (opacity != undefined ? opacity : 1.0) + ")";
+};
+
 shared.dateToString = function (date, inv) {
     var yyyy = date.getFullYear().toString();
     var mm = (date.getMonth() + 1).toString();

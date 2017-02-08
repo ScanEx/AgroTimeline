@@ -274,6 +274,26 @@ ThematicHandler.prototype.repaint = function () {
     }
 };
 
+ThematicHandler.prototype.hide = function () {
+    if (this._visibility) {
+        this._visibility = false;
+        for (var l in this.sourceLayersArr) {
+            styleHookManager.removeStyleHook(this.sourceLayersArr[l], ThematicHandler.__hookId);
+            this.sourceLayersArr[l].repaint();
+        }
+    }
+};
+
+ThematicHandler.prototype.show = function () {
+    if (!this._visibility) {
+        this._visibility = true
+        for (var l in this.sourceLayersArr) {
+            this.setLayerStyleHook(this.sourceLayersArr[l]);
+            this.sourceLayersArr[l].repaint();
+        }
+    }
+};
+
 ThematicHandler.prototype.removeStyleHooks = function () {
     for (var l in this.sourceLayersArr) {
         styleHookManager.removeStyleHook(this.sourceLayersArr[l], ThematicHandler.__hookId);
@@ -321,10 +341,10 @@ ThematicHandler.prototype._applyStrategy = function (features, layerName) {
         if (prop.valid_area_pct >= 90.0) {
             color = this._thematicStrategy.getColor(prop);
         }
-
+        var opacity = (color ? (color[3] || 1.0) : 0.0);
         this._layersStyleData[layerName][prop[identityField]] = {
-            fillStyle: shared.DEC2RGB(color),
-            fillOpacity: 1.0
+            fillStyle: shared.DEC2RGBA(color, opacity),
+            fillOpacity: opacity
         };
     }
 };
@@ -422,11 +442,11 @@ ThematicHandler.prototype._applyLayer = function (layer) {
         'WrapStyle': "window"
     };
 
-    if(nsGmx.Auth && nsGmx.Auth.getResourceServer){
+    if (nsGmx.Auth && nsGmx.Auth.getResourceServer) {
         nsGmx.Auth.getResourceServer('geomixer').sendPostRequest("VectorLayer/Search.ashx", data).then(function (result) {
             _success(result);
         });
-    }else{
+    } else {
         sendCrossDomainPostRequest(window.serverBase + "VectorLayer/Search.ashx", data, function (result) {
             _success(result);
         });
@@ -481,6 +501,7 @@ ThematicHandler.prototype._whilePendings = function () {
 };
 
 ThematicHandler.prototype.start = function (layersArr, date, alternativeGMX_RKArr, alternativeFilenames) {
+    this._visibility = true;
     this._dateStr = date;
     this.clear();
     this.activated = true;

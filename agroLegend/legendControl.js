@@ -88,9 +88,15 @@ var LegendControl = function (agroTimeline) {
         } else if (so == "RATING") {
             that.showButton();
             that.applyLegend(that._ratingLegendView);
+            if (!that._manual) {
+                that.setVisibility(true);
+            }
         } else if (so == "INHOMOGENUITY") {
             that.showButton();
             that.applyLegend(that._odnorodnostLegendView);
+            if (!that._manual) {
+                that.setVisibility(true);
+            }
         } else {
             that.hideButton();
         }

@@ -89,7 +89,11 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
         if (val == 0 || val == -100) {
             return shared.RGB2HEX(0, 179, 255);
         } else {
-            return shared.RGB2HEX(color[0], color[1], color[2]);
+            if (color[3]) {
+                return shared.RGB2HEX(color[0], color[1], color[2]);
+            } else {
+                return null;
+            }
         }
     });
 
@@ -1981,9 +1985,9 @@ NDVITimelineManager.prototype._showNDVI_MEAN = function () {
         }
 
         this.hideSelectedLayer();
-        this._selectedOption = "MEAN_NDVI";
         this._themesHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true), this._currentRKIdArr, this._currentFnIdArr);
     }
+    this._selectedOption = "MEAN_NDVI";
 };
 
 NDVITimelineManager.prototype._hideNDVI_MEAN = function () {
@@ -2003,9 +2007,9 @@ NDVITimelineManager.prototype._showINHOMOGENUITY = function () {
         }
 
         this.hideSelectedLayer();
-        this._selectedOption = "INHOMOGENUITY";
         this._neodnrHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true), this._currentRKIdArr, this._currentFnIdArr);
     }
+    this._selectedOption = "INHOMOGENUITY";
 };
 
 NDVITimelineManager.prototype._hideINHOMOGENUITY = function () {
@@ -2063,15 +2067,32 @@ NDVITimelineManager.prototype.refreshDateInterval_bug = function () {
     this.layerCollection[this._layersLegend.RGB.name].setDateInterval(new Date(2000, 1, 1), new Date());
 };
 
-NDVITimelineManager.prototype.showSelectedLayers = function () {
-    for (var i = 0; i < this._selectedLayers.length; i++) {
-        this.lmap.addLayer(this._selectedLayers[i]);
+NDVITimelineManager.prototype.showSelectedLayersHR = function () {
+    if (this._selectedOption == "MEAN_NDVI") {
+        this._themesHandler.show();
+    } else if (this._selectedOption == "RATING") {
+        this._ratingHandler.show();
+    } else if (this._selectedOption == "INHOMOGENUITY") {
+        this._neodnrHandler.show();
+    } else if (this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI") {
+        for (var i = 0; i < this._selectedLayers.length; i++) {
+            this.lmap.addLayer(this._selectedLayers[i]);
+            this._selectedLayers[i].repaint();
+        }
     }
 };
 
-NDVITimelineManager.prototype.hodeSelectedLayers = function () {
-    for (var i = 0; i < this._selectedLayers.length; i++) {
-        this.lmap.removeLayer(this._selectedLayers[i]);
+NDVITimelineManager.prototype.hideSelectedLayersHR = function () {
+    if (this._selectedOption == "MEAN_NDVI") {
+        this._themesHandler.hide();
+    } else if (this._selectedOption == "RATING") {
+        this._ratingHandler.hide();
+    } else if (this._selectedOption == "INHOMOGENUITY") {
+        this._neodnrHandler.hide();
+    } else if (this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI") {
+        for (var i = 0; i < this._selectedLayers.length; i++) {
+            this.lmap.removeLayer(this._selectedLayers[i]);
+        }
     }
 };
 
@@ -2083,7 +2104,9 @@ NDVITimelineManager.prototype.applyHRZoomREstriction = function (zoom) {
 
         if (this._combo[this._selectedCombo].resolution == "landsat") {
             if (zoom >= NDVITimelineManager.MIN_ZOOM_HR) {
-                this.showSelectedLayers();
+                if (this.selectedDiv) {
+                    this.showSelectedLayersHR();
+                }
 
                 this.zoomRestrictionLabel.style.display = "none";
                 $(".ntHelp").removeClass("ntHelpLightOn")
@@ -2091,6 +2114,9 @@ NDVITimelineManager.prototype.applyHRZoomREstriction = function (zoom) {
                 this.updateRadioLabelsActivity();
 
             } else {
+                if (this.selectedDiv) {
+                    this.hideSelectedLayersHR();
+                }
                 if (zoom >= NDVITimelineManager.MIN_ZOOM) {
                     if (this.selectedDiv && !this._isPreview && this._combo[this._selectedCombo].rk.length > 1) {
                         this.zoomRestrictionLabel.style.display = "block";
@@ -2100,8 +2126,6 @@ NDVITimelineManager.prototype.applyHRZoomREstriction = function (zoom) {
                     this.zoomRestrictionLabel.style.display = "none";
                     $(".ntHelp").removeClass("ntHelpLightOn")
                     if (this.selectedDiv) {
-                        //this.hideSelectedLayers();
-
                         for (var l in this._visibleFieldsLayers) {
                             var ll = this.layerCollection[l];
                             if (ll.clearTilePattern) {

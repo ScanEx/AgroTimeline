@@ -43,6 +43,14 @@ Rating.prototype.setLayerStyleHook = function (layer) {
     }, 100);
 };
 
+Rating.prototype.show = function () {
+    //TODO
+};
+
+Rating.prototype.hide = function () {
+    //TODO
+};
+
 Rating.prototype.redraw = function () {
     for (var i = 0; i < this._layers.length; i++) {
         this._layers[i].repaint();
