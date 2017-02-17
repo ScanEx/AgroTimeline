@@ -3306,7 +3306,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
             }
 
             var qrk = comboArr[q];
-            var dcln = that._layersLegend[qrk].dateColumnName;
+            var dcln = that._layersLegend[qrk] ? that._layersLegend[qrk].dateColumnName : this._layerConfigs[selectedLayer].dateColumnName;
             var filenames = [];
 
             for (var u = 0; u < selectedItems.length; u++) {

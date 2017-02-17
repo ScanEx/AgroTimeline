@@ -1,28 +1,28 @@
-var WarningDialog = function () {
+var SWarningDialog = function () {
     this.dialog = null;
     this.dialogContent = null;
     this.__dialogClass = "dlgAgroWarning";
     this._createDialog("Предупреждение", 680, 100);
 };
 
-WarningDialog.prototype.setPosition = function (x, y) {
+SWarningDialog.prototype.setPosition = function (x, y) {
     $(this.dialog).dialog('option', 'position', [x, y]);
 };
 
-WarningDialog.prototype.show = function () {
+SWarningDialog.prototype.show = function () {
     $("." + this.__dialogClass).show();
     $(this.dialog).dialog();
 };
 
-WarningDialog.prototype.hide = function () {
+SWarningDialog.prototype.hide = function () {
     $("." + this.__dialogClass).hide();
 };
 
-WarningDialog.prototype.closeDialog = function () {
+SWarningDialog.prototype.closeDialog = function () {
     //...
 };
 
-WarningDialog.prototype._createDialog = function (caption, width, height) {
+SWarningDialog.prototype._createDialog = function (caption, width, height) {
     if (this.dialog)
         return;
 
@@ -48,7 +48,7 @@ WarningDialog.prototype._createDialog = function (caption, width, height) {
     $(this.dialog).dialog('moveToTop');
 };
 
-WarningDialog.prototype.appendHTML = function (html) {
+SWarningDialog.prototype.appendHTML = function (html) {
     $(this.dialogContent.get(0)).empty();
     $(this.dialogContent.get(0)).append(html);
 };
@@ -57,7 +57,7 @@ var AgroWarning = (function () {
     var instance;
 
     function createInstance() {
-        var object = new WarningDialog();
+        var object = new SWarningDialog();
         return object;
     }
 
