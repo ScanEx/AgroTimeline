@@ -3180,8 +3180,6 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
 
     this.meanNdviNoDataLabel.style.display = "none";
 
-    this.optionsMenu.hide();
-
     this.setRadioLabelActive_grey("rgbRadio", false);
     this.setRadioLabelActive_grey("ndviRadio_modis", false);
     this.setRadioLabelActive_grey("conditionsOfVegetationRadio", false);
@@ -3249,6 +3247,8 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
         that._SelectedDate1 = null;
         this.events.dispatch(this.events.clearselection, this);
     } else {
+
+        this.optionsMenu.hide();
 
         var c = this.timeLine.getTimelineController();
         var t = c.getTimeline();
@@ -4743,6 +4743,8 @@ NDVITimelineManager.prototype.qlCheckClick = function (e, data) {
         tl.setSelection([{ "row": tl.getItemIndex(currItem.dom) }]);
         this.timeLine.shiftActiveItem(0);
         this.setTimeLineYear(this._selectedYear);
+    } else {
+        this.clearSelection();
     }
 };
 
