@@ -24,6 +24,8 @@ var LegendControl = function (agroTimeline) {
     this._ratingLegendView = new RatingLegendView();
     this._odnorodnostLegendView = new OdnorodnostLegendView();
     this._ndviLegendView = new NDVILegendView();
+    this._qualityLegendView = new QualityLegendView();
+    this._conditionsOfVegetationLegendView = new ConditionsOfVegetationLegendView();
 
     this._btn = document.createElement("div");
     this._btn.classList.add("legendControlButton");
@@ -79,7 +81,19 @@ var LegendControl = function (agroTimeline) {
 
     agroTimeline.events.on("changeselection", null, function (t) {
         var so = t._selectedOption;
-        if (so == "HR" || so == "MEAN_NDVI" || so == "SENTINEL_NDVI" || so == "NDVI16") {
+        if (so == "CONDITIONS_OF_VEGETATION") {
+            that.showButton();
+            that.applyLegend(that._conditionsOfVegetationLegendView);
+            if (!that._manual) {
+                that.setVisibility(true);
+            }
+        } else if (so == "QUALITY16") {
+            that.showButton();
+            that.applyLegend(that._qualityLegendView);
+            if (!that._manual) {
+                that.setVisibility(true);
+            }
+        } else if (so == "HR" || so == "MEAN_NDVI" || so == "SENTINEL_NDVI" || so == "NDVI16") {
             that.showButton();
             that.applyLegend(that._ndviLegendView);
             if (!that._manual) {

@@ -1548,6 +1548,8 @@ NDVITimelineManager.prototype._showCONDITIONS_OF_VEGETATION = function () {
     this.hideSelectedLayer();
     var fns = this._comboFilenames[this._selectedCombo];
 
+    this._selectedOption = "CONDITIONS_OF_VEGETATION";
+
     if (fns) {
         var url = 'http://maps.kosmosnimki.ru/VectorLayer/Search.ashx?WrapStyle=func&geometry=false&tables=[{%22LayerName%22:%224B68E05D988E404D962F5CC79FFCE67F%22,%22Alias%22:%22v%22},{%22LayerName%22:%2258B949C8E8454CF297184034DD8A62CD%22,%22Alias%22:%22a%22,%22Join%22:%22Inner%22,%22On%22:%22[v].area_id%20=%20[a].ogc_fid%22}]&columns=[{%22Value%22:%22[a].[Region]%22},{%22Value%22:%22[a].[District]%22},{%22Value%22:%22[v].[Value]%22}]';
         var query = '&query="Type"=' + (document.getElementById("chkVciType").checked ? 1 : 0) +
