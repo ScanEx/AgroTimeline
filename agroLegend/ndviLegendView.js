@@ -10,7 +10,8 @@ var NDVILegendView = function () {
         }, {
             'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_BLUE_interp_legend.icxleg.xml",
             'min': 0.0,
-            'max': 1.0
+            'max': 1.0,
+            'isStatic': false
         }]
     }));
 
@@ -40,7 +41,11 @@ var NDVILegendView = function () {
                         <div class="alpCaption">Аналитическая шкала</div>\
                         <div class="alpPaletteSlider alpS-1"></div>\
                         <div class="alpPaletteColors alpP-1"></div>\
-                        <div class="alpPaletteValues alpV-1"></div>\
+                        <div class="alpPaletteValues alpV-1">\
+                          <div class="alpInp" style="margin-left: -15px; margin-right: 15px;"><input type="text" class="alpMin"/></div>\
+                          <div class="alpValues"></div>\
+                          <div class="alpInp" style="margin-left: 15px"><input type="text" class="alpMax"/><\div>\
+                        </div>\
                       </div>\
                     </div></div>';
 
@@ -62,13 +67,104 @@ var NDVILegendView = function () {
             });
         });
 
+
+        var inpMin = this.el.querySelector(".alpV-1 .alpMin"),
+            inpMax = this.el.querySelector(".alpV-1 .alpMax");
+
+        function _checkValue(evt) {
+            var c = String.fromCharCode(evt.keyCode);
+            var val;
+            if (evt.keyCode == 8) {
+                val = this.value.substr(0, this.value.length - 1);
+            } else {
+                if (evt.keyCode == 190) {
+                    c = ".";
+                }
+                val = this.value + c;
+            }
+            return val;
+        };
+
+        function _checkNumber(evt) {
+            if (evt.keyCode == 8 || evt.keyCode == 190 || event.keyCode >= 48 && event.keyCode <= 57) {
+                return true;
+            }
+            return false;
+        };
+
+        inpMin.addEventListener('keydown', function (evt) {
+
+            if (evt.keyCode == 37 || evt.keyCode == 39) {
+                return;
+            }
+
+            if (!_checkNumber(evt)) {
+                evt.preventDefault();
+                return;
+            }
+
+            var p = that.model.palettes[1];
+            var v = _checkValue.call(this, evt);
+
+            if (!isNaN(v)) {
+                v = parseFloat(v);
+                if (v >= p.max) {
+                    evt.preventDefault();
+                    return;
+                }
+                p.min = v;
+                if (p.min < p.max) {
+                    that._renderAnaliticalPalette();
+                    that.events.dispatch(that.events.changerange, this);
+                }
+            } else {
+                evt.preventDefault();
+            }
+        });
+
+        inpMax.addEventListener('keydown', function (evt) {
+
+            if (evt.keyCode == 37 || evt.keyCode == 39) {
+                return;
+            }
+
+            if (!_checkNumber(evt)) {
+                evt.preventDefault();
+                return;
+            }
+
+            var p = that.model.palettes[1];
+            var v = _checkValue.call(this, evt);
+
+            if (!isNaN(v)) {
+                v = parseFloat(v);
+                if (v > 1) {
+                    evt.preventDefault();
+                    return;
+                }
+                if (v > 0 && v < p.min) {
+                    evt.preventDefault();
+                    return;
+                }
+                p.max = v;
+                if (p.min < p.max) {
+                    that._renderAnaliticalPalette();
+                    that.events.dispatch(that.events.changerange, this);
+                }
+            } else {
+                evt.preventDefault();
+            }
+        });
+
+
         return this;
     };
 
     this.initialize();
 
-    this._renderStaticPalettes = function () {
+    this._renderStaticPalette = function () {
         var p = this.model.palettes;
+
         for (var i = 0; i < p.length; i++) {
 
             var colorLine = '<div class="alpPaletteShade"></div><div class="alpPaletteShade"></div>',
@@ -101,25 +197,59 @@ var NDVILegendView = function () {
                 }
             }
             this.$el.find(".alpP-" + i).html(colorLine);
-            this.$el.find(".alpV-" + i).html(valueLine);
 
-            this.sliders[i] = new NdviSlider(this.$el.find(".alpS-" + i)[0], SLIDER_CONTAINER_SIZE, [pi.min, pi.max], {
-                'paletteIndex': i
-            });
-            var that = this;
-            this.sliders[i].on("mouseup", function (e) {
-                that.events.dispatch(that.events.changerange, that.model);
-            });
-            this.sliders[i].on("move", function (e) {
-                var palIndex = this.properties.paletteIndex;
-                that.model.setRange(palIndex, e.range[0], e.range[1]);
-                if (palIndex === that.model.getSelectedPaletteIndex()) {
-                    var rp = this.getPixelRange();
-                    that._applyPaletteShade(palIndex, rp[0], rp[1]);
-                }
-            });
+            if (pi.isStatic) {
+                this.$el.find(".alpV-" + i).html(valueLine);
+            }
+
+            this._bindSlider(i);
         }
-        this._refreshPaletteShades();
+    };
+
+    this._bindSlider = function (i) {
+        var pi = this.model.palettes[i];
+        this.sliders[i] = new NdviSlider(this.$el.find(".alpS-" + i)[0], SLIDER_CONTAINER_SIZE, [pi.sliderMin, pi.sliderMax], {
+            'paletteIndex': i
+        });
+        var that = this;
+        this.sliders[i].on("mouseup", function (e) {
+            that.events.dispatch(that.events.changerange, that.model);
+        });
+        this.sliders[i].on("move", function (e) {
+            var palIndex = this.properties.paletteIndex;
+            that.model.setSliderRange(palIndex, e.range[0], e.range[1]);
+            if (palIndex === that.model.getSelectedPaletteIndex()) {
+                var rp = this.getPixelRange();
+                that._applyPaletteShade(palIndex, rp[0], rp[1]);
+            }
+        });
+    }
+
+    this._renderAnaliticalPalette = function () {
+        var i = 1;
+        var pi = this.model.palettes[i];
+        var min = pi.min,
+            max = pi.max,
+            scale = pi.scale;
+        var startIndex = 7;
+        var size = 101;
+        var valueLine = "";
+        for (var j = 7; j < 93; j++) {
+            var v = "";
+            if (j % 10 == 0) {
+                v = _lerp(j / size, max, min);
+                v = v.toFixed(2);
+                if (v == 0.0 || v == 1.0) {
+                    v = parseInt(v);
+                }
+                if (j > 7 && j < 93) {
+                    v = '<div style="margin-left:-11px">' + v + '</div>';
+                }
+            }
+            valueLine += '<div class="alpValueCell">' + v + '</div>';
+        }
+
+        this.$el.find(".alpV-" + i + " .alpValues").html(valueLine);
     };
 
     this._refreshPaletteShades = function () {
@@ -143,7 +273,11 @@ var NDVILegendView = function () {
     };
 
     this._renderPalettes = function () {
-        this._renderStaticPalettes();
+        this._renderStaticPalette();
+        this._renderAnaliticalPalette();
+        this.$el.find(".alpV-1 .alpMin").attr('value', this.model.palettes[1].min);
+        this.$el.find(".alpV-1 .alpMax").attr('value', this.model.palettes[1].max);
+        this._refreshPaletteShades();
     };
 };
 
