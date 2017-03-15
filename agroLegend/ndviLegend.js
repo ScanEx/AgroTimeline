@@ -41,21 +41,29 @@ var NDVILegend = function (options) {
 
     this.getNDVIColor = function (ndviValue) {
         var p = this.palettes[this._selectedPaletteIndex];
-        var rangeValue = (ndviValue - p.min) / (p.max - p.min);
-        var sliderMin = (p.sliderMin - p.min) / (p.max - p.min),
-            sliderMax = (p.sliderMax - p.min) / (p.max - p.min);
-        if (rangeValue >= sliderMin && rangeValue <= sliderMax) {
-            var index = Math.round((p.scale.length - p.startIndex) * rangeValue + p.startIndex);
-            if (index < p.startIndex) {
-                index = p.startIndex;
-            } else if (index >= p.scale.length) {
-                index = p.scale.length - 1;
-            }
-            var c = p.scale[index];
-            return [c.partRed, c.partGreen, c.partBlue, 255];
-        } else {
+        var d = p.max - p.min;
+        var palValue = (ndviValue - p.min) / d;
+        var sliderMin = p.min + p.sliderMin * d,
+            sliderMax = p.min + p.sliderMax * d;
+        var rangeValue = p.min + palValue * d;
+
+        if (rangeValue < sliderMin && p.sliderMin > 0 ||
+            rangeValue > sliderMax && p.sliderMax < 1) {
             return [0, 0, 0, 0];
         }
+
+        var index = Math.round((p.scale.length - p.startIndex) * palValue + p.startIndex);
+        if (index < p.startIndex) {
+            index = p.startIndex;
+        } else if (index >= p.scale.length) {
+            index = p.scale.length - 1;
+        }
+        var res = [0, 0, 0, 0];
+        var c = p.scale[index];
+        if (c)
+            res = [c.partRed, c.partGreen, c.partBlue, 255];
+
+        return res;
     };
 
     this.setSelectedPaletteIndex = function (index) {
