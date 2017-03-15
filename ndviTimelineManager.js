@@ -523,9 +523,11 @@ NDVITimelineManager.prototype.getState = function () {
     var palIndex = this.legendControl._ndviLegendView.model.getSelectedPaletteIndex();
     var palettes = this.legendControl._ndviLegendView.model.palettes;
     var pal = palettes[palIndex];
-    var palettesBands = [];
+    var palettesBands = [],
+        paletteSlidersBands = [];
     for (var i = 0; i < palettes.length; i++) {
         palettesBands.push([palettes[i].min, palettes[i].max]);
+        paletteSlidersBands.push([palettes[i].sliderMin, palettes[i].sliderMax]);
     }
 
     return {
@@ -541,6 +543,7 @@ NDVITimelineManager.prototype.getState = function () {
         "ndviLegend": {
             'selectedPalette': palIndex,
             'palettesBands': palettesBands,
+            'sliderBands': paletteSlidersBands,
             'visibility': this.legendControl._dialog.getVisibility()
         }
     };
@@ -575,17 +578,24 @@ NDVITimelineManager.prototype.loadState = function (data) {
 
     if (data.ndviLegend) {
         this.legendControl._ndviLegendView.model.events.on("loadend", this.legendControl._ndviLegendView, function () {
-            var bands = data.ndviLegend.palettesBands;
+            var bands = data.ndviLegend.palettesBands,
+                sliderBands = data.ndviLegend.sliderBands;
             var palettes = this.model.palettes;
             for (var i = 0; i < palettes.length; i++) {
                 var min = parseFloat(bands[i][0]),
                     max = parseFloat(bands[i][1]);
-                this.sliders[i].setRange(min, max);
+                var sliderMin = parseFloat(sliderBands[i][0]),
+                    sliderMax = parseFloat(sliderBands[i][1]);
+                this.sliders[i].setRange(sliderMin, sliderMax);
                 this.model.palettes[i].min = min;
                 this.model.palettes[i].max = max;
+                this.model.palettes[i].sliderMin = sliderMin;
+                this.model.palettes[i].sliderMax = sliderMax;
             }
             this.model._selectedPaletteIndex = parseInt(data.ndviLegend.selectedPalette);
             this._refreshPaletteShades();
+            this._renderAnaliticalPalette();
+            this.refreshRangeValues();
         });
     }
 

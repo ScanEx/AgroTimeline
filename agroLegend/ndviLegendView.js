@@ -253,8 +253,9 @@ var NDVILegendView = function () {
     };
 
     this._refreshPaletteShades = function () {
+        var index = this.model.getSelectedPaletteIndex();
         for (var i = 0; i < this.sliders.length; i++) {
-            if (this.model.getSelectedPaletteIndex() === i) {
+            if (index === i) {
                 var rp = this.sliders[i].getPixelRange();
                 this._applyPaletteShade(i, rp[0], rp[1]);
                 this.$el.find(".alpS-" + i + " .alpSlider").removeClass("alpSliderInactive");
@@ -263,6 +264,8 @@ var NDVILegendView = function () {
                 this.$el.find(".alpS-" + i + " .alpSlider").addClass("alpSliderInactive");
             }
         }
+
+        this.$el.find('input:radio[name="alpRadio"]').filter('[value="' + index + '"]')[0].checked = true;
     };
 
     this._applyPaletteShade = function (paletteIndex, left, right) {
@@ -272,11 +275,15 @@ var NDVILegendView = function () {
         shades[1].style.width = (SLIDER_CONTAINER_SIZE - right) + "px";
     };
 
+    this.refreshRangeValues = function () {
+        this.$el.find(".alpV-1 .alpMin").attr('value', this.model.palettes[1].min);
+        this.$el.find(".alpV-1 .alpMax").attr('value', this.model.palettes[1].max);
+    };
+
     this._renderPalettes = function () {
         this._renderStaticPalette();
         this._renderAnaliticalPalette();
-        this.$el.find(".alpV-1 .alpMin").attr('value', this.model.palettes[1].min);
-        this.$el.find(".alpV-1 .alpMax").attr('value', this.model.palettes[1].max);
+        this.refreshRangeValues();
         this._refreshPaletteShades();
     };
 };
