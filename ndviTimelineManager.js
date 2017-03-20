@@ -84,16 +84,20 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
 
     //инициализация модуля посторения тематики по средним NDVI
     var ts = new ThematicStrategy(params.layers.HR.palette.ndvi.url, function (prop) {
-        var color = that.legendControl.getNDVIColor(prop.ndvi_mean_clear);
-        val = prop.ndvi_mean_clear * 100 + 101;
-        if (val == 0 || val == -100) {
-            return shared.RGB2HEX(0, 179, 255);
-        } else {
-            if (color[3]) {
-                return shared.RGB2HEX(color[0], color[1], color[2]);
+        if (prop) {
+            var color = that.legendControl.getNDVIColor(prop.ndvi_mean_clear);
+            val = prop.ndvi_mean_clear * 100 + 101;
+            if (val == 0 || val == -100) {
+                return shared.RGB2HEX(0, 179, 255);
             } else {
-                return null;
+                if (color[3]) {
+                    return shared.RGB2HEX(color[0], color[1], color[2]);
+                } else {
+                    return null;
+                }
             }
+        } else {
+            return null;
         }
     });
 
@@ -112,28 +116,25 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
 
     //инициализация тематического модуля посторения тематики неоднородности
     var tsneondn = new ThematicStrategy(null, function (prop) {
-        var val = this.__getNeodnValue[this.funcType](prop);
-        var c = "c0";
-        if (val < 0.02) {
-            c = "c1";
-        } else if (val >= 0.02 && val < 0.04) {
-            c = "c2";
-        } else if (val >= 0.04 && val < 0.06) {
-            c = "c3";
-        } else if (val >= 0.06 && val < 0.08) {
-            c = "c4";
-        } else if (val >= 0.08) {
-            c = "c5";
+        if (prop) {
+            var val = prop.ndvi_std_clear;
+            var c = "c0";
+            if (val < 0.02) {
+                c = "c1";
+            } else if (val >= 0.02 && val < 0.04) {
+                c = "c2";
+            } else if (val >= 0.04 && val < 0.06) {
+                c = "c3";
+            } else if (val >= 0.06 && val < 0.08) {
+                c = "c4";
+            } else if (val >= 0.08) {
+                c = "c5";
+            }
+            return shared.RGB2HEX(this.palette[c].r, this.palette[c].g, this.palette[c].b);
         }
-        return shared.RGB2HEX(this.palette[c].r, this.palette[c].g, this.palette[c].b);
+        return null;
     });
-    tsneondn.funcType = 0;
-    tsneondn.__getNeodnValue = [
-        function (prop) {
-            return prop.ndvi_std_clear;
-        }, function (prop) {
-            return prop.ndvi_max_clear - prop.ndvi_min_clear;
-        }];
+    tsneondn.returnDataArr = ["Stat"];
     tsneondn._requestValueCallback = ThematicStrategy.__neodnrValue;
     tsneondn.palette = {
         "c5": { "r": 245, "g": 12, "b": 50 },

@@ -181,17 +181,18 @@ ThematicStrategy.prototype._constuctRequestsArray = function (GMX_RasterCatalogI
 };
 
 ThematicStrategy.__ndviValue = function (ri) {
-    return Math.round(ri.Bands.b.Mean);
+    return {
+        'ndvi_mean_clear': (Math.round(ri.Bands.b.Mean) - 101) / 100
+    };
 };
 
 ThematicStrategy.__neodnrValue = function (ri) {
-    var h = ri.Bands.b.Hist256;
-    var u = ri.ValidPixels;
-    var max = Math.max.apply(null, [h[0], h[1], h[2], h[3], h[4], h[5]]);
-    return (max / u) * 100;
+    return {
+        'ndvi_std_clear': ri.Bands.b.StdDev / 100
+    };
 };
 
-ThematicStrategy.prototype.getRequestValue = function (ri) {
+ThematicStrategy.prototype.getRequestProp = function (ri) {
     if (this._requestValueCallback)
         return this._requestValueCallback.call(this, ri);
 };
@@ -203,37 +204,19 @@ ThematicStrategy.prototype.applyRequest = function (res) {
             var valid = ri.ValidPixels / (ri.NoDataPixels + ri.ValidPixels + ri.BackgroundPixels);
             var id = ri.Name;
             if (valid > 0.32) {
-                var value = this.getRequestValue(ri);
-                this.applyPalette(parseInt(id), value);
+                var prop = this.getRequestProp(ri);
+                this.applyPalette(parseInt(id), prop);
             } else {
-                this.applyPalette(parseInt(id), -100);
+                this.applyPalette(parseInt(id), null);
             }
         }
     }
 };
 
-ThematicStrategy.prototype.getColor = function (value) {
-    return this.colorCallback.call(this, value);
-};
-
-ThematicStrategy.prototype.applyPalette = function (id, value) {
-    var color = this.getColor(value);
+ThematicStrategy.prototype.applyPalette = function (id, prop) {
+    var color = this.colorCallback.call(this, prop);
     this._applyCallback(id, color);
 };
-
-//NeodnrManager.checkGreyHisto = function (channels) {
-//    for (var i = 0; i < 255; i++) {
-//        var r = channels.r.Hist256[i],
-//            g = channels.g.Hist256[i],
-//            b = channels.b.Hist256[i];
-
-//        if (!(r == g && r == b)) {
-//            return false;
-//        }
-//    }
-//    return true;
-//};
-
 
 /*
 ====================================
@@ -339,7 +322,7 @@ ThematicHandler.prototype._applyStrategy = function (features, layerName) {
         var prop = fi.properties;
         var color = shared.RGB2HEX(0, 179, 255);
         if (prop.valid_area_pct >= 90.0) {
-            color = this._thematicStrategy.getColor(prop);
+            color = this._thematicStrategy.colorCallback.call(this._thematicStrategy, prop);
         }
         var opacity = (color ? (color[3] || 1.0) : 0.0);
         this._layersStyleData[layerName][prop[identityField]] = {
@@ -472,16 +455,24 @@ ThematicHandler.prototype._exec = function (layer) {
 
     var that = this;
     shared.getLayersGeometry([layerName], null, function (result) {
-        that._thematicStrategy.startThemesThreadByIds(that._alternativeGMX_RKArr, that._sceneIds, that.katalogName, result.features, function (id, color) {
-            that._layersStyleData[layerName][id] = {
-                //fillColor: color,
-                fillStyle: shared.DEC2RGB(color),
-                fillOpacity: 1.0
-            };
-            layer.repaint();
-        }, function () {
-            that._dequeueRequest();
-        });
+
+        for (var i = 0; i < result.features.length; i++) {
+            if (!that._layersFeatures[layerName]) {
+                that._layersFeatures[layerName] = [];
+            }
+            that._layersFeatures[layerName].push(result.features[i]);
+        }
+
+        that._thematicStrategy.startThemesThreadByIds(that._alternativeGMX_RKArr, that._sceneIds, that.katalogName, result.features,
+            function (id, color) {
+                that._layersStyleData[layerName][id] = {
+                    fillStyle: shared.DEC2RGB(color),
+                    fillOpacity: 1.0
+                };
+                layer.repaint();
+            }, function () {
+                that._dequeueRequest();
+            });
     }, this.errorCallback);
 };
 
