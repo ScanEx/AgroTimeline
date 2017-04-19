@@ -980,13 +980,13 @@ NDVITimelineManager.prototype.setCloudMaskRenderHook = function (layer, callback
 
 NDVITimelineManager.prototype.setRenderHook = function (layer, callback, callback2) {
 
-    if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR") {
+    if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI") {
         this.layerBounds && layer.removeClipPolygon(this.layerBounds);
     }
 
     if (this._cutOff) {
 
-        if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR") {
+        if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI") {
             this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
             layer.addClipPolygon(this.layerBounds);
         }
