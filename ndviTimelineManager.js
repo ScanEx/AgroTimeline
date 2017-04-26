@@ -17,11 +17,6 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
 
     this._combo = params.combo;
 
-    //addCombo - [{ "caption": "LANDSAT-8", "rk": ["RGB753", "RGB432"] }]
-    //addLayers - { "RGB753": { "viewTimeline": true, "name": "7E81339914D54801A50DD986FD4333AC", "dateColumnName": "ACQDATE" }, "RGB432": { "name": "47A9D4E5E5AE497A8A1A7EA49C7FC336", "dateColumnName": "ACQDATE" } }
-    //disableOptions - true
-    //selectedCombo - 4
-
     //дополнительные параметры
     params.addCombo && this._combo.push.apply(this._combo, JSON.parse(params.addCombo));
     if (params.addLayers) {
@@ -265,14 +260,16 @@ NDVITimelineManager.INHOMOGENUITY = 107;
 NDVITimelineManager.MEAN_VCI = 108;
 NDVITimelineManager.RATING = 109;
 NDVITimelineManager.LANDSAT = 110;
-NDVITimelineManager.RGB753 = 2000;
-NDVITimelineManager.RGB432 = 2001;
+NDVITimelineManager.LANDSAT_IR = 111;
+NDVITimelineManager.SENTINEL = 2000;
+NDVITimelineManager.SENTINEL_IR = 2001;
 NDVITimelineManager.FIRES_POINTS = 5000;
 
 NDVITimelineManager.prodTypes = [];
 NDVITimelineManager.prodTypes[NDVITimelineManager.LANDSAT] = "LANDSAT";
-NDVITimelineManager.prodTypes[NDVITimelineManager.RGB753] = "RGB753";
-NDVITimelineManager.prodTypes[NDVITimelineManager.RGB432] = "RGB432";
+NDVITimelineManager.prodTypes[NDVITimelineManager.LANDSAT_IR] = "LANDSAT_IR";
+NDVITimelineManager.prodTypes[NDVITimelineManager.SENTINEL] = "SENTINEL";
+NDVITimelineManager.prodTypes[NDVITimelineManager.SENTINEL_IR] = "SENTINEL_IR";
 
 //поправка слайлера на рисочках, зависит от длинны слайдера и диапазона на таймлайне
 NDVITimelineManager.SLIDER_EPSILON = 28;
@@ -379,8 +376,11 @@ NDVITimelineManager._comboRadios = [{
 }, {
     "HR": "ndviRadio_hr",
     "RGB2": "rgbRadio2",
+    "RGB": "rgbRadio",
     "SENTINEL_NDVI": "ndviRadio_hr",
-    "SENTINEL_IR": "rgbRadio"
+    "SENTINEL_IR": "rgbRadio",
+    "SENTINEL": "rgbRadio2",
+    "LANDSAT": "rgbRadio",
 }];
 
 //соответсвия продукт - радиокнопка, нужно для пермалинков
@@ -396,8 +396,10 @@ NDVITimelineManager.radioProduct = {
     "qualityRadio": { "prodId": NDVITimelineManager.QUALITY16, "numCombo": 0 },
     "conditionsOfVegetationRadio": { "prodId": NDVITimelineManager.CONDITIONS_OF_VEGETATION, "numCombo": 0 },
 
-    "rgbRadio753": { "prodId": NDVITimelineManager.RGB753, "numCombo": 4 },
-    "rgbRadio432": { "prodId": NDVITimelineManager.RGB432, "numCombo": 4 },
+    "landsatRGB": { "prodId": NDVITimelineManager.LANDSAT, "numCombo": 3 },
+    "landsatIR": { "prodId": NDVITimelineManager.LANDSAT_IR, "numCombo": 3 },
+    "sentinelRGB": { "prodId": NDVITimelineManager.SENTINEL, "numCombo": 4 },
+    "sentinelIR": { "prodId": NDVITimelineManager.SENTINEL_IR, "numCombo": 4 },
 
     "firesPoints": { "prodId": NDVITimelineManager.FIRES_POINTS, "numCombo": 3 }
 };
@@ -410,6 +412,7 @@ NDVITimelineManager.minZoomOption[NDVITimelineManager.NDVI_HR] = NDVITimelineMan
 NDVITimelineManager.minZoomOption[NDVITimelineManager.NDVI16] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.RGB_HR] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.LANDSAT] = NDVITimelineManager.MIN_ZOOM + 1;
+NDVITimelineManager.minZoomOption[NDVITimelineManager.LANDSAT_IR] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.RGB2_HR] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.QUALITY16] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.NDVI_MEAN] = NDVITimelineManager.MIN_ZOOM_HR;
@@ -418,8 +421,8 @@ NDVITimelineManager.minZoomOption[NDVITimelineManager.RATING] = NDVITimelineMana
 NDVITimelineManager.minZoomOption[NDVITimelineManager.CONDITIONS_OF_VEGETATION] = 0;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.INHOMOGENUITY] = NDVITimelineManager.MIN_ZOOM_HR;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.MEAN_VCI] = NDVITimelineManager.MIN_ZOOM_HR;
-NDVITimelineManager.minZoomOption[NDVITimelineManager.RGB753] = NDVITimelineManager.MIN_ZOOM + 1;
-NDVITimelineManager.minZoomOption[NDVITimelineManager.RGB432] = NDVITimelineManager.MIN_ZOOM + 1;
+NDVITimelineManager.minZoomOption[NDVITimelineManager.SENTINEL] = NDVITimelineManager.MIN_ZOOM + 1;
+NDVITimelineManager.minZoomOption[NDVITimelineManager.SENTINEL_IR] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.FIRES_POINTS] = NDVITimelineManager.MIN_ZOOM + 1;
 
 NDVITimelineManager.prototype.getMinZoomCurrentSelection = function (prod) {
@@ -1742,9 +1745,13 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
 };
 
 NDVITimelineManager.prototype._showPREVIEW = function () {
+
     this.setRadioLabelActive_grey("rgbRadio2", true);
+
     document.getElementById("rgbRadio2").checked = true;
-    this._selectedType[this._selectedCombo] = NDVITimelineManager.RGB2_HR;
+
+    //this._selectedType[this._selectedCombo] = NDVITimelineManager.RGB2_HR;
+
     if (this.isSentinel) {
         this._showLayer("SENTINEL_PREVIEW");
     } else {
@@ -1755,19 +1762,34 @@ NDVITimelineManager.prototype._showPREVIEW = function () {
 NDVITimelineManager.prototype._showSENTINEL = function () {
     this.setRadioLabelActive_grey("rgbRadio2", true);
 
-    if (document.getElementById("rgbRadio").checked) {
-        this._selectedType[this._selectedCombo] = NDVITimelineManager.RGB_HR;
+    var sel = this._selectedType[this._selectedCombo];
+
+    if (sel == NDVITimelineManager.SENTINEL_IR || sel == NDVITimelineManager.RGB_HR) {
         this._showLayer("SENTINEL_IR");
-    } else if (document.getElementById("rgbRadio2").checked) {
-        this._selectedType[this._selectedCombo] = NDVITimelineManager.RGB2_HR;
+    } else if (sel == NDVITimelineManager.SENTINEL || sel == NDVITimelineManager.RGB2_HR) {
         this._showLayer("SENTINEL");
-    } else if (document.getElementById("ndviRadio_hr").checked) {
+    } else if (sel == NDVITimelineManager.NDVI_HR) {
         this._showLayerNDVI_HR("SENTINEL_NDVI");
-    } else if (document.getElementById("ndviMeanRadio").checked) {
+    } else if (sel == NDVITimelineManager.NDVI_MEAN) {
         this._showNDVI_MEAN();
-    } else if (document.getElementById("inhomogenuityRadio").checked) {
+    } else if (sel == NDVITimelineManager.INHOMOGENUITY) {
         this._showINHOMOGENUITY();
     }
+
+
+    //if (document.getElementById("rgbRadio").checked) {
+    //    //this._selectedType[this._selectedCombo] = NDVITimelineManager.RGB_HR;
+    //    this._showLayer("SENTINEL_IR");
+    //} else if (document.getElementById("rgbRadio2").checked) {
+    //    //this._selectedType[this._selectedCombo] = NDVITimelineManager.RGB2_HR;
+    //    this._showLayer("SENTINEL");
+    //} else if (document.getElementById("ndviRadio_hr").checked) {
+    //    this._showLayerNDVI_HR("SENTINEL_NDVI");
+    //} else if (document.getElementById("ndviMeanRadio").checked) {
+    //    this._showNDVI_MEAN();
+    //} else if (document.getElementById("inhomogenuityRadio").checked) {
+    //    this._showINHOMOGENUITY();
+    //}
 };
 
 NDVITimelineManager.prototype._showRGB_HR = function () {
@@ -3194,6 +3216,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
     this.meanNdviNoDataLabel.style.display = "none";
 
     this.setRadioLabelActive_grey("rgbRadio", false);
+    this.setRadioLabelActive_grey("rgbRadio2", false);
     this.setRadioLabelActive_grey("ndviRadio_modis", false);
     this.setRadioLabelActive_grey("conditionsOfVegetationRadio", false);
 
@@ -3392,7 +3415,12 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
             //Показать снимок
             that._prepareRedraw();
             var selType = that._selectedType[that._selectedCombo];
-            var isDefault = (selType == NDVITimelineManager.RGB_HR || selType == NDVITimelineManager.NDVI16 || selType == NDVITimelineManager.LANDSAT);
+            var isDefault = (selType == NDVITimelineManager.RGB_HR ||
+                selType == NDVITimelineManager.NDVI16 ||
+                selType == NDVITimelineManager.LANDSAT ||
+                selType == NDVITimelineManager.SENTINEL ||
+                selType == NDVITimelineManager.SENTINEL_IR ||
+                selType == NDVITimelineManager.LANDSAT_IR);
 
             if (isDefault || this._activatePermalink) {
                 that._showRedraw();
@@ -3579,9 +3607,6 @@ NDVITimelineManager.prototype._setSliderState = function (range, date, async) {
         var s = $(".timeline-event-selected")[0];
         if (s) {
             var b = $("#ntSliderBar")[0];
-            //var bb = b.clientWidth;
-            //var ss = parseFloat(s.style.left.substr(0, s.style.left.length - 2));
-            //var l = ss * 100 / bb;
             l = parseFloat(s.style.left);
             that._slider.setValue(l, NDVITimelineManager.formatDate(date.getDate(),
                 date.getMonth() + 1, date.getFullYear()));
@@ -4113,10 +4138,33 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
                 that._selectedType[that._selectedCombo] = NDVITimelineManager.FIRES_POINTS;
                 that._redrawShots();
             }, false, true);
+
+
         } else if (this._combo[k].rk[0] == "LANDSAT") {
-            this._selectedType[k] = NDVITimelineManager.LANDSAT;
+            this._selectedType[k] = NDVITimelineManager.LANDSAT_IR;
+            this.addRadio("firstPanel_" + k, "Снимок-ИК", "shotsOptions", "landsatIR", k, true, function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT_IR;
+                that._redrawShots();
+            }, false, true);
+
+            this.addRadio("firstPanel_" + k, "Снимок", "shotsOptions", "landsatRGB", k, true, function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT;
+                that._redrawShots();
+            });
+
         } else if (this._combo[k].rk[0] == "SENTINEL") {
-            that._selectedType[k] = NDVITimelineManager.RGB_HR;
+            that._selectedType[k] = NDVITimelineManager.SENTINEL_IR;
+            this.addRadio("firstPanel_" + k, "Снимок-ИК", "shotsOptions", "sentinelIR", k, true, function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.SENTINEL_IR;
+                that._redrawShots();
+            }, false, true);
+
+            this.addRadio("firstPanel_" + k, "Снимок", "shotsOptions", "sentinelRGB", k, true, function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.SENTINEL;
+                that._redrawShots();
+            });
+
+
         } else if (this._combo[k].rk[0] == "MODIS143") {
             that._selectedType[k] = NDVITimelineManager.NDVI16;
             this.addRadio("firstPanel_" + k, "MODIS 1-4-3", "shotsOptions", "modis143", k, true, function (r) {
