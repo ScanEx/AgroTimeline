@@ -176,8 +176,7 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
         NDVITimelineManager.RGB_HR,
         NDVITimelineManager.NDVI16,
         NDVITimelineManager.NDVI16,
-        NDVITimelineManager.FIRES_POINTS,
-        NDVITimelineManager.RGB753];
+        NDVITimelineManager.FIRES_POINTS];
 
     //ассоциативный по годам массив в котором хранятся:
     //radio - указатель на элемент переключателя,
@@ -259,15 +258,24 @@ NDVITimelineManager.CONDITIONS_OF_VEGETATION = 106;
 NDVITimelineManager.INHOMOGENUITY = 107;
 NDVITimelineManager.MEAN_VCI = 108;
 NDVITimelineManager.RATING = 109;
-NDVITimelineManager.LANDSAT = 110;
-NDVITimelineManager.LANDSAT_IR = 111;
 NDVITimelineManager.SENTINEL = 2000;
 NDVITimelineManager.SENTINEL_IR = 2001;
 NDVITimelineManager.FIRES_POINTS = 5000;
 
+NDVITimelineManager.LANDSAT_432 = 110;
+NDVITimelineManager.LANDSAT_753 = 111;
+NDVITimelineManager.LANDSAT_654 = 112;
+NDVITimelineManager.SENTINEL_432 = 210;
+NDVITimelineManager.SENTINEL_384 = 211;
+
+
 NDVITimelineManager.prodTypes = [];
-NDVITimelineManager.prodTypes[NDVITimelineManager.LANDSAT] = "LANDSAT";
-NDVITimelineManager.prodTypes[NDVITimelineManager.LANDSAT_IR] = "LANDSAT_IR";
+NDVITimelineManager.prodTypes[NDVITimelineManager.LANDSAT_432] = "LANDSAT_432";
+NDVITimelineManager.prodTypes[NDVITimelineManager.LANDSAT_753] = "LANDSAT_753";
+NDVITimelineManager.prodTypes[NDVITimelineManager.LANDSAT_654] = "LANDSAT_654";
+NDVITimelineManager.prodTypes[NDVITimelineManager.SENTINEL_432] = "SENTINEL_432";
+NDVITimelineManager.prodTypes[NDVITimelineManager.SENTINEL_384] = "SENTINEL_384";
+
 NDVITimelineManager.prodTypes[NDVITimelineManager.SENTINEL] = "SENTINEL";
 NDVITimelineManager.prodTypes[NDVITimelineManager.SENTINEL_IR] = "SENTINEL_IR";
 
@@ -396,12 +404,14 @@ NDVITimelineManager.radioProduct = {
     "qualityRadio": { "prodId": NDVITimelineManager.QUALITY16, "numCombo": 0 },
     "conditionsOfVegetationRadio": { "prodId": NDVITimelineManager.CONDITIONS_OF_VEGETATION, "numCombo": 0 },
 
-    "landsatRGB": { "prodId": NDVITimelineManager.LANDSAT, "numCombo": 3 },
-    "landsatIR": { "prodId": NDVITimelineManager.LANDSAT_IR, "numCombo": 3 },
-    "sentinelRGB": { "prodId": NDVITimelineManager.SENTINEL, "numCombo": 4 },
-    "sentinelIR": { "prodId": NDVITimelineManager.SENTINEL_IR, "numCombo": 4 },
+    "landsat432": { "prodId": NDVITimelineManager.LANDSAT_432, "numCombo": 3 },
+    "landsat753": { "prodId": NDVITimelineManager.LANDSAT_753, "numCombo": 3 },
+    "landsat654": { "prodId": NDVITimelineManager.LANDSAT_654, "numCombo": 3 },
 
-    "firesPoints": { "prodId": NDVITimelineManager.FIRES_POINTS, "numCombo": 3 }
+    "sentinel432": { "prodId": NDVITimelineManager.SENTINEL_432, "numCombo": 4 },
+    "sentinel384": { "prodId": NDVITimelineManager.SENTINEL_384, "numCombo": 4 },
+
+    "firesPoints": { "prodId": NDVITimelineManager.FIRES_POINTS, "numCombo": 5 }
 };
 
 NDVITimelineManager.MIN_ZOOM = 7;
@@ -411,8 +421,6 @@ NDVITimelineManager.minZoomOption = {};
 NDVITimelineManager.minZoomOption[NDVITimelineManager.NDVI_HR] = NDVITimelineManager.MIN_ZOOM_HR;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.NDVI16] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.RGB_HR] = NDVITimelineManager.MIN_ZOOM + 1;
-NDVITimelineManager.minZoomOption[NDVITimelineManager.LANDSAT] = NDVITimelineManager.MIN_ZOOM + 1;
-NDVITimelineManager.minZoomOption[NDVITimelineManager.LANDSAT_IR] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.RGB2_HR] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.QUALITY16] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.NDVI_MEAN] = NDVITimelineManager.MIN_ZOOM_HR;
@@ -424,6 +432,13 @@ NDVITimelineManager.minZoomOption[NDVITimelineManager.MEAN_VCI] = NDVITimelineMa
 NDVITimelineManager.minZoomOption[NDVITimelineManager.SENTINEL] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.SENTINEL_IR] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.FIRES_POINTS] = NDVITimelineManager.MIN_ZOOM + 1;
+
+NDVITimelineManager.minZoomOption[NDVITimelineManager.LANDSAT_432] = NDVITimelineManager.MIN_ZOOM + 1;
+NDVITimelineManager.minZoomOption[NDVITimelineManager.LANDSAT_753] = NDVITimelineManager.MIN_ZOOM + 1;
+NDVITimelineManager.minZoomOption[NDVITimelineManager.LANDSAT_654] = NDVITimelineManager.MIN_ZOOM + 1;
+NDVITimelineManager.minZoomOption[NDVITimelineManager.SENTINEL_432] = NDVITimelineManager.MIN_ZOOM + 1;
+NDVITimelineManager.minZoomOption[NDVITimelineManager.SENTINEL_384] = NDVITimelineManager.MIN_ZOOM + 1;
+
 
 NDVITimelineManager.prototype.getMinZoomCurrentSelection = function (prod) {
     return NDVITimelineManager.minZoomOption[prod];
@@ -1764,7 +1779,7 @@ NDVITimelineManager.prototype._showSENTINEL = function () {
 
     var sel = this._selectedType[this._selectedCombo];
 
-    if (sel == NDVITimelineManager.SENTINEL_IR || sel == NDVITimelineManager.RGB_HR) {
+    if (sel == NDVITimelineManager.SENTINEL_IR || sel == NDVITimelineManager.RGB_HR ) {
         this._showLayer("SENTINEL_IR");
     } else if (sel == NDVITimelineManager.SENTINEL || sel == NDVITimelineManager.RGB2_HR) {
         this._showLayer("SENTINEL");
@@ -1774,22 +1789,9 @@ NDVITimelineManager.prototype._showSENTINEL = function () {
         this._showNDVI_MEAN();
     } else if (sel == NDVITimelineManager.INHOMOGENUITY) {
         this._showINHOMOGENUITY();
+    } else {
+        this._showLayer(NDVITimelineManager.prodTypes[this._selectedType[this._selectedCombo]]);
     }
-
-
-    //if (document.getElementById("rgbRadio").checked) {
-    //    //this._selectedType[this._selectedCombo] = NDVITimelineManager.RGB_HR;
-    //    this._showLayer("SENTINEL_IR");
-    //} else if (document.getElementById("rgbRadio2").checked) {
-    //    //this._selectedType[this._selectedCombo] = NDVITimelineManager.RGB2_HR;
-    //    this._showLayer("SENTINEL");
-    //} else if (document.getElementById("ndviRadio_hr").checked) {
-    //    this._showLayerNDVI_HR("SENTINEL_NDVI");
-    //} else if (document.getElementById("ndviMeanRadio").checked) {
-    //    this._showNDVI_MEAN();
-    //} else if (document.getElementById("inhomogenuityRadio").checked) {
-    //    this._showINHOMOGENUITY();
-    //}
 };
 
 NDVITimelineManager.prototype._showRGB_HR = function () {
@@ -3417,10 +3419,14 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
             var selType = that._selectedType[that._selectedCombo];
             var isDefault = (selType == NDVITimelineManager.RGB_HR ||
                 selType == NDVITimelineManager.NDVI16 ||
-                selType == NDVITimelineManager.LANDSAT ||
                 selType == NDVITimelineManager.SENTINEL ||
                 selType == NDVITimelineManager.SENTINEL_IR ||
-                selType == NDVITimelineManager.LANDSAT_IR);
+
+                selType == NDVITimelineManager.LANDSAT_432,
+                selType == NDVITimelineManager.LANDSAT_753 ||
+                selType == NDVITimelineManager.LANDSAT_564 ||
+                selType == NDVITimelineManager.SENTINEL_432 ||
+                selType == NDVITimelineManager.SENTINEL_384);
 
             if (isDefault || this._activatePermalink) {
                 that._showRedraw();
@@ -4140,27 +4146,32 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
             }, false, true);
 
 
-        } else if (this._combo[k].rk[0] == "LANDSAT") {
-            this._selectedType[k] = NDVITimelineManager.LANDSAT_IR;
-            this.addRadio("firstPanel_" + k, "Снимок-ИК", "shotsOptions", "landsatIR", k, true, function (r) {
-                that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT_IR;
+        } else if (this._combo[k].rk[0] == "LANDSAT_432") {
+            this._selectedType[k] = NDVITimelineManager.LANDSAT_432;
+            this.addRadio("firstPanel_" + k, "Снимок-432", "shotsOptions", "landsat432", k, true, function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT_432;
                 that._redrawShots();
             }, false, true);
 
-            this.addRadio("firstPanel_" + k, "Снимок", "shotsOptions", "landsatRGB", k, true, function (r) {
-                that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT;
+            this.addRadio("firstPanel_" + k, "Снимок-753", "shotsOptions", "landsat753", k, true, function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT_753;
                 that._redrawShots();
             });
 
-        } else if (this._combo[k].rk[0] == "SENTINEL") {
-            that._selectedType[k] = NDVITimelineManager.SENTINEL_IR;
-            this.addRadio("firstPanel_" + k, "Снимок-ИК", "shotsOptions", "sentinelIR", k, true, function (r) {
-                that._selectedType[that._selectedCombo] = NDVITimelineManager.SENTINEL_IR;
+            this.addRadio("firstPanel_" + k, "Снимок-654", "shotsOptions", "landsat654", k, true, function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT_654;
+                that._redrawShots();
+            });
+
+        } else if (this._combo[k].rk[0] == "SENTINEL_432") {
+            that._selectedType[k] = NDVITimelineManager.SENTINEL_432;
+            this.addRadio("firstPanel_" + k, "Снимок-432", "shotsOptions", "sentinel432", k, true, function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.SENTINEL_432;
                 that._redrawShots();
             }, false, true);
 
-            this.addRadio("firstPanel_" + k, "Снимок", "shotsOptions", "sentinelRGB", k, true, function (r) {
-                that._selectedType[that._selectedCombo] = NDVITimelineManager.SENTINEL;
+            this.addRadio("firstPanel_" + k, "Снимок-384", "shotsOptions", "sentinel384", k, true, function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.SENTINEL_384;
                 that._redrawShots();
             });
 
