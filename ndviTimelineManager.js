@@ -1765,7 +1765,7 @@ NDVITimelineManager.prototype._showPREVIEW = function () {
 
     document.getElementById("rgbRadio2").checked = true;
 
-    //this._selectedType[this._selectedCombo] = NDVITimelineManager.RGB2_HR;
+    this._selectedType[1] = NDVITimelineManager.RGB2_HR;
 
     if (this.isSentinel) {
         this._showLayer("SENTINEL_PREVIEW");
@@ -3428,9 +3428,10 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                 selType == NDVITimelineManager.SENTINEL_432 ||
                 selType == NDVITimelineManager.SENTINEL_384);
 
-            if (isDefault || this._activatePermalink) {
+            if (this._isPreview || isDefault || this._activatePermalink) {
                 that._showRedraw();
             }
+
             if (!this._isPreview) {
 
                 //выключаем "неопознанные" продукты

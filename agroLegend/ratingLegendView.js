@@ -13,7 +13,6 @@ var RatingLegendView = function () {
          <tbody>\
            <tr>\
              <td><div class="legendColorh" style="background-color:#f50c32; margin-left: 0; margin-right: 0;width:{cellWidth};"></div></td>\
-             <td><div class="legendColorh" style="background-color:#000000; margin-left: 0; margin-right: 0;width:{cellWidth};"></div></td>\
              <td><div class="legendColorh" style="background-color:#e39139; margin-left: 0; margin-right: 0;width:{cellWidth};"></div></td>\
              <td><div class="legendColorh" style="background-color:#e6c84e; margin-left: 0; margin-right: 0;width:{cellWidth};"></div></td>\
              <td><div class="legendColorh" style="background-color:#f0f018; margin-left: 0; margin-right: 0;width:{cellWidth};"></div></td>\
