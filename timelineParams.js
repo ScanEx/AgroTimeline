@@ -1,6 +1,6 @@
 ﻿var timelineParams = {
     proxyUrl: '',
-    exMap: { host: "maps.kosmosnimki.ru", name: "PLDYO" },
+    exMap: [{ host: "maps.kosmosnimki.ru", name: "PLDYO" }, { host: "maps.kosmosnimki.ru", name: "4C7E120502D5486AAA24698B984A3B7B" }],
     layers: {
         "MODIS": {
             viewTimeline: true,

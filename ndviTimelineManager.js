@@ -12,7 +12,11 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     this._userRole = userRole;
 
     this._timelineVisibilityLayerID = params.timelineVisibilityLayerID;
-    this._exMap = params.exMap;
+    if(params.exMap instanceof Array){
+        this._exMaps = params.exMap;
+    } else {
+        this._exMaps = [params.exMap];
+    }
     this._layersLegend = params.layers;
 
     this._combo = params.combo;
@@ -474,16 +478,15 @@ NDVITimelineManager.prototype.start = function () {
     var that = this;
     this.showLoading();
 
-    var p = L.gmx.loadMap(this._exMap.name);
-
-    p.then(function (h) {
-
+    function _applyMap(h) {
         var cr = h.layersByID["04DDB23F49F84B9A9122CBA6BC26D3ED"];
-        var styles = cr.getStyles();
-        styles.forEach(function (it) {
-            it.HoverStyle = it.RenderStyle;
-        });
-        cr.setStyles(styles);
+        if (cr) {
+            var styles = cr.getStyles();
+            styles.forEach(function (it) {
+                it.HoverStyle = it.RenderStyle;
+            });
+            cr.setStyles(styles);
+        }
 
         for (var i in h.layersByID) {
             if (nsGmx && nsGmx.widgets && nsGmx.widgets.commonCalendar) {
@@ -491,9 +494,35 @@ NDVITimelineManager.prototype.start = function () {
             }
             that.layerCollection[i] = h.layersByID[i];
         }
+    };
 
-        that._main();
-    });
+    var mapsQueue = [],
+        counter = 0;
+
+    function _loadMap(exMap) {
+        if (counter > 0) {
+            mapsQueue.push(exMap);
+        } else {
+            _execMap(exMap);
+        }
+    };
+
+    function _execMap(pmap) {
+        counter++;
+        L.gmx.loadMap(pmap.name).then(function (h) {
+            counter--;
+            _applyMap(h);
+            if (mapsQueue.length > 0) {
+                _execMap(mapsQueue.pop());
+            } else {
+                that._main();
+            }
+        });
+    };
+
+    for (var i = 0; i < this._exMaps.length; i++) {
+        _loadMap(this._exMaps[i]);
+    }
 
 };
 
@@ -1779,7 +1808,7 @@ NDVITimelineManager.prototype._showSENTINEL = function () {
 
     var sel = this._selectedType[this._selectedCombo];
 
-    if (sel == NDVITimelineManager.SENTINEL_IR || sel == NDVITimelineManager.RGB_HR ) {
+    if (sel == NDVITimelineManager.SENTINEL_IR || sel == NDVITimelineManager.RGB_HR) {
         this._showLayer("SENTINEL_IR");
     } else if (sel == NDVITimelineManager.SENTINEL || sel == NDVITimelineManager.RGB2_HR) {
         this._showLayer("SENTINEL");
