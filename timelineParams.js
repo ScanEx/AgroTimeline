@@ -30,10 +30,6 @@
                 ndvi: {
                     url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
-                },
-                quality: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/legend_class_1-5.icxleg',
-                    prodtype: "FIELD"
                 }
             }
         },
