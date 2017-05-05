@@ -1765,17 +1765,21 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
                 }
             }
         } else if (that.isSentinel) {
-            var s = that._comboFilenames[that._selectedCombo];
-            for (var i = 0; i < s.length; i++) {
-                if (NDVITimelineManager._normalizeFilename(s[i]) == prop[sceneidIndex]) {
-                    return true;
-                }
-            }
-        } else {
-            if (pathId && prop[pathId] == that._selectedPath && prop[dateId] == that._selectedDateL ||
-                !pathId && prop[dateId] == that._selectedDateL) {
+            //var s = that._comboFilenames[that._selectedCombo];
+            //for (var i = 0; i < s.length; i++) {
+            //    if (NDVITimelineManager._normalizeFilename(s[i]) == prop[sceneidIndex]) {
+            //        return true;
+            //    }
+            //}
+            if (prop[dateId] === that._selectedDateL)
                 return true;
-            }
+        } else {
+            //if (pathId && prop[pathId] == that._selectedPath && prop[dateId] == that._selectedDateL ||
+            //    !pathId && prop[dateId] == that._selectedDateL) {
+            //    return true;
+            //}
+            if (prop[dateId] == that._selectedDateL)
+                return true;
         }
 
         return false;
