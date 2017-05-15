@@ -2038,6 +2038,10 @@ NDVITimelineManager.prototype._showRATING = function () {
             cosmosagro.agroFieldProjectView._ratingHandler.startRating();
             if (cosmosagro.agroFieldProjectView._selectedFields.length <= 1) {
                 this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
+            } else {
+                if (cosmosagro.agroFieldProjectView._ratingHandler.refreshVisibleLayersOnDisplay()) {
+                    cosmosagro.agroFieldProjectView._ratingHandler.startRating();
+                }
             }
         } else {
             this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
