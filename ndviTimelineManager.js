@@ -1270,6 +1270,8 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
 
     var success = function () {
         if ($(".timeline-event.timeline-event-line").length) {
+            clearInterval(intervalHandler);
+
             NDVITimelineManager.fires_ht = {};
             that.timeLine.updateFilters();
             that.hideLoadingSmall();
@@ -1290,17 +1292,15 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
                             clearInterval(successPermalinkHandler);
                         }
                     };
-                    var successPermalinkHandler = setInterval(successPermalink, 1000);
-                }, 2000);
+                    var successPermalinkHandler = setInterval(successPermalink, 10);
+                }, 10);
             }
 
             that._firstTimeCombo[that._selectedCombo] = true;
-
-            clearInterval(intervalHandler);
         }
     };
 
-    intervalHandler = setInterval(success, 500);
+    intervalHandler = setInterval(success, 10);
 };
 
 /*
@@ -2038,10 +2038,6 @@ NDVITimelineManager.prototype._showRATING = function () {
             cosmosagro.agroFieldProjectView._ratingHandler.startRating();
             if (cosmosagro.agroFieldProjectView._selectedFields.length <= 1) {
                 this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
-            } else {
-                if (cosmosagro.agroFieldProjectView._ratingHandler.refreshVisibleLayersOnDisplay()) {
-                    cosmosagro.agroFieldProjectView._ratingHandler.startRating();
-                }
             }
         } else {
             this._ratingHandler.start(this._visibleLayersOnTheDisplayPtr, shared.dateToString(this._selectedDate, true));
