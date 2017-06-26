@@ -9,9 +9,11 @@
 
 var OptionsMenu = function (elementId, params) {
 
+    L.gmxLocale.getLanguage()
+
     var button = document.createElement("div");
     button.classList.add("ntBtnOptions");
-    button.title = "Дополнительные настройки";
+    button.title = OptionsMenu.locale[L.gmxLocale.getLanguage()].DopolnitelnieParametri;
     button.tabIndex = "100";
     document.getElementById(elementId).appendChild(button);
 
@@ -21,7 +23,7 @@ var OptionsMenu = function (elementId, params) {
     _optionsMenu.innerHTML =
         '<div id="ntOptionsArrowDiv" class="ntOptionsArrowDiv">\
           <div id="ntOptionsHead">\
-            <div id="ntOptionsHeadLabel">Дополнительные параметры</div>\
+            <div id="ntOptionsHeadLabel">' + button.title + '</div>\
             <div id="ntOptionsCloseBtn">×</div>\
           </div>\
         <div>';
@@ -95,6 +97,15 @@ var OptionsMenu = function (elementId, params) {
         for (var i = 0; i < params.items.length; i++) {
             this.addItem(params.items[i]);
         }
+    }
+};
+
+OptionsMenu.locale = {
+    'rus': {
+        'DopolnitelnieParametri': "Дополнительные параметры"
+    },
+    'eng': {
+        'DopolnitelnieParametri': "Advanced parameters"
     }
 };
 

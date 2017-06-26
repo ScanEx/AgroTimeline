@@ -1,28 +1,37 @@
-var SWarningDialog = function () {
+var WarningDialog = function () {
     this.dialog = null;
     this.dialogContent = null;
     this.__dialogClass = "dlgAgroWarning";
-    this._createDialog("Предупреждение", 680, 100);
+    this._createDialog(WarningDialog.locale[L.gmxLocale.getLanguage()].Preduprezhdenie, 680, 100);
 };
 
-SWarningDialog.prototype.setPosition = function (x, y) {
+WarningDialog.locale = {
+    'rus': {
+        'Preduprezhdenie': "Предупреждение"
+    },
+    'eng': {
+        'Preduprezhdenie': "Attention"
+    }
+}
+
+WarningDialog.prototype.setPosition = function (x, y) {
     $(this.dialog).dialog('option', 'position', [x, y]);
 };
 
-SWarningDialog.prototype.show = function () {
+WarningDialog.prototype.show = function () {
     $("." + this.__dialogClass).show();
     $(this.dialog).dialog();
 };
 
-SWarningDialog.prototype.hide = function () {
+WarningDialog.prototype.hide = function () {
     $("." + this.__dialogClass).hide();
 };
 
-SWarningDialog.prototype.closeDialog = function () {
+WarningDialog.prototype.closeDialog = function () {
     //...
 };
 
-SWarningDialog.prototype._createDialog = function (caption, width, height) {
+WarningDialog.prototype._createDialog = function (caption, width, height) {
     if (this.dialog)
         return;
 
@@ -48,7 +57,7 @@ SWarningDialog.prototype._createDialog = function (caption, width, height) {
     $(this.dialog).dialog('moveToTop');
 };
 
-SWarningDialog.prototype.appendHTML = function (html) {
+WarningDialog.prototype.appendHTML = function (html) {
     $(this.dialogContent.get(0)).empty();
     $(this.dialogContent.get(0)).append(html);
 };
@@ -57,7 +66,7 @@ var AgroWarning = (function () {
     var instance;
 
     function createInstance() {
-        var object = new SWarningDialog();
+        var object = new WarningDialog();
         return object;
     }
 

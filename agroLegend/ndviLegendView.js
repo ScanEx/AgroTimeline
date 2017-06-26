@@ -1,6 +1,9 @@
 var NDVILegendView = function () {
+
+    var lang = L.gmxLocale.getLanguage();
+
     inheritance.base(this, new NDVILegend({
-        'name': "Цветовая шкала NDVI",
+        'name': NDVILegendView.locale[lang].CvetovajaShkalaNdvi,
         'width': 480,
         'height': 220,
         'palettes': [{
@@ -28,7 +31,7 @@ var NDVILegendView = function () {
     this.template = '<div><div class="alpBlock">\
                       <div class="alpRadioTab"><input type="radio" class="alpRadio" name="alpRadio" value="0" checked/></div>\
                       <div class="alpColorTab">\
-                        <div class="alpCaption">Естественная шкала</div>\
+                        <div class="alpCaption">' + NDVILegendView.locale[lang].EstestvennayaShkala + '</div>\
                         <div class="alpPaletteSlider alpS-0"></div>\
                         <div class="alpPaletteColors alpP-0"></div>\
                         <div class="alpPaletteValues alpV-0"></div>\
@@ -38,7 +41,7 @@ var NDVILegendView = function () {
                     <div class="alpBlock">\
                       <div class="alpRadioTab"><input type="radio" class="alpRadio" name="alpRadio" value="1"/></div>\
                       <div class="alpColorTab">\
-                        <div class="alpCaption">Аналитическая шкала</div>\
+                        <div class="alpCaption">' + NDVILegendView.locale[lang].AnaliticheskayaShkala + '</div>\
                         <div class="alpPaletteSlider alpS-1"></div>\
                         <div class="alpPaletteColors alpP-1"></div>\
                         <div class="alpPaletteValues alpV-1">\
@@ -289,3 +292,16 @@ var NDVILegendView = function () {
 };
 
 inheritance.extend(NDVILegendView, LegendView);
+
+NDVILegendView.locale = {
+    'rus': {
+        'CvetovajaShkalaNdvi': "Цветовая шкала NDVI",
+        'EstestvennayaShkala': "Естественная шкала",
+        'AnaliticheskayaShkala': "Аналитическая шкала"
+    },
+    'eng': {
+        'CvetovajaShkalaNdvi': "Color NDVI Scale",
+        'EstestvennayaShkala': "True color scale",
+        'AnaliticheskayaShkala': "Analitical scale"
+    }
+};

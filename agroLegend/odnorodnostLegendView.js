@@ -1,14 +1,16 @@
 var OdnorodnostLegendView = function () {
+    var lang = L.gmxLocale.getLanguage();
+
     inheritance.base(this, new Legend({
         'width': 480,
         'height': 220,
-        'name': "Однородность"
+        'name': OdnorodnostLegendView.locale[lang].Odnorodnost
     }));
 
     this.template =
     '<div style="top:50%; left: 50%; margin-left:-76px; margin-top: -30px; position: absolute; width: 152px">\
-       <div style="float:left">низкая</div>\
-       <div style="float:right">высокая</div>\
+       <div style="float:left">' + OdnorodnostLegendView.locale[lang].Nizkaja + '</div>\
+       <div style="float:right">' + OdnorodnostLegendView.locale[lang].Visokaja + '</div>\
        <table class="legendTable">\
          <tbody>\
            <tr>\
@@ -35,3 +37,16 @@ var OdnorodnostLegendView = function () {
 };
 
 inheritance.extend(OdnorodnostLegendView, LegendView);
+
+OdnorodnostLegendView.locale = {
+    'rus': {
+        'Odnorodnost': "Однородность",
+        'Nizkaja': "Низкая",
+        'Visokaja': "Высокая"
+    },
+    'eng': {
+        'Odnorodnost': "Homogeneity",
+        'Nizkaja': "low",
+        'Visokaja': "high"
+    }
+}

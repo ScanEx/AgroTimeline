@@ -1,14 +1,17 @@
 var RatingLegendView = function () {
+
+    var lang = L.gmxLocale.getLanguage();
+
     inheritance.base(this, new Legend({
-        'name': "Рейтинг",
+        'name': RatingLegendView.locale[lang].Rejting,
         'width': 480,
         'height': 220,
     }));
 
     this.template =
     '<div style="top:50%; left: 50%; margin-left:-108px; margin-top: -30px; position: absolute; width: 216px;">\
-       <div style="float:left">низкий</div>\
-       <div style="float:right">высокий</div>\
+       <div style="float:left">' + RatingLegendView.locale[lang].Nizkij + '</div>\
+       <div style="float:right">' + RatingLegendView.locale[lang].Visokij + '</div>\
        <table class="legendTable">\
          <tbody>\
            <tr>\
@@ -38,3 +41,16 @@ var RatingLegendView = function () {
 };
 
 inheritance.extend(RatingLegendView, LegendView);
+
+RatingLegendView.locale = {
+    'rus': {
+        'Rejting': "Рейтинг",
+        'Visokij': "высокий",
+        'Nizkij': "низкий"
+    },
+    'eng': {
+        'Rejting': "Raiting",
+        'Visokij': "high",
+        'Nizkij': "low"
+    }
+};
