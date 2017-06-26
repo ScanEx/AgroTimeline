@@ -4114,13 +4114,13 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         var lang = L.gmxLocale.getLanguage();
 
         return '<select id="ntComboBox">' +
-        '<option value="' + 1 + '">' + this._combo[1].caption[lang] + '</option>' +
-        '<option value="' + 0 + '">' + this._combo[0].caption[lang] + '</option>' +
-        '<option value="' + 2 + '">' + this._combo[2].caption[lang] + '</option>' +
-        ((this._combo[3] && '<option value="' + 3 + '">' + this._combo[3].caption[lang] + '</option>') || "") +
-        ((this._combo[4] && '<option value="' + 4 + '" selected>' + this._combo[4].caption[lang] + '</option>') || "") +
-        ((this._combo[5] && '<option value="' + 5 + '">' + this._combo[5].caption[lang] + '</option>') || "") +
-        ((this._combo[6] && '<option value="' + 6 + '">' + this._combo[6].caption[lang] + '</option>') || "") +
+        '<option value="' + 1 + '">' + (this._combo[1].caption[lang] || this._combo[1].caption) + '</option>' +
+        '<option value="' + 0 + '">' + (this._combo[0].caption[lang] || this._combo[0].caption) + '</option>' +
+        '<option value="' + 2 + '">' + (this._combo[2].caption[lang] || this._combo[2].caption) + '</option>' +
+        ((this._combo[3] && '<option value="' + 3 + '">' + (this._combo[3].caption[lang] || this._combo[3].caption) + '</option>') || "") +
+        ((this._combo[4] && '<option value="' + 4 + '" selected>' + (this._combo[4].caption[lang] || this._combo[4].caption) + '</option>') || "") +
+        ((this._combo[5] && '<option value="' + 5 + '">' + (this._combo[5].caption[lang] || this._combo[5].caption) + '</option>') || "") +
+        ((this._combo[6] && '<option value="' + 6 + '">' + (this._combo[6].caption[lang] || this._combo[6].caption) + '</option>') || "") +
         '</select>';
     }
 
