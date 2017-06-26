@@ -4135,7 +4135,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         '</div>' +
         '</div>';
 
-    var lang = NDVITimelineManager.locale[L.gmxLocale.getLanguage()];
+    var lang = L.gmxLocale.getLanguage();
 
     this.loadingDiv = '<div id="ntLoading">' + NDVITimelineManager.locale[lang].Zagruzka + '</div>';
 
@@ -4143,19 +4143,19 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
 
     this.zoomRestrictionLabel = document.createElement("div");
     this.zoomRestrictionLabel.id = "ntZoomRestrictionLabel";
-    this.zoomRestrictionLabel.innerHTML = lang.PriblizteKartu;
+    this.zoomRestrictionLabel.innerHTML = NDVITimelineManager.locale[lang].PriblizteKartu;
     this.zoomRestrictionLabel.style.display = "none";
     this.timeLine.getFooterContainer()[0].appendChild(this.zoomRestrictionLabel);
 
     this.radioActiveLabels = document.createElement("div");
     this.radioActiveLabels.id = "ntRadioActiveLabels";
-    this.radioActiveLabels.innerHTML = lang.DljaAktivaciiNavedite;
+    this.radioActiveLabels.innerHTML = NDVITimelineManager.locale[lang].DljaAktivaciiNavedite;
     this.radioActiveLabels.style.display = "none";
     this.timeLine.getFooterContainer()[0].appendChild(this.radioActiveLabels);
 
     this.meanNdviNoDataLabel = document.createElement("div");
     this.meanNdviNoDataLabel.id = "ntMeanNdviNoDataLabel";
-    this.meanNdviNoDataLabel.innerHTML = lang.NetDannihPoVibrannomuProductu;
+    this.meanNdviNoDataLabel.innerHTML = NDVITimelineManager.locale[lang].NetDannihPoVibrannomuProductu;
     this.meanNdviNoDataLabel.style.display = "none";
     this.timeLine.getFooterContainer()[0].appendChild(this.meanNdviNoDataLabel);
 
@@ -4187,56 +4187,56 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
 
     var panels = this.createOptionsPanel();
 
-    var lang = NDVITimelineManager.locale[L.gmxLocale.getLanguage()];
+    var loc = NDVITimelineManager.locale[L.gmxLocale.getLanguage()];
 
     this.addRadio("secondPanel_1", "NDVI", "shotsOptions", "ndviRadio_hr", 1, false, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI_HR;
         that._redrawShots();
     }, true);
 
-    this.addRadio("firstPanel_0", lang.KompozitNDVI, "shotsOptions", "ndviRadio_modis", 0, false, function (r) {
+    this.addRadio("firstPanel_0", loc.KompozitNDVI, "shotsOptions", "ndviRadio_modis", 0, false, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI16;
         that._redrawShots();
     }, false, true);
 
-    this.addRadio("secondPanel_1", lang.NDVIsrednee, "shotsOptions", "ndviMeanRadio", 1, true, function (r) {
+    this.addRadio("secondPanel_1", loc.NDVIsrednee, "shotsOptions", "ndviMeanRadio", 1, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI_MEAN;
         that._redrawShots();
     }, true);
 
-    this.addRadio("thirdPanel_1", lang.Reiting, "shotsOptions", "ratingRadio", 1, true, function (r) {
+    this.addRadio("thirdPanel_1", loc.Reiting, "shotsOptions", "ratingRadio", 1, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.RATING;
         that._redrawShots();
     }, true);
 
-    this.addRadio("thirdPanel_1", lang.Odnorodnost, "shotsOptions", "inhomogenuityRadio", 1, true, function (r) {
+    this.addRadio("thirdPanel_1", loc.Odnorodnost, "shotsOptions", "inhomogenuityRadio", 1, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.INHOMOGENUITY;
         that._redrawShots();
     }, true);
 
-    this.addRadio("firstPanel_0", lang.OcenkaKachestva, "shotsOptions", "qualityRadio", 0, true, function (r) {
+    this.addRadio("firstPanel_0", loc.OcenkaKachestva, "shotsOptions", "qualityRadio", 0, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.QUALITY16;
         that._redrawShots();
     });
 
-    this.addRadio("secondPanel_0", lang.UslovijaVegetacii, "shotsOptions", "conditionsOfVegetationRadio", 0, true, function (r) {
+    this.addRadio("secondPanel_0", loc.UslovijaVegetacii, "shotsOptions", "conditionsOfVegetationRadio", 0, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.CONDITIONS_OF_VEGETATION;
         that._redrawShots();
     });
 
-    this.addRadio("firstPanel_1", lang.SnimokIK, "shotsOptions", "rgbRadio", 1, true, function (r) {
+    this.addRadio("firstPanel_1", loc.SnimokIK, "shotsOptions", "rgbRadio", 1, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB_HR;
         that._redrawShots();
     }, false, true);
 
-    this.addRadio("firstPanel_1", lang.Snimok, "shotsOptions", "rgbRadio2", 1, true, function (r) {
+    this.addRadio("firstPanel_1", loc.Snimok, "shotsOptions", "rgbRadio2", 1, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB2_HR;
         that._redrawShots();
     });
 
     for (var k = 2; k < this._combo.length; k++) {
         if (this._combo[k].rk[0] == "FIRES") {
-            this.addRadio("firstPanel_" + k, lang.Termotochki, "shotsOptions", "firesPoints", k, true, function (r) {
+            this.addRadio("firstPanel_" + k, loc.Termotochki, "shotsOptions", "firesPoints", k, true, function (r) {
                 that._selectedType[that._selectedCombo] = NDVITimelineManager.FIRES_POINTS;
                 that._redrawShots();
             }, false, true);
@@ -4244,29 +4244,29 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
 
         } else if (this._combo[k].rk[0] == "LANDSAT_432") {
             this._selectedType[k] = NDVITimelineManager.LANDSAT_432;
-            this.addRadio("firstPanel_" + k, lang.Snimok432, "shotsOptions", "landsat432", k, true, function (r) {
+            this.addRadio("firstPanel_" + k, loc.Snimok432, "shotsOptions", "landsat432", k, true, function (r) {
                 that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT_432;
                 that._redrawShots();
             }, false, true);
 
-            this.addRadio("firstPanel_" + k, lang.Snimok753, "shotsOptions", "landsat753", k, true, function (r) {
+            this.addRadio("firstPanel_" + k, loc.Snimok753, "shotsOptions", "landsat753", k, true, function (r) {
                 that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT_753;
                 that._redrawShots();
             });
 
-            this.addRadio("firstPanel_" + k, lang.Snimok654, "shotsOptions", "landsat654", k, true, function (r) {
+            this.addRadio("firstPanel_" + k, loc.Snimok654, "shotsOptions", "landsat654", k, true, function (r) {
                 that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT_654;
                 that._redrawShots();
             });
 
         } else if (this._combo[k].rk[0] == "SENTINEL_432") {
             that._selectedType[k] = NDVITimelineManager.SENTINEL_432;
-            this.addRadio("firstPanel_" + k, lang.Snimok432, "shotsOptions", "sentinel432", k, true, function (r) {
+            this.addRadio("firstPanel_" + k, loc.Snimok432, "shotsOptions", "sentinel432", k, true, function (r) {
                 that._selectedType[that._selectedCombo] = NDVITimelineManager.SENTINEL_432;
                 that._redrawShots();
             }, false, true);
 
-            this.addRadio("firstPanel_" + k, lang.Snimok384, "shotsOptions", "sentinel384", k, true, function (r) {
+            this.addRadio("firstPanel_" + k, loc.Snimok384, "shotsOptions", "sentinel384", k, true, function (r) {
                 that._selectedType[that._selectedCombo] = NDVITimelineManager.SENTINEL_384;
                 that._redrawShots();
             });
@@ -4280,23 +4280,23 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
             }, false, true);
         } else if (this._combo[k].rk[0] == "EVERYDAY250") {
             that._selectedType[k] = NDVITimelineManager.NDVI16;
-            this.addRadio("firstPanel_" + k, lang.KompozitNDVI, "shotsOptions", "ndviRadio_modis", k, false, function (r) {
+            this.addRadio("firstPanel_" + k, loc.KompozitNDVI, "shotsOptions", "ndviRadio_modis", k, false, function (r) {
                 that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI16;
                 that._redrawShots();
             }, false, true);
 
-            this.addRadio("firstPanel_" + k, lang.OcenkaKachestva, "shotsOptions", "qualityRadio", k, true, function (r) {
+            this.addRadio("firstPanel_" + k, loc.OcenkaKachestva, "shotsOptions", "qualityRadio", k, true, function (r) {
                 that._selectedType[that._selectedCombo] = NDVITimelineManager.QUALITY16;
                 that._redrawShots();
             });
         } else if (this._combo[k].rk[0] == "TERRA_NDVI" || this._combo[k].rk[0] == "AQUA_NDVI") {
             that._selectedType[k] = NDVITimelineManager.NDVI16;
-            this.addRadio("firstPanel_" + k, lang.KompozitNDVI, "shotsOptions", "ndviRadio_modis", k, false, function (r) {
+            this.addRadio("firstPanel_" + k, loc.KompozitNDVI, "shotsOptions", "ndviRadio_modis", k, false, function (r) {
                 that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI16;
                 that._redrawShots();
             }, false, true);
 
-            this.addRadio("firstPanel_" + k, lang.OcenkaKachestva, "shotsOptions", "qualityRadio", k, true, function (r) {
+            this.addRadio("firstPanel_" + k, loc.OcenkaKachestva, "shotsOptions", "qualityRadio", k, true, function (r) {
                 that._selectedType[that._selectedCombo] = NDVITimelineManager.QUALITY16;
                 that._redrawShots();
             });
@@ -4554,14 +4554,14 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
 
     ////выключим гомогенность на время
     //NDVITimelineManager.disableHomogenuity();
-    //var lang = NDVITimelineManager.locale[L.gmxLocale.getLanguage()];
+    var loc = NDVITimelineManager.locale[L.gmxLocale.getLanguage()];
 
     var items =
     [{
         "id": "chkVciType",
         "type": "checkbox",
         "class": "ntOptionsMODIS",
-        "text": lang.UslovijaVegetaciiPoMaske,
+        "text": loc.UslovijaVegetaciiPoMaske,
         "click": function (e) {
             if (document.getElementById("conditionsOfVegetationRadio").checked) {
                 that._redrawShots();
@@ -4571,7 +4571,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         "id": "chkQl",
         "class": "ntOptionsHR",
         "type": "checkbox",
-        "text": lang.PokazatPrevju,
+        "text": loc.PokazatPrevju,
         "click": function (e) {
             that.qlCheckClick(e);
         }
@@ -4595,7 +4595,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         "id": "cloudMask",
         "class": "ntOptionsHR",
         "type": "checkbox",
-        "text": lang.MaskaOblachnostiTenej,
+        "text": loc.MaskaOblachnostiTenej,
         "click": function (e) {
             that._useCloudMask = e.checked;
             if (e.checked) {
@@ -4615,7 +4615,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
             "id": "chkCut",
             "class": "ntOptionsHR",
             "type": "checkbox",
-            "text": lang.ObrezatPoMaskePolej,
+            "text": loc.ObrezatPoMaskePolej,
             "click": function (e) {
                 that.setCutOff(e);
             }
