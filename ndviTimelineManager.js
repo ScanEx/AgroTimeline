@@ -12,7 +12,7 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     this._userRole = userRole;
 
     this._timelineVisibilityLayerID = params.timelineVisibilityLayerID;
-    if(params.exMap instanceof Array){
+    if (params.exMap instanceof Array) {
         this._exMaps = params.exMap;
     } else {
         this._exMaps = [params.exMap];
@@ -524,6 +524,9 @@ NDVITimelineManager.prototype.start = function () {
         _loadMap(this._exMaps[i]);
     }
 
+    if (nsGmx && nsGmx.widgets && nsGmx.widgets.commonCalendar) {
+        nsGmx.widgets.commonCalendar.hide();
+    }
 };
 
 NDVITimelineManager.prototype.listenForPeramlink = function () {
