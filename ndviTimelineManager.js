@@ -276,7 +276,7 @@ NDVITimelineManager.locale = {
         'Zagruzka': "Загрузка..."
     },
     'eng': {
-        'SnimokIK': "Image-ИК",
+        'SnimokIK': "Image-IR",
         'Snimok': "Image",
         'NDVI': "NDVI",
         'NDVIsrednee': "NDVI average",
@@ -804,23 +804,23 @@ NDVITimelineManager.prototype.loadState = function (data) {
 }
 
 NDVITimelineManager.prototype.refreshOptionsDisplay = function () {
+
+    $(".ntOptionsMenuItemLine").css("display", "none");
+
     var rkName = this._combo[this._selectedCombo].rk[0];
+
+    //TODO: Эти проверки связи опций и дополнительных параметров было бы лучше связывать в конфиге
     if (rkName == "FIRES") {
         document.getElementById("ntPeriodSelectOption").style.display = "block";
-        $(".ntOptionsHR").css("display", "none");
-        $(".ntOptionsMODIS").css("display", "none");
-    } else if (rkName == "MODIS") {
+    } else if (rkName == "MODIS" || rkName == "EVERYDAY250" || rkName == "MODIS143") {
         $(".ntOptionsMODIS").css("display", "block");
-        document.getElementById("ntPeriodSelectOption").style.display = "none";
-        $(".ntOptionsHR").css("display", "none");
-    } if (rkName == "HR") {
+    } else if (rkName == "HR") {
         $(".ntOptionsHR").css("display", "block");
-        document.getElementById("ntPeriodSelectOption").style.display = "none";
-        $(".ntOptionsMODIS").css("display", "none");
-    } if (rkName == "LANDSAT" || rkName == "SENTINEL") {
-        $(".ntOptionsHR").css("display", "none");
-        $(".ntOptionsMODIS").css("display", "none");
-        $("#chkQl").parent().parent().css("display", "block");
+    } else if (rkName == "LANDSAT" || rkName == "SENTINEL") {
+        $(".ntOptionsHR").css("display", "block");
+        //$("#chkQl").parent().parent().css("display", "block");
+    } else if (rkName == "SENTINEL_432" || rkName == "LANDSAT_432") {
+        $(".ntPreview").css("display", "block");
     }
 };
 
@@ -4569,7 +4569,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         }
     }, {
         "id": "chkQl",
-        "class": "ntOptionsHR",
+        "class": "ntOptionsHR ntPreview",
         "type": "checkbox",
         "text": loc.PokazatPrevju,
         "click": function (e) {
