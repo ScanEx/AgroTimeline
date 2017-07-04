@@ -715,21 +715,24 @@ NDVITimelineManager.prototype.loadState = function (data) {
         that._selectedDate1 = new Date(data.selectedDate1.y, data.selectedDate1.m - 1, data.selectedDate1.d);
     }
 
+    that._activateOptions = function () {
+        restoreOptionsMenu();
+        that._activateOptions = null;
+    };
+
     //по умолчанию ничего не выбрано
     that._activatePermalink = function () {
-        restoreOptionsMenu();
         if (that._combo[data.selectedCombo].rk[0] == "FIRES") {
             document.getElementById("ntPeriodSelectOption").style.display = "block";
             $(".ntOptionsHR").css("display", "none");
             $(".ntOptionsMODIS").css("display", "none");
         }
         return true;
-    }
+    };
 
     //этот пермалинк активируется для периода, который доступен только для пожаров.
     if (data.selectedDate0 && data.selectedDate1) {
         that._activatePermalink = function () {
-            restoreOptionsMenu();
             that._slider.setPeriodSelector(true);
             document.getElementById("ntPeriodSelectOption").style.display = "block";
             $(".ntOptionsHR").css("display", "none");
@@ -757,8 +760,6 @@ NDVITimelineManager.prototype.loadState = function (data) {
         //...а эти после
         //отложенный вызов активации по пермалику, после загрузки снимков на таймлайн
         that._activatePermalink = function () {
-
-            restoreOptionsMenu();
 
             that.setVisibleYear(that._selectedYear);
 
@@ -1357,6 +1358,8 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
     };
 
     intervalHandler = setInterval(success, 10);
+
+    this._activateOptions && this._activateOptions();
 };
 
 /*
