@@ -559,9 +559,9 @@ NDVITimelineManager.prototype.start = function () {
         }
     };
 
-    var options = {
-        'skipTiles': nsGmx.leafletMap.options.skipTiles
-    };
+    //var options = {
+    //    'skipTiles': nsGmx.leafletMap.options.skipTiles
+    //};
 
     function _execMap(pmap) {
         counter++;
