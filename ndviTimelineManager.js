@@ -559,17 +559,23 @@ NDVITimelineManager.prototype.start = function () {
         }
     };
 
+    var options = {
+        'skipTiles': nsGmx.leafletMap.options.skipTiles
+    };
+
     function _execMap(pmap) {
         counter++;
-        L.gmx.loadMap(pmap.name).then(function (h) {
-            counter--;
-            _applyMap(h);
-            if (mapsQueue.length > 0) {
-                _execMap(mapsQueue.pop());
-            } else {
-                that._main();
-            }
-        });
+        setTimeout(function () {
+            L.gmx.loadMap(pmap.name/*, options*/).then(function (h) {
+                counter--;
+                _applyMap(h);
+                if (mapsQueue.length > 0) {
+                    _execMap(mapsQueue.pop());
+                } else {
+                    that._main();
+                }
+            });
+        }, 20);
     };
 
     for (var i = 0; i < this._exMaps.length; i++) {
@@ -1547,7 +1553,7 @@ NDVITimelineManager.prototype._prepareRedraw = function () {
 
 NDVITimelineManager.prototype._showRedraw = function () {
 
-    if (this._selectedDiv) {
+    if (this.selectedDiv) {
         if (this._selectedType[this._selectedCombo] == NDVITimelineManager.RATING) {
             this._showRATING();
         } else if (this._isPreview) {
@@ -2547,13 +2553,13 @@ NDVITimelineManager.prototype.onMoveEnd = function () {
 };
 
 NDVITimelineManager.prototype._refreshTimeline = function () {
-    if (this._selectedOption != "FIRES") {
-        this.__yearRefreshHandler && clearTimeout(this.__yearRefreshHandler);
-        var that = this;
-        this.__yearRefreshHandler = setTimeout(function () {
-            that.timeLine.getTimelineController().update();
-        }, 1500);
-    }
+    //if (this._selectedOption != "FIRES") {
+    //this.__yearRefreshHandler && clearTimeout(this.__yearRefreshHandler);
+    //var that = this;
+    //this.__yearRefreshHandler = setTimeout(function () {
+    //    that.timeLine.getTimelineController().update();
+    //}, 1500);
+    //}
 };
 
 //кеш геометрий слоев
@@ -3336,6 +3342,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
     $(".timeline-event.timeline-event-line").removeClass("timeline-event-selected");
 
     that.selectedDiv = null;
+    this._selectedDiv = null;
 
     that._currentSelection = x.changed.selection;
 
