@@ -559,14 +559,14 @@ NDVITimelineManager.prototype.start = function () {
         }
     };
 
-    //var options = {
-    //    'skipTiles': nsGmx.leafletMap.options.skipTiles
-    //};
+    var options = {
+        'skipTiles': this.lmap.options.skipTiles
+    };
 
     function _execMap(pmap) {
         counter++;
         setTimeout(function () {
-            L.gmx.loadMap(pmap.name/*, options*/).then(function (h) {
+            L.gmx.loadMap(pmap.name, options).then(function (h) {
                 counter--;
                 _applyMap(h);
                 if (mapsQueue.length > 0) {
