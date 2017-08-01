@@ -24,6 +24,10 @@ var RatingLegendView = function () {
              <td><div class="legendColorh" style="background-color:#7deb15; margin-left: 0; margin-right: 0;width:{cellWidth};"></div></td>\
              <td><div class="legendColorh" style="background-color:#1ea312; margin-left: 0; margin-right: 0;width:{cellWidth};"></div></td>\
            </tr>\
+           <tr>\
+             <td><div class="legendColorh" style="background-color:rgb(0,179,255); margin-left: 0; margin-right: 0;width:{cellWidth};"></div></td>\
+             <td colspan="2"><div style="float:right">' + RatingLegendView.locale[lang].Oblaka + '</div></td>\
+           </tr>\
          </tbody>\
        </table>\
      </div>';
@@ -46,11 +50,13 @@ RatingLegendView.locale = {
     'rus': {
         'Rejting': "Рейтинг",
         'Visokij': "высокий",
-        'Nizkij': "низкий"
+        'Nizkij': "низкий",
+        'Oblaka': "нет данных"
     },
     'eng': {
-        'Rejting': "Raiting",
+        'Rejting': "Rating",
         'Visokij': "high",
-        'Nizkij': "low"
+        'Nizkij': "low",
+        'Oblaka': "no data"
     }
 };
