@@ -1553,7 +1553,7 @@ NDVITimelineManager.prototype._prepareRedraw = function () {
 
 NDVITimelineManager.prototype._showRedraw = function () {
 
-    if (this.selectedDiv) {
+    //if (this.selectedDiv) {
         if (this._selectedType[this._selectedCombo] == NDVITimelineManager.RATING) {
             this._showRATING();
         } else if (this._isPreview) {
@@ -1585,7 +1585,7 @@ NDVITimelineManager.prototype._showRedraw = function () {
         }
 
         this.events.dispatch(this.events.changeselection, this);
-    }
+    //}
 };
 
 NDVITimelineManager.prototype._redrawShots = function () {
@@ -3030,7 +3030,7 @@ NDVITimelineManager.prototype.refreshSelections = function () {
         for (var k = 0; k < layerNames.length; k++) {
             var layerName = layerNames[k];
             var l = this.layerCollection[layerName];
-            var PATHId = l._gmx.tileAttributeIndexes["PATH"];
+            var PATHId = l._gmx.tileAttributeIndexes["PATH"] || l._gmx.tileAttributeIndexes["path"];
             var ACQDATEId = l._gmx.tileAttributeIndexes["ACQDATE"] || l._gmx.tileAttributeIndexes["acqdate"];
 
             var done = false;
@@ -3482,7 +3482,8 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                     that._selectedDateL = date;
                     that._selectedDate = new Date(date * 1000);
                     that._selectedDateStr = shared.dateToString(new Date(date * 1000));
-                    var _PATH = this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["PATH"];
+                    var _PATH = this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["PATH"]
+                        || this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["path"];
                     that._selectedPath = prop[_PATH];
                     if (that._switchYearCallback)
                         that._switchYearCallback(that._selectedDate);
@@ -3723,7 +3724,7 @@ NDVITimelineManager.prototype._setSliderState = function (range, date, async) {
     if (!async) {
         f();
     } else {
-        setTimeout(f, 10);
+        setTimeout(f, 100);
     }
 };
 
