@@ -1553,7 +1553,7 @@ NDVITimelineManager.prototype._prepareRedraw = function () {
 
 NDVITimelineManager.prototype._showRedraw = function () {
 
-    //if (this.selectedDiv) {
+    if (this._selectedDiv) {
         if (this._selectedType[this._selectedCombo] == NDVITimelineManager.RATING) {
             this._showRATING();
         } else if (this._isPreview) {
@@ -1585,7 +1585,7 @@ NDVITimelineManager.prototype._showRedraw = function () {
         }
 
         this.events.dispatch(this.events.changeselection, this);
-    //}
+    }
 };
 
 NDVITimelineManager.prototype._redrawShots = function () {
