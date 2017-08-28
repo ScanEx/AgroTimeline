@@ -763,6 +763,7 @@ NDVITimelineManager.prototype.loadState = function (data) {
     //выбрана одна риска
     if (data.selectedDate && data.selectedDiv) {
         that._selectedDate = new Date(data.selectedDate.y, data.selectedDate.m - 1, data.selectedDate.d);
+
         //...а эти после
         //отложенный вызов активации по пермалику, после загрузки снимков на таймлайн
         that._activatePermalink = function () {
