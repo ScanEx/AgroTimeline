@@ -5018,6 +5018,8 @@ NDVITimelineManager.prototype._filterTimeline = function (elem, layer) {
 
     var prop = elem.obj.properties;
 
+    elem.timelineItem && (elem.timelineItem.dom.style.zIndex = 0);
+
     if (this._combo[this._selectedCombo].rk[0] == "FIRES") {
         var dateCn = this._layersLegend["FIRES"].dateColumnName;
         var date = prop[layer._gmx.tileAttributeIndexes[dateCn]];
@@ -5032,7 +5034,13 @@ NDVITimelineManager.prototype._filterTimeline = function (elem, layer) {
         }
     } else if (this._combo[this._selectedCombo].resolution === "landsat") {
         var isQl = $("#chkQl").is(':checked');
-        var isPreview = this._layerConfigs[layer.options.layerID].isPreview;
+        var conf = this._layerConfigs[layer.options.layerID];
+        var isPreview = conf.isPreview;
+
+        if (conf.isSentinel) {
+            elem.timelineItem && (elem.timelineItem.dom.style.zIndex = 1);
+        }
+
         if (isQl) {
             if (isPreview) {
                 return true;
