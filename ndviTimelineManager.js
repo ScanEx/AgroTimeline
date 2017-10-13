@@ -1243,6 +1243,9 @@ NDVITimelineManager.prototype.initializeIntegralScheme = function () {
 
 NDVITimelineManager.prototype.setVisibleYear = function (year) {
 
+    if (year === this._selectedYear)
+        return;
+
     this.setTimeLineYear(year);
     this._selectedYear = year;
 
@@ -1332,6 +1335,10 @@ NDVITimelineManager.prototype._setStyleHook = function (layer) {
 
 NDVITimelineManager.prototype.startFinishLoading = function () {
 
+    function _extremRefresh() {
+        //that.setTimelineCombo(that._selectedCombo, true);
+    };
+
     if (this._successPermalinkHandler) {
         clearInterval(this._successPermalinkHandler);
     }
@@ -1353,7 +1360,7 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
             clearInterval(that._intervalHandler);
 
             NDVITimelineManager.fires_ht = {};
-            that.timeLine.updateFilters();
+            //that.timeLine.updateFilters();
             that.hideLoadingSmall();
             document.getElementById("ntComboBox").disabled = false;
             document.getElementById("ntComboBox").classList.remove("ntDisabledLabel");
@@ -1362,31 +1369,25 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
 
                 that._extremeRefreshHandler = setInterval(_extremRefresh, 5000);
 
-                setTimeout(function () {
-                    function successPermalink() {
-                        if (that._activatePermalink) {
-                            if (that._activatePermalink()) {
-                                that._activatePermalink = null;
-                                that.refreshOptionsDisplay();
-                                clearInterval(that._successPermalinkHandler);
-                            }
-                        } else {
+                function successPermalink() {
+                    if (that._activatePermalink) {
+                        if (that._activatePermalink()) {
+                            clearInterval(that._extremeRefreshHandler);
+                            that._activatePermalink = null;
                             that.refreshOptionsDisplay();
                             clearInterval(that._successPermalinkHandler);
                         }
+                    } else {
+                        that.refreshOptionsDisplay();
+                        clearInterval(that._successPermalinkHandler);
                         clearInterval(that._extremeRefreshHandler);
-                    };
-                    that._successPermalinkHandler = setInterval(successPermalink, 10);
-                }, 10);
-
+                    }
+                };
+                that._successPermalinkHandler = setInterval(successPermalink, 50);
             }
 
             that._firstTimeCombo[that._selectedCombo] = true;
         }
-    };
-
-    function _extremRefresh() {
-        that.setTimelineCombo(that._selectedCombo, true);
     };
 
     this._intervalHandler = setInterval(success, 10);
