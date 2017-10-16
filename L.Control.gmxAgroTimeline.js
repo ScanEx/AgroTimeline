@@ -14,6 +14,7 @@ L.Control.gmxAgroTimeline = L.Control.extend({
         container.style.right = "0px";
 
         this.manager = new NDVITimelineManager(map, timelineParams, false, container);
+        this.manager._oninit = this.options.oninit;
         this.manager.start();
         return container;
     },

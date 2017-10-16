@@ -1008,6 +1008,8 @@ NDVITimelineManager.prototype._main = function () {
     this.timeLine.getContainer().append(this.legendControl.getContainer());
 
     this._initialized = true;
+
+    this._oninit && this._oninit();
 };
 
 NDVITimelineManager.prototype.resize = function () {
