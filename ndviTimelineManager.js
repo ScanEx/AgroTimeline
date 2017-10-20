@@ -980,8 +980,6 @@ NDVITimelineManager.prototype._main = function () {
 
     this.applyZoomRestriction(this.lmap.getZoom());
 
-    //this.startFinishLoading();
-
     this.refreshOptionsDisplay();
 
     if (this._timelineVisibilityLayerID && !this._timelineVisibilityLayer._map) {
@@ -1010,6 +1008,10 @@ NDVITimelineManager.prototype._main = function () {
     this._initialized = true;
 
     this._oninit && this._oninit();
+
+    if (this._activatePermalink) {
+        this.startFinishLoading();
+    }
 };
 
 NDVITimelineManager.prototype.resize = function () {
@@ -1337,6 +1339,9 @@ NDVITimelineManager.prototype._setStyleHook = function (layer) {
 
 NDVITimelineManager.prototype.startFinishLoading = function () {
 
+    document.getElementById("ntComboBox").disabled = false;
+    document.getElementById("ntComboBox").classList.remove("ntDisabledLabel");
+
     function _extremRefresh() {
         //that.setTimelineCombo(that._selectedCombo, true);
     };
@@ -1364,8 +1369,6 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
             NDVITimelineManager.fires_ht = {};
             //that.timeLine.updateFilters();
             that.hideLoadingSmall();
-            document.getElementById("ntComboBox").disabled = false;
-            document.getElementById("ntComboBox").classList.remove("ntDisabledLabel");
 
             if (that._activatePermalink) {
 
@@ -3221,7 +3224,7 @@ NDVITimelineManager.prototype.initializeTimeline = function (show) {
     this.timeLine.getTimelineController().getTimeline().setOptions({ "moveable": false, "zoomable": false });
 
     //помещаем контрол в такой zIndex, чтобы он отображался под другими контролами
-    $(".leaflet-bottom.leaflet-right.gmx-bottom-shift").css("z-index", 0);
+    /*$(".leaflet-bottom.leaflet-right.gmx-bottom-shift").css("z-index", 0);*/
 
     $(this.timeLine.getContainer()).on('click', function (event) {
         if (that.optionsMenu._isOpened && !that.optionsMenu._dontClose) {
@@ -3879,6 +3882,9 @@ NDVITimelineManager.prototype.showLoadingSmall = function () {
 
 NDVITimelineManager.prototype.hideLoadingSmall = function () {
     document.getElementById("ntLoading").style.display = "none";
+
+    document.getElementById("ntComboBox").disabled = false;
+    document.getElementById("ntComboBox").classList.remove("ntDisabledLabel");
 };
 
 NDVITimelineManager.equalDates = function (d1, d2) {
