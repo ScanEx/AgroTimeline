@@ -787,8 +787,8 @@ NDVITimelineManager.prototype.loadState = function (data) {
                 var itemDate = new Date(item.center);
 
                 if (itemDate.getDate() == that._selectedDate.getDate() &&
-                itemDate.getFullYear() == that._selectedDate.getFullYear() &&
-                itemDate.getMonth() == that._selectedDate.getMonth()) {
+                    itemDate.getFullYear() == that._selectedDate.getFullYear() &&
+                    itemDate.getMonth() == that._selectedDate.getMonth()) {
                     currItem = item;
                     break;
                 }
@@ -980,8 +980,6 @@ NDVITimelineManager.prototype._main = function () {
 
     this.applyZoomRestriction(this.lmap.getZoom());
 
-    this.startFinishLoading();
-
     this.refreshOptionsDisplay();
 
     if (this._timelineVisibilityLayerID && !this._timelineVisibilityLayer._map) {
@@ -1006,6 +1004,14 @@ NDVITimelineManager.prototype._main = function () {
     }
 
     this.timeLine.getContainer().append(this.legendControl.getContainer());
+
+    this._initialized = true;
+
+    this._oninit && this._oninit();
+
+    if (this._activatePermalink) {
+        this.startFinishLoading();
+    }
 };
 
 NDVITimelineManager.prototype.resize = function () {
@@ -1128,7 +1134,7 @@ NDVITimelineManager.prototype.clearRenderHook = function () {
 
     NDVITimelineManager.tolesBG = {};
 
-    for (var i = 0 ; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
+    for (var i = 0; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
         this._visibleLayersOnTheDisplayPtr[i].removePreRenderHook(NDVITimelineManager.l_hook);
     }
 
@@ -1241,6 +1247,9 @@ NDVITimelineManager.prototype.initializeIntegralScheme = function () {
 
 NDVITimelineManager.prototype.setVisibleYear = function (year) {
 
+    if (year === this._selectedYear)
+        return;
+
     this.setTimeLineYear(year);
     this._selectedYear = year;
 
@@ -1329,42 +1338,64 @@ NDVITimelineManager.prototype._setStyleHook = function (layer) {
 };
 
 NDVITimelineManager.prototype.startFinishLoading = function () {
+
+    document.getElementById("ntComboBox").disabled = false;
+    document.getElementById("ntComboBox").classList.remove("ntDisabledLabel");
+
+    function _extremRefresh() {
+        //that.setTimelineCombo(that._selectedCombo, true);
+    };
+
+    if (this._successPermalinkHandler) {
+        clearInterval(this._successPermalinkHandler);
+    }
+
+    if (this._intervalHandler) {
+        clearInterval(this._intervalHandler);
+    }
+
+    if (this._extremeRefreshHandler) {
+        clearInterval(this._extremeRefreshHandler);
+    }
+
     var that = this;
-    var intervalHandler = null;
+
+    this._tryCounter = 0;
 
     var success = function () {
         if ($(".timeline-event.timeline-event-line").length) {
-            clearInterval(intervalHandler);
+            clearInterval(that._intervalHandler);
 
             NDVITimelineManager.fires_ht = {};
-            that.timeLine.updateFilters();
+            //that.timeLine.updateFilters();
             that.hideLoadingSmall();
-            document.getElementById("ntComboBox").disabled = false;
-            document.getElementById("ntComboBox").classList.remove("ntDisabledLabel");
 
             if (that._activatePermalink) {
-                setTimeout(function () {
-                    function successPermalink() {
-                        if (that._activatePermalink) {
-                            if (that._activatePermalink()) {
-                                that._activatePermalink = null;
-                                that.refreshOptionsDisplay();
-                                clearInterval(successPermalinkHandler);
-                            }
-                        } else {
+
+                that._extremeRefreshHandler = setInterval(_extremRefresh, 5000);
+
+                function successPermalink() {
+                    if (that._activatePermalink) {
+                        if (that._activatePermalink()) {
+                            clearInterval(that._extremeRefreshHandler);
+                            that._activatePermalink = null;
                             that.refreshOptionsDisplay();
-                            clearInterval(successPermalinkHandler);
+                            clearInterval(that._successPermalinkHandler);
                         }
-                    };
-                    var successPermalinkHandler = setInterval(successPermalink, 10);
-                }, 10);
+                    } else {
+                        that.refreshOptionsDisplay();
+                        clearInterval(that._successPermalinkHandler);
+                        clearInterval(that._extremeRefreshHandler);
+                    }
+                };
+                that._successPermalinkHandler = setInterval(successPermalink, 50);
             }
 
             that._firstTimeCombo[that._selectedCombo] = true;
         }
     };
 
-    intervalHandler = setInterval(success, 10);
+    this._intervalHandler = setInterval(success, 10);
 
     this._activateOptions && this._activateOptions();
 };
@@ -1412,10 +1443,10 @@ NDVITimelineManager.prototype.createOptionsPanel = function () {
     var html = "";
     for (var i = 0; i < this._combo.length; i++) {
         html += '<div id="optionsPanel_' + i + '" style="height:100%; display:none; white-space: nowrap;">' +
-                    '<div id="firstPanel_' + i + '" class="comboOptionsPanel"></div>' +
-                    '<div id="secondPanel_' + i + '" class="comboOptionsPanel"></div>' +
-                    '<div id="thirdPanel_' + i + '" class="comboOptionsPanel"></div>' +
-                    '</div>';
+            '<div id="firstPanel_' + i + '" class="comboOptionsPanel"></div>' +
+            '<div id="secondPanel_' + i + '" class="comboOptionsPanel"></div>' +
+            '<div id="thirdPanel_' + i + '" class="comboOptionsPanel"></div>' +
+            '</div>';
 
     }
     fsComboOptions.innerHTML += html;
@@ -1678,7 +1709,7 @@ NDVITimelineManager.prototype._showCONDITIONS_OF_VEGETATION = function () {
         var url = 'http://maps.kosmosnimki.ru/VectorLayer/Search.ashx?WrapStyle=func&geometry=false&tables=[{%22LayerName%22:%224B68E05D988E404D962F5CC79FFCE67F%22,%22Alias%22:%22v%22},{%22LayerName%22:%2258B949C8E8454CF297184034DD8A62CD%22,%22Alias%22:%22a%22,%22Join%22:%22Inner%22,%22On%22:%22[v].area_id%20=%20[a].ogc_fid%22}]&columns=[{%22Value%22:%22[a].[Region]%22},{%22Value%22:%22[a].[District]%22},{%22Value%22:%22[v].[Value]%22}]';
         var query = '&query="Type"=' + (document.getElementById("chkVciType").checked ? 1 : 0) +
             ' AND "date"=' + "'" + NDVITimelineManager.formatDate(this._selectedDate.getDate(),
-            this._selectedDate.getMonth() + 1, this._selectedDate.getFullYear()) + "'";
+                this._selectedDate.getMonth() + 1, this._selectedDate.getFullYear()) + "'";
 
         //делаем запрос и раскрашиваем
         var that = this;
@@ -1955,8 +1986,8 @@ NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
     }).on('doneDraw', function () {
         ndviTimelineManager.repaintAllVisibleLayers();
     }).setDateInterval(
-            NDVITimelineManager.addDays(this._selectedDate, -1),
-            NDVITimelineManager.addDays(this._selectedDate, 1)
+        NDVITimelineManager.addDays(this._selectedDate, -1),
+        NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
     //layer.setZIndex(0);
@@ -1990,8 +2021,8 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
     }).on('doneDraw', function () {
         ndviTimelineManager.repaintAllVisibleLayers();
     }).setDateInterval(
-            NDVITimelineManager.addDays(this._selectedDate, -1),
-            NDVITimelineManager.addDays(this._selectedDate, 1)
+        NDVITimelineManager.addDays(this._selectedDate, -1),
+        NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
     //layer.setZIndex(0);
@@ -2024,8 +2055,8 @@ NDVITimelineManager.prototype._showCLASSIFICATION = function () {
     }).on('doneDraw', function () {
         ndviTimelineManager.repaintAllVisibleLayers();
     }).setDateInterval(
-            NDVITimelineManager.addDays(this._selectedDate, -1),
-            NDVITimelineManager.addDays(this._selectedDate, 1)
+        NDVITimelineManager.addDays(this._selectedDate, -1),
+        NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
     //layer.setZIndex(0);
@@ -2433,11 +2464,11 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
             this.removeSelectedLayersClipPolygon();
             if (this._cutOff) {
 
-                for (var i = 0 ; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
+                for (var i = 0; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
                     this._visibleLayersOnTheDisplayPtr[i].removePreRenderHook(NDVITimelineManager.l_hook);
                 }
 
-                for (var i = 0 ; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
+                for (var i = 0; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
                     this._visibleLayersOnTheDisplayPtr[i].addPreRenderHook(NDVITimelineManager.l_hook);
                 }
 
@@ -2555,11 +2586,11 @@ NDVITimelineManager.prototype.onMoveEnd = function () {
 
 NDVITimelineManager.prototype._refreshTimeline = function () {
     //if (this._selectedOption != "FIRES") {
-    //this.__yearRefreshHandler && clearTimeout(this.__yearRefreshHandler);
-    //var that = this;
-    //this.__yearRefreshHandler = setTimeout(function () {
-    //    that.timeLine.getTimelineController().update();
-    //}, 1500);
+    //    this.__yearRefreshHandler && clearTimeout(this.__yearRefreshHandler);
+    //    var that = this;
+    //    this.__yearRefreshHandler = setTimeout(function () {
+    //        that.timeLine.getTimelineController().update();
+    //    }, 1500);
     //}
 };
 
@@ -2601,8 +2632,8 @@ NDVITimelineManager.prototype.getLayersCommonGeometry = function (layersArr, cal
                     NDVITimelineManager.geomCache[layerName] = [];
                     //Получаем геометрию полей с сервера
                     var url = "http://maps.kosmosnimki.ru/VectorLayer/Search.ashx?WrapStyle=func" +
-                              "&layer=" + layerName +
-                              "&geometry=true";
+                        "&layer=" + layerName +
+                        "&geometry=true";
 
                     sendCrossDomainJSONRequest(url, function (response) {
                         var res = response.Result;
@@ -2826,8 +2857,8 @@ NDVITimelineManager.isPointInPoly = function (poly, pt) {
     poly[0][0] == poly[l - 1][0] && poly[0][1] == poly[l - 1][1] && l--;
     for (var c = false, i = -1, j = l - 1; ++i < l; j = i)
         ((poly[i][1] <= pt.y && pt.y < poly[j][1]) || (poly[j][1] <= pt.y && pt.y < poly[i][1]))
-        && (pt.x < (poly[j][0] - poly[i][0]) * (pt.y - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0])
-        && (c = !c);
+            && (pt.x < (poly[j][0] - poly[i][0]) * (pt.y - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0])
+            && (c = !c);
     return c;
 }
 
@@ -2864,15 +2895,15 @@ NDVITimelineManager.prototype.initializeImageProcessor = function () {
     var that = this;
     function applyMask(dstCanvas, srcCanvas, info) {
         shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-                   info.destination.x, info.destination.y, that.lmap.getZoom(),
-                   dstCanvas,
-                   function (r, g, b, a) {
-                       if (r === 0 || r === 1) {
-                           return [r, g, b, 0];
-                       } else {
-                           return [r, g, b, a];
-                       }
-                   }, shared.NEAREST);
+            info.destination.x, info.destination.y, that.lmap.getZoom(),
+            dstCanvas,
+            function (r, g, b, a) {
+                if (r === 0 || r === 1) {
+                    return [r, g, b, 0];
+                } else {
+                    return [r, g, b, a];
+                }
+            }, shared.NEAREST);
     }
 };
 
@@ -3193,7 +3224,7 @@ NDVITimelineManager.prototype.initializeTimeline = function (show) {
     this.timeLine.getTimelineController().getTimeline().setOptions({ "moveable": false, "zoomable": false });
 
     //помещаем контрол в такой zIndex, чтобы он отображался под другими контролами
-    $(".leaflet-bottom.leaflet-right.gmx-bottom-shift").css("z-index", 0);
+    /*$(".leaflet-bottom.leaflet-right.gmx-bottom-shift").css("z-index", 0);*/
 
     $(this.timeLine.getContainer()).on('click', function (event) {
         if (that.optionsMenu._isOpened && !that.optionsMenu._dontClose) {
@@ -3494,8 +3525,8 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                             var lip = layerItems[i].obj.properties;
 
                             var lip_dcln = lip[this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes[dcln]] ||
-                                           lip[this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["ACQDATE"]] ||
-                                           lip[this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["acqdate"]];
+                                lip[this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["ACQDATE"]] ||
+                                lip[this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["acqdate"]];
 
                             if (lip_dcln == date) {
                                 var center = L.Projection.Mercator.project(that.lmap.getCenter());
@@ -3851,6 +3882,9 @@ NDVITimelineManager.prototype.showLoadingSmall = function () {
 
 NDVITimelineManager.prototype.hideLoadingSmall = function () {
     document.getElementById("ntLoading").style.display = "none";
+
+    document.getElementById("ntComboBox").disabled = false;
+    document.getElementById("ntComboBox").classList.remove("ntDisabledLabel");
 };
 
 NDVITimelineManager.equalDates = function (d1, d2) {
@@ -4126,20 +4160,20 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         var lang = L.gmxLocale.getLanguage();
 
         return '<select id="ntComboBox">' +
-        '<option value="' + 1 + '">' + (this._combo[1].caption[lang] || this._combo[1].caption) + '</option>' +
-        '<option value="' + 0 + '">' + (this._combo[0].caption[lang] || this._combo[0].caption) + '</option>' +
-        '<option value="' + 2 + '">' + (this._combo[2].caption[lang] || this._combo[2].caption) + '</option>' +
-        ((this._combo[3] && '<option value="' + 3 + '">' + (this._combo[3].caption[lang] || this._combo[3].caption) + '</option>') || "") +
-        ((this._combo[4] && '<option value="' + 4 + '" selected>' + (this._combo[4].caption[lang] || this._combo[4].caption) + '</option>') || "") +
-        ((this._combo[5] && '<option value="' + 5 + '">' + (this._combo[5].caption[lang] || this._combo[5].caption) + '</option>') || "") +
-        ((this._combo[6] && '<option value="' + 6 + '">' + (this._combo[6].caption[lang] || this._combo[6].caption) + '</option>') || "") +
-        '</select>';
+            '<option value="' + 1 + '">' + (this._combo[1].caption[lang] || this._combo[1].caption) + '</option>' +
+            '<option value="' + 0 + '">' + (this._combo[0].caption[lang] || this._combo[0].caption) + '</option>' +
+            '<option value="' + 2 + '">' + (this._combo[2].caption[lang] || this._combo[2].caption) + '</option>' +
+            ((this._combo[3] && '<option value="' + 3 + '">' + (this._combo[3].caption[lang] || this._combo[3].caption) + '</option>') || "") +
+            ((this._combo[4] && '<option value="' + 4 + '" selected>' + (this._combo[4].caption[lang] || this._combo[4].caption) + '</option>') || "") +
+            ((this._combo[5] && '<option value="' + 5 + '">' + (this._combo[5].caption[lang] || this._combo[5].caption) + '</option>') || "") +
+            ((this._combo[6] && '<option value="' + 6 + '">' + (this._combo[6].caption[lang] || this._combo[6].caption) + '</option>') || "") +
+            '</select>';
     }
 
     var htmlTxt = '<div class="ntFooter">' +
         '<div class="ntLeftPanel">' +
         '</div>' +
-                getComboRadios.call(this) +
+        getComboRadios.call(this) +
         '<div class="ntRightPanel" id="ntRightPanel">' +
         '<div class="ntOptionsFieldset">' +
         '<div id="fsComboOptions"></div>' +
@@ -4187,7 +4221,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
 
     var filenameCaption = '<div id="ntFilenameCaption"></div>';
     var datelineHtml = '<div class="ntDatesLine">' +
-          '<div id="ntYearsScrollPanel"><div id="ntYearsPanel"></div></div>' +
+        '<div id="ntYearsScrollPanel"><div id="ntYearsPanel"></div></div>' +
         '</div>';
     var shotsSlider = '<div id=ntSliderBar><div id="ntShotsSlider" style="width:100%; height:100%;"></div></div>';
 
@@ -4569,57 +4603,57 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
     var loc = NDVITimelineManager.locale[L.gmxLocale.getLanguage()];
 
     var items =
-    [{
-        "id": "chkVciType",
-        "type": "checkbox",
-        "class": "ntOptionsMODIS",
-        "text": loc.UslovijaVegetaciiPoMaske,
-        "click": function (e) {
-            if (document.getElementById("conditionsOfVegetationRadio").checked) {
-                that._redrawShots();
-            }
-        }
-    }, {
-        "id": "chkQl",
-        "class": "ntOptionsHR ntPreview",
-        "type": "checkbox",
-        "text": loc.PokazatPrevju,
-        "click": function (e) {
-            that.qlCheckClick(e);
-        }
-    }, {
-        "id": "setDoubleSlide",
-        "type": "checkbox",
-        "text": "Включить выборку данных за период",
-        "lineId": "ntPeriodSelectOption",
-        "click": function (e) {
-            if (e.checked) {
-                $(".ntYearSwitcher").css("display", "none");
-            } else {
-                $(".ntYearSwitcher").css("display", "block");
-            }
-            that._selectedPeriod = e.checked;
-            that.clearSelection();
-            that._hideLayers();
-            that._slider.setPeriodSelector(e.checked);
-        }
-    }, {
-        "id": "cloudMask",
-        "class": "ntOptionsHR",
-        "type": "checkbox",
-        "text": loc.MaskaOblachnostiTenej,
-        "click": function (e) {
-            that._useCloudMask = e.checked;
-            if (e.checked) {
-                that.showCloudMask(that._selectedDate);
-            } else {
-                that.hideCloudMask(true);
-                if (that._cutOff && (that._selectedOption === "SENTINEL_NDVI" || that._selectedOption === "HR")) {
+        [{
+            "id": "chkVciType",
+            "type": "checkbox",
+            "class": "ntOptionsMODIS",
+            "text": loc.UslovijaVegetaciiPoMaske,
+            "click": function (e) {
+                if (document.getElementById("conditionsOfVegetationRadio").checked) {
                     that._redrawShots();
                 }
             }
-        }
-    }];
+        }, {
+            "id": "chkQl",
+            "class": "ntOptionsHR ntPreview",
+            "type": "checkbox",
+            "text": loc.PokazatPrevju,
+            "click": function (e) {
+                that.qlCheckClick(e);
+            }
+        }, {
+            "id": "setDoubleSlide",
+            "type": "checkbox",
+            "text": "Включить выборку данных за период",
+            "lineId": "ntPeriodSelectOption",
+            "click": function (e) {
+                if (e.checked) {
+                    $(".ntYearSwitcher").css("display", "none");
+                } else {
+                    $(".ntYearSwitcher").css("display", "block");
+                }
+                that._selectedPeriod = e.checked;
+                that.clearSelection();
+                that._hideLayers();
+                that._slider.setPeriodSelector(e.checked);
+            }
+        }, {
+            "id": "cloudMask",
+            "class": "ntOptionsHR",
+            "type": "checkbox",
+            "text": loc.MaskaOblachnostiTenej,
+            "click": function (e) {
+                that._useCloudMask = e.checked;
+                if (e.checked) {
+                    that.showCloudMask(that._selectedDate);
+                } else {
+                    that.hideCloudMask(true);
+                    if (that._cutOff && (that._selectedOption === "SENTINEL_NDVI" || that._selectedOption === "HR")) {
+                        that._redrawShots();
+                    }
+                }
+            }
+        }];
 
 
     if (!this._userRole) {
@@ -4688,12 +4722,12 @@ NDVITimelineManager.prototype.showCloudMask = function (date) {
             }
             return false;
         })
-        .on('doneDraw', function () {
-            ndviTimelineManager.repaintAllVisibleLayers();
-        })
-        .setDateInterval(
-                NDVITimelineManager.addDays(that._selectedDate, -1),
-                NDVITimelineManager.addDays(that._selectedDate, 1)
+            .on('doneDraw', function () {
+                ndviTimelineManager.repaintAllVisibleLayers();
+            })
+            .setDateInterval(
+            NDVITimelineManager.addDays(that._selectedDate, -1),
+            NDVITimelineManager.addDays(that._selectedDate, 1)
             );
         layer.setZIndex(1);
         that.lmap.addLayer(layer);
@@ -4723,7 +4757,7 @@ NDVITimelineManager.prototype.hideCloudMask = function (force) {
     }
 };
 
-NDVITimelineManager.prototype.setTimelineCombo = function (index) {
+NDVITimelineManager.prototype.setTimelineCombo = function (index, currentSelection) {
 
     $("#ntComboBox > option").each(function (e, x) {
         (x.value == index && (x.selected = true));
@@ -4751,13 +4785,16 @@ NDVITimelineManager.prototype.setTimelineCombo = function (index) {
     that.bindTimelineCombo(index);
 
     that.refreshTimeline();
-    that._hideLayers();
     that.setRadioLabelActive("ndviMeanRadio", false);
     that.setRadioLabelActive("ratingRadio", false);
 
     that.setDatesStickHoverCallback();
 
-    that.selectedDiv = null;
+    if (!currentSelection) {
+        that.selectedDiv = null;
+        that._hideLayers();
+    }
+
     that._currentZoom = that.lmap.getZoom();
     that.applyZoomRestriction(that._currentZoom);
 
@@ -4781,12 +4818,14 @@ NDVITimelineManager.prototype.setTimelineCombo = function (index) {
         that.showLoadingSmall();
     }
 
-    //снимаем выделение
-    that._dontTouchEmptyClick = true;
-    that.clearSelection();
-    that._dontTouchEmptyClick = false;
+    if (!currentSelection) {
+        //снимаем выделение
+        that._dontTouchEmptyClick = true;
+        that.clearSelection();
+        that._dontTouchEmptyClick = false;
+    }
 
-    that.startFinishLoading();
+    //that.startFinishLoading();
 
     document.getElementById("ntRightPanel").scrollLeft = 0;
 
@@ -5132,25 +5171,25 @@ NDVITimelineManager.prototype._applyClassificationPalette = function (url, dstCa
 
     if (NDVITimelineManager.checkGreyImageData(pix)) {
         shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-           info.destination.x, info.destination.y, that.lmap.getZoom(),
-           dstCanvas,
-           function (r, g, b, a) {
-               var px = r;
-               var pal = palette[px];
-               if (pal !== undefined) {
-                   if (r == 0 && g == 0 && b == 0) {
-                       return [0, 179, 255, 255];
-                   } else {
-                       return [pal.partRed, pal.partGreen, pal.partBlue, 255];
-                   }
-               }
-               return [0, 0, 0, 255];
-           }, shared.NEAREST);
+            info.destination.x, info.destination.y, that.lmap.getZoom(),
+            dstCanvas,
+            function (r, g, b, a) {
+                var px = r;
+                var pal = palette[px];
+                if (pal !== undefined) {
+                    if (r == 0 && g == 0 && b == 0) {
+                        return [0, 179, 255, 255];
+                    } else {
+                        return [pal.partRed, pal.partGreen, pal.partBlue, 255];
+                    }
+                }
+                return [0, 0, 0, 255];
+            }, shared.NEAREST);
 
     } else {
         shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-           info.destination.x, info.destination.y, that.lmap.getZoom(),
-           dstCanvas, null, shared.NEAREST);
+            info.destination.x, info.destination.y, that.lmap.getZoom(),
+            dstCanvas, null, shared.NEAREST);
     }
 };
 
@@ -5160,15 +5199,15 @@ NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanva
     if (url) {
         var palette = this._palettes[url];
         shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-        info.destination.x, info.destination.y, that.lmap.getZoom(),
-        dstCanvas,
-        function (r, g, b, a) {
-            if (r == 0 && g == 0 && b == 0) {
-                return [0, 179, 255, 255];
-            } else {
-                return that.legendControl.getNDVIColor((r - 101) / 100);
-            }
-        }, shared.NEAREST);
+            info.destination.x, info.destination.y, that.lmap.getZoom(),
+            dstCanvas,
+            function (r, g, b, a) {
+                if (r == 0 && g == 0 && b == 0) {
+                    return [0, 179, 255, 255];
+                } else {
+                    return that.legendControl.getNDVIColor((r - 101) / 100);
+                }
+            }, shared.NEAREST);
     } else {
         dstCanvas = srcCanvas;
     }

@@ -51,12 +51,12 @@ RatingLegendView.locale = {
         'Rejting': "Рейтинг",
         'Visokij': "высокий",
         'Nizkij': "низкий",
-        'Oblaka': "нет данных(облака)"
+        'Oblaka': "нет данных (облака)"
     },
     'eng': {
         'Rejting': "Rating",
         'Visokij': "high",
         'Nizkij': "low",
-        'Oblaka': "no data(clouds)"
+        'Oblaka': "no data (clouds)"
     }
 };

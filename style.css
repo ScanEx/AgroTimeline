@@ -35,7 +35,7 @@
 .ntAttentionMessage {
     height: 20px;
     position: absolute;
-    zIndex: 50000;
+    z-index: 50000;
     bottom: 4px;
     right: 340px;
 }
