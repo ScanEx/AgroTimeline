@@ -7,6 +7,8 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
 
     this._container = container || document.getElementById("flash");
 
+    this._chkQl = false;
+
     //этот параметр не рассматривается с точки зрения безопасноти, 
     //только лишь изменяет функциональность
     this._userRole = userRole;
@@ -647,7 +649,7 @@ NDVITimelineManager.prototype.getState = function () {
         "selectedDiv": (this.selectedDiv ? true : false),
         "selectedCombo": this._selectedCombo,
         "radioId": radioId,
-        "chkQl": document.getElementById("chkQl").checked,
+        "chkQl": this._chkQl,//document.getElementById("chkQl").checked,
         "optionsMenu": optionsMenu,
         "ndviLegend": {
             'selectedPalette': palIndex,
@@ -1046,6 +1048,9 @@ NDVITimelineManager.prototype._initSwitcher = function () {
             that.timeLine.toggleVisibility(true);
 
             setTimeout(function () {
+
+                that.bindTimelineCombo(that._selectedCombo);
+
                 NDVITimelineManager.fires_ht = {};
                 that.timeLine.updateFilters();
                 window.resizeAll && resizeAll();
@@ -1065,6 +1070,8 @@ NDVITimelineManager.prototype._initSwitcher = function () {
             }
 
             //that.applyZoomRestriction(that.lmap.getZoom());
+
+            that.unbindLayersTimeline();
 
             if (that.lmap.getZoom() <= NDVITimelineManager.MIN_ZOOM) {
                 that._attDiv.style.display = "block";
@@ -1838,7 +1845,7 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
     var dateCn = this._layersLegend[layerTypeName].dateColumnName;
     var pathCn = "PATH";
     var GMX_RasterCatalogIDCn = "GMX_RasterCatalogID";
-    var isQl = document.getElementById("chkQl").checked;
+    var isQl = this._chkQl;//document.getElementById("chkQl").checked;
 
     var dateId = layer._gmx.tileAttributeIndexes[dateCn];
     var pathId = layer._gmx.tileAttributeIndexes[pathCn];
@@ -2342,6 +2349,7 @@ NDVITimelineManager.prototype.applyZoomRestriction = function (zoom) {
                 this.showLoadingSmall();
             }
 
+            //включаем один раз
             if (this._prevZoom <= NDVITimelineManager.MIN_ZOOM) {
                 this.bindTimelineCombo(this._selectedCombo);
                 this._showRedraw();
@@ -2922,16 +2930,16 @@ NDVITimelineManager.prototype.initializeRGB2ImagePrrocessing = function () {
 };
 
 NDVITimelineManager.prototype.initializeShotsObserver = function () {
-    for (var i = 0; i < this._combo.length; i++) {
-        var r = this._combo[i].rk;
-        for (var j = 0; j < r.length; j++) {
-            var rj = r[j];
-            var lrj = this._layersLegend[rj];
-            if (this._layersLegend[rj].viewTimeline) {
-                var n = lrj.name;
-            }
-        }
-    }
+    //for (var i = 0; i < this._combo.length; i++) {
+    //    var r = this._combo[i].rk;
+    //    for (var j = 0; j < r.length; j++) {
+    //        var rj = r[j];
+    //        var lrj = this._layersLegend[rj];
+    //        if (this._layersLegend[rj].viewTimeline) {
+    //            var n = lrj.name;
+    //        }
+    //    }
+    //}
 
     this.bindTimelineCombo(this._selectedCombo);
 };
@@ -2946,12 +2954,16 @@ NDVITimelineManager.prototype.unbindLayersTimeline = function () {
 };
 
 NDVITimelineManager.prototype.getViewTimelineLayers = function (selectedCombo) {
+    var _chkQl = this._chkQl;//document.getElementById("chkQl").checked;
+    var _isCloudsPreview = this._combo[this._selectedCombo].clouds;
     var res = [];
     var rkArr = this._combo[selectedCombo].rk;
-    var viewTimelineLayer = 0
     for (var i = 0; i < rkArr.length; i++) {
-        if (this._layersLegend[rkArr[i]].viewTimeline) {
-            res.push(this._layersLegend[rkArr[i]].name);
+        var prop = this._layersLegend[rkArr[i]];
+        if (prop.viewTimeline) {
+            if (!_isCloudsPreview || _chkQl && prop.isPreview || !_chkQl && !prop.isPreview) {
+                res.push(prop.name);
+            }
         }
     }
     return res;
@@ -3033,7 +3045,7 @@ NDVITimelineManager.prototype.deactivateUnknownRadios = function () {
 
     var donttouchArray = null;
 
-    if (document.getElementById("chkQl").checked) {
+    if (this._chkQl/*document.getElementById("chkQl").checked*/) {
         donttouchArray = ["rgbRadio"];
     }
 
@@ -3189,7 +3201,9 @@ NDVITimelineManager.prototype.initializeTimeline = function (show) {
         this.initializeRGB2ImagePrrocessing();
 
         //обсерверы на КР, нужно для определения кол-ва снимков,  и окончания загрузки на таймлайн
-        this.initializeShotsObserver();
+        //this.initializeShotsObserver();
+
+        this.bindTimelineCombo(this._selectedCombo);
 
         this.timeLine.addFilter(function (elem, a, b, layer) {
             return that._filterTimeline(elem, layer);
@@ -3254,7 +3268,7 @@ NDVITimelineManager.prototype.redrawTimelineLinks = function () {
 
     if (that._combo[that._selectedCombo].clouds) {
 
-        var isQl = $("#chkQl").is(':checked');
+        var isQl = that._chkQl;//$("#chkQl").is(':checked');
 
         setTimeout(function () {
             for (var k = 0; k < layerNames.length; k++) {
@@ -3532,8 +3546,8 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                                 var center = L.Projection.Mercator.project(that.lmap.getCenter());
                                 var geom = lip[lip.length - 1];
                                 if (NDVITimelineManager.isPointInGeometry(geom, center)) {
-                                    if (document.getElementById("chkQl").checked ||
-                                        _GMX_RasterCatalogID && !document.getElementById("chkQl").checked && lip[_GMX_RasterCatalogID].length) {
+                                    if (this._chkQl/*document.getElementById("chkQl").checked*/ ||
+                                        _GMX_RasterCatalogID && !this._chkQl/*document.getElementById("chkQl").checked*/ && lip[_GMX_RasterCatalogID].length) {
                                         filenames.push(getFilename(lip, this.layerCollection[selectedLayer]));
                                         that._currentRKIdArr.push(lip[_GMX_RasterCatalogID]);
                                     }
@@ -4045,7 +4059,7 @@ NDVITimelineManager.prototype.initSlider = function () {
                         var timelineItems = that.timeLine.data.attributes.items[that._comboAsLayers[that._selectedCombo][1]];
                         var filenames = [];
                         var dates = [];
-                        var chkQl = document.getElementById("chkQl").checked;
+                        var chkQl = that._chkQl/*document.getElementById("chkQl").checked;*/
                         for (var ii in timelineItems) {
                             var item = timelineItems[ii];
                             var date = item.obj.properties['ACQDATE'];
@@ -4933,6 +4947,8 @@ NDVITimelineManager.prototype.setActiveRadio = function (radioId) {
 
 NDVITimelineManager.prototype.qlCheckClick = function (e, data) {
 
+    this._chkQl = e.checked;
+
     NDVITimelineManager.fires_ht = {};
     this.timeLine.updateFilters();
 
@@ -4956,7 +4972,6 @@ NDVITimelineManager.prototype.qlCheckClick = function (e, data) {
                 itemDate.getMonth() == this._selectedDate.getMonth()) {
                 currItem = item;
                 break;
-
             }
         }
 
@@ -4965,6 +4980,7 @@ NDVITimelineManager.prototype.qlCheckClick = function (e, data) {
         this.setTimeLineYear(this._selectedYear);
     } else {
         this.clearSelection();
+        this.bindTimelineCombo(this._selectedCombo);
     }
 };
 
@@ -5072,7 +5088,7 @@ NDVITimelineManager.prototype._filterTimeline = function (elem, layer) {
             return true;
         }
     } else if (this._combo[this._selectedCombo].resolution === "landsat") {
-        var isQl = $("#chkQl").is(':checked');
+        var isQl = this._chkQl;//$("#chkQl").is(':checked');
         var conf = this._layerConfigs[layer.options.layerID];
         var isPreview = conf.isPreview;
 
