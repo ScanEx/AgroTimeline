@@ -1115,7 +1115,7 @@ NDVITimelineManager.prototype.setRenderHook = function (layer, callback, callbac
             layer.addClipPolygon(this.layerBounds);
         }
 
-        layer.addRenderHook(callback);
+        layer.addRenderHook(callback.bind(this));
 
         for (var i = 0; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
 
@@ -1955,6 +1955,9 @@ NDVITimelineManager.kr_hook = function (tile, info) {
     if (tile) {
         NDVITimelineManager.tolesBG[id] = tile;
         tile.style.display = 'none';
+        this._visibleLayersOnTheDisplayPtr.forEach(function(l) {
+            l.repaint(id);
+        });
     }
 };
 

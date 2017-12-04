@@ -1,5 +1,5 @@
 L.Control.gmxAgroTimeline = L.Control.extend({
-    includes: L.Mixin.Events,
+    includes: L.Evented ? L.Evented.prototype : L.Mixin.Events,
     options: {
         position: 'bottomright',
         isActive: true
