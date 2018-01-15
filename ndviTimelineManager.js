@@ -562,6 +562,7 @@ NDVITimelineManager.prototype.start = function () {
     };
 
     var options = {
+        'srs': this.lmap.options.srs,
         'skipTiles': this.lmap.options.skipTiles
     };
 
@@ -1086,9 +1087,9 @@ NDVITimelineManager.prototype._initSwitcher = function () {
     });
 };
 
-NDVITimelineManager.prototype.setCloudMaskRenderHook = function (layer, callback, callback2) {
+NDVITimelineManager.prototype.setCloudMaskRenderHook = function (layer, callback_kr, callback2) {
 
-    layer.addRenderHook(callback);
+    layer.addRenderHook(callback_kr);
 
     for (var i = 0; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
 
@@ -1102,20 +1103,24 @@ NDVITimelineManager.prototype.setCloudMaskRenderHook = function (layer, callback
     }
 };
 
-NDVITimelineManager.prototype.setRenderHook = function (layer, callback, callback2) {
+NDVITimelineManager.prototype.setRenderHook = function (layer, callback_kr, callback2) {
 
-    if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI") {
-        this.layerBounds && layer.removeClipPolygon(this.layerBounds);
+    if (L.version.indexOf("1.2") === -1) {
+        if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI") {
+            this.layerBounds && layer.removeClipPolygon(this.layerBounds);
+        }
     }
 
     if (this._cutOff) {
 
-        if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI") {
-            this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
-            layer.addClipPolygon(this.layerBounds);
+        if (L.version.indexOf("1.2") === -1) {
+            if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI") {
+                this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
+                layer.addClipPolygon(this.layerBounds);
+            }
         }
 
-        layer.addRenderHook(callback);
+        layer.addRenderHook(callback_kr);
 
         for (var i = 0; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
 
@@ -1947,6 +1952,9 @@ NDVITimelineManager.cloudMaskKr_hook = function (tile, info) {
     if (tile) {
         NDVITimelineManager.cloudMaskTolesBG[id] = tile;
         tile.style.display = 'none';
+        if (L.version.indexOf("1.2") !== -1) {
+            ndviTimelineManager.repaintVisibleLayers(tile.zKey);
+        }
     }
 };
 
@@ -1955,6 +1963,9 @@ NDVITimelineManager.kr_hook = function (tile, info) {
     if (tile) {
         NDVITimelineManager.tolesBG[id] = tile;
         tile.style.display = 'none';
+        if (L.version.indexOf("1.2") !== -1) {
+            ndviTimelineManager.repaintVisibleLayers(tile.zKey);
+        }
     }
 };
 
@@ -2469,7 +2480,11 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
 
     if (this._selectedLayers.length && !NDVITimelineManager.equal(that._visibleLayersOnTheDisplay, prevLayers)) {
         if (this._selectedOption == "HR" || this._selectedOption == "CLASSIFICATION") {
-            this.removeSelectedLayersClipPolygon();
+
+            if (L.version.indexOf("1.2") === -1) {
+                this.removeSelectedLayersClipPolygon();
+            }
+
             if (this._cutOff) {
 
                 for (var i = 0; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
@@ -2480,8 +2495,10 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
                     this._visibleLayersOnTheDisplayPtr[i].addPreRenderHook(NDVITimelineManager.l_hook);
                 }
 
-                this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
-                this.addSelectedLayersClipPolygon(this.layerBounds);
+                if (L.version.indexOf("1.2") === -1) {
+                    this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
+                    this.addSelectedLayersClipPolygon(this.layerBounds);
+                }
             }
         }
     }
