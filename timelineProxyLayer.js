@@ -92,11 +92,13 @@ TimelineProxyLayer.prototype.bindLayer = function (layer) {
     });
 
     this._observer = layer.addObserver({
-        type: "update",
-        bounds: this.lmap.getBounds(),
-        dateInterval: [new Date(), new Date()],
-        filters: ['clipFilter', 'TemporalFilter', 'myDateFilter'],
-        callback: function (data) {
+        'srs': this.lmap.options.srs,
+        'ftc': this.lmap.options.ftc,
+        'type': "update",
+        'bounds': this.lmap.getBounds(),
+        'dateInterval': [new Date(), new Date()],
+        'filters': ['clipFilter', 'TemporalFilter', 'myDateFilter'],
+        'callback': function (data) {
             var arr = data.added || [];
             var features = [];
             for (var i = 0; i < arr.length; i++) {

@@ -563,7 +563,8 @@ NDVITimelineManager.prototype.start = function () {
 
     var options = {
         'srs': this.lmap.options.srs,
-        'skipTiles': this.lmap.options.skipTiles
+        'skipTiles': this.lmap.options.skipTiles,
+        'ftc': this.lmap.options.ftc
     };
 
     function _execMap(pmap) {
@@ -1858,9 +1859,11 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
 
     var sceneidIndex = layer._gmx.tileAttributeIndexes["sceneid"] || layer._gmx.tileAttributeIndexes["SCENEID"];
 
+    var layerId = layer.getGmxProperties().name;
+
     var isPreview = this._layerConfigs[this._layersLegend[layerTypeName].name].isPreview;
-    var cloudsId = this._layerConfigs[layer.options.layerID].cloudsField && (layer._gmx.tileAttributeIndexes[this._layerConfigs[layer.options.layerID].cloudsField.toUpperCase()] ||
-        layer._gmx.tileAttributeIndexes[this._layerConfigs[layer.options.layerID].cloudsField.toLowerCase()]);
+    var cloudsId = this._layerConfigs[layerId].cloudsField && (layer._gmx.tileAttributeIndexes[this._layerConfigs[layerId].cloudsField.toUpperCase()] ||
+        layer._gmx.tileAttributeIndexes[this._layerConfigs[layerId].cloudsField.toLowerCase()]);
 
     var that = this;
     layer.setFilter(function (item) {
@@ -5106,7 +5109,7 @@ NDVITimelineManager.prototype._filterTimeline = function (elem, layer) {
         }
     } else if (this._combo[this._selectedCombo].resolution === "landsat") {
         var isQl = this._chkQl;//$("#chkQl").is(':checked');
-        var conf = this._layerConfigs[layer.options.layerID];
+        var conf = this._layerConfigs[layer.getGmxProperties().name];
         var isPreview = conf.isPreview;
 
         if (conf.isSentinel) {
