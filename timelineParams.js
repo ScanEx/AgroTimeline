@@ -128,6 +128,31 @@
                     url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg',
                 }
             }
+        },
+        "LANDSAT_MSAVI": {
+            name: "E5450B8BDDE44E9A903BCF850327766E",
+            //mask: "A05BB0207AEE4CFD93C045BF71576FDE",
+            dateColumnName: "acqdate",
+            palette: {
+                ndvi: {
+                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    prodtype: "NDVI"
+                }
+            },
+            sceneFieldName: "sceneid"
+        },
+        "SENTINEL_MSAVI": {
+            isSentinel: true,
+            name: "F350F1FB55944351AE10AC66C1BAB76B",
+            //mask: "14A988CBC5FD424D9EBE23CEC8168150",
+            dateColumnName: "acqdate",
+            palette: {
+                ndvi: {
+                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    prodtype: "NDVI"
+                }
+            },
+            sceneFieldName: "sceneid"
         }
     },
     combo: [{
@@ -138,7 +163,7 @@
         resolution: "landsat",
         clouds: true,
         caption: "Космосъемка 10-30 м",
-        rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI", "SENTINEL_IR", "LANDSAT_PREVIEW", "SENTINEL_PREVIEW"]
+        rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI", "SENTINEL_IR", "LANDSAT_PREVIEW", "SENTINEL_PREVIEW", "LANDSAT_MSAVI", "SENTINEL_MSAVI"]
     }, {
         caption: "Космосъемка 250 м",
         resolution: "modis",

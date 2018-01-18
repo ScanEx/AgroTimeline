@@ -93,7 +93,7 @@ var LegendControl = function (agroTimeline) {
             if (!that._manual) {
                 that.setVisibility(true);
             }
-        } else if (so == "HR" || so == "MEAN_NDVI" || so == "SENTINEL_NDVI" || so == "NDVI16") {
+        } else if (so == "HR" || so == "MEAN_NDVI" || so == "SENTINEL_NDVI" || so == "NDVI16" || so == "LANDSAT_MSAVI" || so == "SENTINEL_MSAVI") {
             that.showButton();
             that.applyLegend(that._ndviLegendView);
             if (!that._manual) {

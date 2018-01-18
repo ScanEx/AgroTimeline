@@ -329,6 +329,9 @@ NDVITimelineManager.LANDSAT_654 = 112;
 NDVITimelineManager.SENTINEL_432 = 210;
 NDVITimelineManager.SENTINEL_384 = 211;
 
+NDVITimelineManager.LANDSAT_MSAVI = 10100;
+NDVITimelineManager.SENTINEL_MSAVI = 10101;
+
 
 NDVITimelineManager.prodTypes = [];
 NDVITimelineManager.prodTypes[NDVITimelineManager.LANDSAT_432] = "LANDSAT_432";
@@ -339,6 +342,10 @@ NDVITimelineManager.prodTypes[NDVITimelineManager.SENTINEL_384] = "SENTINEL_384"
 
 NDVITimelineManager.prodTypes[NDVITimelineManager.SENTINEL] = "SENTINEL";
 NDVITimelineManager.prodTypes[NDVITimelineManager.SENTINEL_IR] = "SENTINEL_IR";
+
+NDVITimelineManager.prodTypes[NDVITimelineManager.LANDSAT_MSAVI] = "LANDSAT_MSAVI";
+NDVITimelineManager.prodTypes[NDVITimelineManager.SENTINEL_MSAVI] = "SENTINEL_MSAVI";
+
 
 //поправка слайлера на рисочках, зависит от длинны слайдера и диапазона на таймлайне
 NDVITimelineManager.SLIDER_EPSILON = 28;
@@ -450,6 +457,9 @@ NDVITimelineManager._comboRadios = [{
     "SENTINEL_IR": "rgbRadio",
     "SENTINEL": "rgbRadio2",
     "LANDSAT": "rgbRadio",
+
+    "LANDSAT_MSAVI": "msaviRadio",
+    "SENTINEL_MSAVI": "msaviRadio"
 }];
 
 //соответсвия продукт - радиокнопка, нужно для пермалинков
@@ -472,7 +482,9 @@ NDVITimelineManager.radioProduct = {
     "sentinel432": { "prodId": NDVITimelineManager.SENTINEL_432, "numCombo": 4 },
     "sentinel384": { "prodId": NDVITimelineManager.SENTINEL_384, "numCombo": 4 },
 
-    "firesPoints": { "prodId": NDVITimelineManager.FIRES_POINTS, "numCombo": 5 }
+    "firesPoints": { "prodId": NDVITimelineManager.FIRES_POINTS, "numCombo": 5 },
+
+    "msaviRadio": { "prodId": NDVITimelineManager.LANDSAT_MSAVI, "numCombo": 1 }
 };
 
 NDVITimelineManager.MIN_ZOOM = 7;
@@ -500,6 +512,8 @@ NDVITimelineManager.minZoomOption[NDVITimelineManager.LANDSAT_654] = NDVITimelin
 NDVITimelineManager.minZoomOption[NDVITimelineManager.SENTINEL_432] = NDVITimelineManager.MIN_ZOOM + 1;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.SENTINEL_384] = NDVITimelineManager.MIN_ZOOM + 1;
 
+NDVITimelineManager.minZoomOption[NDVITimelineManager.LANDSAT_MSAVI] = NDVITimelineManager.MIN_ZOOM + 1;
+NDVITimelineManager.minZoomOption[NDVITimelineManager.SENTINEL_MSAVI] = NDVITimelineManager.MIN_ZOOM + 1;
 
 NDVITimelineManager.prototype.getMinZoomCurrentSelection = function (prod) {
     return NDVITimelineManager.minZoomOption[prod];
@@ -1107,7 +1121,7 @@ NDVITimelineManager.prototype.setCloudMaskRenderHook = function (layer, callback
 NDVITimelineManager.prototype.setRenderHook = function (layer, callback_kr, callback2) {
 
     if (L.version.indexOf("1.2") === -1) {
-        if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI") {
+        if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI" || this._selectedOption == "LANDSAT_MSAVI" || this._selectedOption == "SENTINEL_MSAVI") {
             this.layerBounds && layer.removeClipPolygon(this.layerBounds);
         }
     }
@@ -1115,7 +1129,7 @@ NDVITimelineManager.prototype.setRenderHook = function (layer, callback_kr, call
     if (this._cutOff) {
 
         if (L.version.indexOf("1.2") === -1) {
-            if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI") {
+            if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI" || this._selectedOption == "LANDSAT_MSAVI" || this._selectedOption == "SENTINEL_MSAVI") {
                 this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
                 layer.addClipPolygon(this.layerBounds);
             }
@@ -1141,9 +1155,15 @@ NDVITimelineManager.prototype.clearRenderHook = function () {
     var classLayer = this.layerCollection[this._layersLegend.CLASSIFICATION.name];
     var sentinelNdviLayer = this.layerCollection[this._layersLegend.SENTINEL_NDVI.name];
 
+    var landsatMsaviLayer = this.layerCollection[this._layersLegend.LANDSAT_MSAVI.name];
+    var sentinelMsaviLayer = this.layerCollection[this._layersLegend.SENTINEL_MSAVI.name];
+
     ndviLayer.removeRenderHook(NDVITimelineManager.kr_hook);
     classLayer && classLayer.removeRenderHook(NDVITimelineManager.kr_hook);
     sentinelNdviLayer.removeRenderHook(NDVITimelineManager.kr_hook);
+
+    landsatMsaviLayer.removeRenderHook(NDVITimelineManager.kr_hook);
+    sentinelMsaviLayer.removeRenderHook(NDVITimelineManager.kr_hook);
 
     NDVITimelineManager.tolesBG = {};
 
@@ -1609,6 +1629,10 @@ NDVITimelineManager.prototype._showRedraw = function () {
             this._showNDVI16();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.NDVI_HR) {
             this._showNDVI_HR();
+
+        } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.LANDSAT_MSAVI) {
+            this._showLANDSAT_MSAVI();
+
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.RGB_HR) {
             this._showRGB_HR();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.RGB2_HR) {
@@ -1930,6 +1954,10 @@ NDVITimelineManager.prototype._showSENTINEL = function () {
         this._showLayer("SENTINEL");
     } else if (sel == NDVITimelineManager.NDVI_HR) {
         this._showLayerNDVI_HR("SENTINEL_NDVI");
+
+    } else if (sel == NDVITimelineManager.LANDSAT_MSAVI) {
+        this._showLayerNDVI_HR("SENTINEL_MSAVI");
+
     } else if (sel == NDVITimelineManager.NDVI_MEAN) {
         this._showNDVI_MEAN();
     } else if (sel == NDVITimelineManager.INHOMOGENUITY) {
@@ -2050,6 +2078,10 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
     this._selectedLayers.push(layer);
 
     this.showCloudMask(this._selectedDate);
+};
+
+NDVITimelineManager.prototype._showLANDSAT_MSAVI = function () {
+    this._showLayerNDVI_HR("LANDSAT_MSAVI");
 };
 
 NDVITimelineManager.prototype._showCLASSIFICATION = function () {
@@ -2262,7 +2294,7 @@ NDVITimelineManager.prototype.showSelectedLayersHR = function () {
         this._ratingHandler.show();
     } else if (this._selectedOption == "INHOMOGENUITY") {
         this._neodnrHandler.show();
-    } else if (this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI") {
+    } else if (this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI" || this._selectedOption == "SENTINEL_MSAVI" || this._selectedOption == "LANDSAT_MSAVI") {
         for (var i = 0; i < this._selectedLayers.length; i++) {
             this.lmap.addLayer(this._selectedLayers[i]);
             this._selectedLayers[i].repaint();
@@ -2277,7 +2309,7 @@ NDVITimelineManager.prototype.hideSelectedLayersHR = function () {
         this._ratingHandler.hide();
     } else if (this._selectedOption == "INHOMOGENUITY") {
         this._neodnrHandler.hide();
-    } else if (this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI") {
+    } else if (this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI" || this._selectedOption == "SENTINEL_MSAVI" || this._selectedOption == "LANDSAT_MSAVI") {
         for (var i = 0; i < this._selectedLayers.length; i++) {
             this.lmap.removeLayer(this._selectedLayers[i]);
         }
@@ -2555,6 +2587,8 @@ NDVITimelineManager.prototype.updateRadioLabelsActivity = function () {
     if (this.selectedDiv && this._visibleLayersOnTheDisplay.length) {
         if (this.lmap.getZoom() >= NDVITimelineManager.MIN_ZOOM_HR) {
             this.getProductAvailability("ndviRadio_hr") && this.setRadioLabelActive_grey("ndviRadio_hr", true);
+            this.getProductAvailability("msaviRadio") && this.setRadioLabelActive_grey("msaviRadio", true);
+
             if (this.getProductAvailability("ndviMeanRadio")) {
                 this.setRadioLabelActive_grey("ndviMeanRadio", true);
                 this.setRadioLabelActive_grey("ratingRadio", true);
@@ -2582,6 +2616,9 @@ NDVITimelineManager.prototype.updateRadioLabelsActivity = function () {
     if (!this._cutOff) {
         this.getProductAvailability("ndviRadio_hr") && this.setRadioLabelActive_grey("ndviRadio_hr", true);
         $("#light_ndviRadio_hr").removeClass("ntHelpLightOn");
+
+        this.getProductAvailability("msaviRadio") && this.setRadioLabelActive_grey("msaviRadio", true);
+        $("#light_msaviRadio").removeClass("ntHelpLightOn");
     }
 };
 
@@ -3538,6 +3575,8 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                     this.setProductAvailability("ratingRadio", false);
                     this.setProductAvailability("ndviMeanRadio", false);
                     this.setProductAvailability("inhomogenuityRadio", false);
+
+                    this.setProductAvailability("msaviRadio", false);
                 }
 
                 date = prop[this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes[dcln]] ||
@@ -3635,7 +3674,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                             });
 
                             //запоминаем filenames(sceneid) для снимков ndvi
-                            if (rki == "HR" || rki == "SENTINEL_NDVI") {
+                            if (rki == "HR" || rki == "SENTINEL_NDVI" || rki == "SENTINEL_MSAVI" || rki == "LANDSAT_MSAVI") {
                                 that._currentFnIdArr.length = 0;
                                 that._currentFnIdArr = [];
                                 that._currentFnIdArr.push.apply(that._currentFnIdArr, filenames);
@@ -4274,6 +4313,11 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         that._redrawShots();
     }, true);
 
+    this.addRadio("secondPanel_1", "MSAVI", "shotsOptions", "msaviRadio", 1, false, function (r) {
+        that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT_MSAVI;
+        that._redrawShots();
+    }, true);
+
     this.addRadio("firstPanel_0", loc.KompozitNDVI, "shotsOptions", "ndviRadio_modis", 0, false, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI16;
         that._redrawShots();
@@ -4682,7 +4726,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
                     that.showCloudMask(that._selectedDate);
                 } else {
                     that.hideCloudMask(true);
-                    if (that._cutOff && (that._selectedOption === "SENTINEL_NDVI" || that._selectedOption === "HR")) {
+                    if (that._cutOff && (that._selectedOption === "SENTINEL_NDVI" || that._selectedOption === "HR" || that._selectedOption === "SENTINEL_MSAVI" || that._selectedOption === "LANDSAT_MSAVI")) {
                         that._redrawShots();
                     }
                 }
