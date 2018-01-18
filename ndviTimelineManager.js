@@ -1495,7 +1495,7 @@ NDVITimelineManager.prototype.createOptionsPanel = function () {
  * callback - событие припереключении
  * checkrd - значение по умолчанию
  */
-NDVITimelineManager.prototype.addRadio = function (elementId, text, tag, id, comboIndex, comboVisibility, callback, light, checked) {
+NDVITimelineManager.prototype.addRadio = function (elementId, text, tag, id, comboIndex, comboVisibility, callback, light, checked, notVisible) {
 
     var element = document.getElementById(elementId);
     var div0 = document.createElement('div');
@@ -1518,6 +1518,9 @@ NDVITimelineManager.prototype.addRadio = function (elementId, text, tag, id, com
         div0.style.marginLeft = "7px";
     }
 
+    if (notVisible) {
+        div0.style.display = "none";
+    }
 
     var overDiv1 = document.createElement('div');
     overDiv1.style.float = "left";
@@ -4316,7 +4319,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
     this.addRadio("secondPanel_1", "MSAVI", "shotsOptions", "msaviRadio", 1, false, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT_MSAVI;
         that._redrawShots();
-    }, true);
+    }, true, false, true);
 
     this.addRadio("firstPanel_0", loc.KompozitNDVI, "shotsOptions", "ndviRadio_modis", 0, false, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI16;
@@ -4729,6 +4732,18 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
                     if (that._cutOff && (that._selectedOption === "SENTINEL_NDVI" || that._selectedOption === "HR" || that._selectedOption === "SENTINEL_MSAVI" || that._selectedOption === "LANDSAT_MSAVI")) {
                         that._redrawShots();
                     }
+                }
+            }
+        }, {
+            "id": "chkMSAVI",
+            "class": "ntOptionsHR",
+            "type": "checkbox",
+            "text": "Включить опцию MSAVI",
+            "click": function (e) {
+                if (!e.checked) {
+                    that.timeLine.getContainer()[0].querySelector("#light_msaviRadio").style.display = "none";
+                } else {
+                    that.timeLine.getContainer()[0].querySelector("#light_msaviRadio").style.display = "block";
                 }
             }
         }];
