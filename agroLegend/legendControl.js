@@ -91,9 +91,15 @@ var LegendControl = function (agroTimeline) {
             that.showButton();
             that.applyLegend(that._qualityLegendView);
             if (!that._manual) {
-                that.setVisibility(true);
+                that.setVisibility(false);
             }
-        } else if (so == "HR" || so == "MEAN_NDVI" || so == "SENTINEL_NDVI" || so == "NDVI16" || so == "LANDSAT_MSAVI" || so == "SENTINEL_MSAVI") {
+        } else if (so == "NDVI16") {
+            that.showButton();
+            that.applyLegend(that._ndviLegendView);
+            if (!that._manual) {
+                that.setVisibility(false);
+            }
+        } else if (so == "HR" || so == "MEAN_NDVI" || so == "SENTINEL_NDVI" || so == "LANDSAT_MSAVI" || so == "SENTINEL_MSAVI") {
             that.showButton();
             that.applyLegend(that._ndviLegendView);
             if (!that._manual) {

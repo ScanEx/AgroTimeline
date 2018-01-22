@@ -1215,6 +1215,9 @@ NDVITimelineManager.prototype.getHozLayers = function () {
                     if ($.trim(v.MetaProperties.product.Value) == "fields" || $.trim(v.MetaProperties.product.Value) == "fields_aggregation")
                         if (!($.isEmptyObject(v.MetaProperties.project)) && ($.trim(v.MetaProperties.project.Value) == "InsuranceGeo" ||
                             $.trim(v.MetaProperties.project.Value) == "cosmosagro")) {
+
+                            layers[v.name].setZIndex(1);
+
                             that._layersHookList[v.name] = layers[v.name];
                             fieldLayers.push(layers[v.name]);
                         }
@@ -1925,7 +1928,7 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
     });
     layer.setDateInterval(NDVITimelineManager.addDays(this._selectedDate, -1), NDVITimelineManager.addDays(this._selectedDate, 1));
     this.lmap.addLayer(layer);
-    //layer.setZIndex(0);
+    layer.setZIndex(0);
     this._selectedLayers.push(layer);
 
     this.showCloudMask(this._selectedDate);
@@ -2042,7 +2045,7 @@ NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
         NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
-    //layer.setZIndex(0);
+    layer.setZIndex(0);
     this._selectedLayers.push(layer);
 
     this.showCloudMask(this._selectedDate);
@@ -2077,7 +2080,7 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
         NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
-    //layer.setZIndex(0);
+    layer.setZIndex(0);
     this._selectedLayers.push(layer);
 
     this.showCloudMask(this._selectedDate);
@@ -2115,7 +2118,7 @@ NDVITimelineManager.prototype._showCLASSIFICATION = function () {
         NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
-    //layer.setZIndex(0);
+    layer.setZIndex(0);
     this._selectedLayers.push(layer);
 };
 
@@ -2146,7 +2149,7 @@ NDVITimelineManager.prototype._showNDVI16 = function () {
             });
             layer.setDateInterval(NDVITimelineManager.addDays(this._selectedDate, -1), NDVITimelineManager.addDays(this._selectedDate, 1));
             this.lmap.addLayer(layer);
-            //layer.setZIndex(0);
+            layer.setZIndex(0);
             this._selectedLayers.push(layer);
         }
     }
@@ -2174,7 +2177,7 @@ NDVITimelineManager.prototype._showQUALITY16 = function () {
     });
     layer.setDateInterval(NDVITimelineManager.addDays(this._selectedDate, -1), NDVITimelineManager.addDays(this._selectedDate, 1));
     this.lmap.addLayer(layer);
-    //layer.setZIndex(0);
+    layer.setZIndex(0);
     this._selectedLayers.push(layer);
 };
 
