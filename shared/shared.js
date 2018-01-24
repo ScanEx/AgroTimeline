@@ -5,7 +5,7 @@ shared.LINEAR = 101;
 
 shared.cnvCache = {};
 
-shared.zoomTile = function (sourceImage, srcX, srcY, srcZ, dstX, dstY, dstZ, destinationCanvas, pixelCallback, mode) {
+shared.zoomTile = function (sourceImage, srcX, srcY, srcZ, dstX, dstY, dstZ, destinationCanvas, pixelCallback, mode, sx, sy) {
 
     mode = mode || shared.NEAREST;
 
@@ -13,8 +13,8 @@ shared.zoomTile = function (sourceImage, srcX, srcY, srcZ, dstX, dstY, dstZ, des
     var dZ2 = Math.pow(2, dZ);
     var currSize = 256 / dZ2;
 
-    var offsetX = (dstX - srcX * dZ2) * currSize,
-        offsetY = (dZ2 - 1 - (dstY - srcY * dZ2)) * currSize;
+    var offsetX = sx,//(dstX - srcX * dZ2) * currSize,
+        offsetY = sy;//(dZ2 - 1 - (dstY - srcY * dZ2)) * currSize; - для старой нумерации тайлов подходит эта формула
 
     var currPix = shared.getPixelsFromImage(sourceImage);
 
@@ -44,6 +44,7 @@ shared.zoomTile = function (sourceImage, srcX, srcY, srcZ, dstX, dstY, dstZ, des
             }
         }
         shared.putPixelsToCanvas(destinationCanvas, pix);
+
     } else if (mode == shared.LINEAR) {
         var count = 256 / currSize;
         var tempCanvas = null;
@@ -294,9 +295,9 @@ shared.loadPaletteSync = function (url, callback, paletteArr) {
         var palette = paletteArr || [];
         $(xml).find("ENTRY").each(function () {
             var code = $(this).find('Code').text(),
-            partRed = $(this).find('Color > Part_Red').text(),
-            partGreen = $(this).find('Color > Part_Green').text(),
-            partBlue = $(this).find('Color > Part_Blue').text();
+                partRed = $(this).find('Color > Part_Red').text(),
+                partGreen = $(this).find('Color > Part_Green').text(),
+                partBlue = $(this).find('Color > Part_Blue').text();
             palette[parseInt(code)] = { 'partRed': parseInt(partRed), 'partGreen': parseInt(partGreen), 'partBlue': parseInt(partBlue) };
         });
         shared.createPaletteHR(palette);
@@ -339,8 +340,8 @@ shared.getFeatures = function (layerId, sender, callback, errorCallback) {
         };
 
         var url = "/VectorLayer/Search.ashx?WrapStyle=func" +
-                  "&layer=" + layerId +
-                  "&geometry=true";
+            "&layer=" + layerId +
+            "&geometry=true";
         if (nsGmx.Auth && nsGmx.Auth.getResourceServer) {
             nsGmx.Auth.getResourceServer('geomixer').sendGetRequest(url).then(function (response) {
                 _success(response);
@@ -365,7 +366,7 @@ shared.getLayersGeometry = function (layersArr, sender, callback, errorCallback)
     var id = 1;
 
     var defArr = [];
-    for (var j = 0 ; j < layersArr.length; j++) {
+    for (var j = 0; j < layersArr.length; j++) {
 
         var layerId = layersArr[j];
 
@@ -448,8 +449,8 @@ shared.isPointInPoly = function (poly, pt) {
     poly[0][0] == poly[l - 1][0] && poly[0][1] == poly[l - 1][1] && l--;
     for (var c = false, i = -1, j = l - 1; ++i < l; j = i)
         ((poly[i][1] <= pt.y && pt.y < poly[j][1]) || (poly[j][1] <= pt.y && pt.y < poly[i][1]))
-        && (pt.x < (poly[j][0] - poly[i][0]) * (pt.y - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0])
-        && (c = !c);
+            && (pt.x < (poly[j][0] - poly[i][0]) * (pt.y - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0])
+            && (c = !c);
     return c;
 };
 
@@ -497,15 +498,15 @@ shared.mergeRecursive = function (obj1, obj2) {
 
 shared.disableHTMLSelection = function (selector) {
     $(selector).attr('unselectable', 'on')
-     .css({
-         '-moz-user-select': '-moz-none',
-         '-moz-user-select': 'none',
-         '-o-user-select': 'none',
-         '-khtml-user-select': 'none',
-         '-webkit-user-select': 'none',
-         '-ms-user-select': 'none',
-         'user-select': 'none'
-     }).bind('selectstart', function () { return false; });
+        .css({
+            '-moz-user-select': '-moz-none',
+            '-moz-user-select': 'none',
+            '-o-user-select': 'none',
+            '-khtml-user-select': 'none',
+            '-webkit-user-select': 'none',
+            '-ms-user-select': 'none',
+            'user-select': 'none'
+        }).bind('selectstart', function () { return false; });
 };
 
 /*

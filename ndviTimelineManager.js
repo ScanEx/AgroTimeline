@@ -1120,7 +1120,7 @@ NDVITimelineManager.prototype.setCloudMaskRenderHook = function (layer, callback
 
 NDVITimelineManager.prototype.setRenderHook = function (layer, callback_kr, callback2) {
 
-    if (L.version.indexOf("1.2") === -1) {
+    if (L.version === "0.7.7") {
         if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI" || this._selectedOption == "LANDSAT_MSAVI" || this._selectedOption == "SENTINEL_MSAVI") {
             this.layerBounds && layer.removeClipPolygon(this.layerBounds);
         }
@@ -1128,7 +1128,7 @@ NDVITimelineManager.prototype.setRenderHook = function (layer, callback_kr, call
 
     if (this._cutOff) {
 
-        if (L.version.indexOf("1.2") === -1) {
+        if (L.version === "0.7.7") {
             if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI" || this._selectedOption == "LANDSAT_MSAVI" || this._selectedOption == "SENTINEL_MSAVI") {
                 this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
                 layer.addClipPolygon(this.layerBounds);
@@ -1989,7 +1989,7 @@ NDVITimelineManager.cloudMaskKr_hook = function (tile, info) {
     if (tile) {
         NDVITimelineManager.cloudMaskTolesBG[id] = tile;
         tile.style.display = 'none';
-        if (L.version.indexOf("1.2") !== -1) {
+        if (L.version !== "0.7.7") {
             ndviTimelineManager.repaintVisibleLayers(tile.zKey);
         }
     }
@@ -2000,7 +2000,7 @@ NDVITimelineManager.kr_hook = function (tile, info) {
     if (tile) {
         NDVITimelineManager.tolesBG[id] = tile;
         tile.style.display = 'none';
-        if (L.version.indexOf("1.2") !== -1) {
+        if (L.version !== "0.7.7") {
             ndviTimelineManager.repaintVisibleLayers(tile.zKey);
         }
     }
@@ -2522,7 +2522,7 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
     if (this._selectedLayers.length && !NDVITimelineManager.equal(that._visibleLayersOnTheDisplay, prevLayers)) {
         if (this._selectedOption == "HR" || this._selectedOption == "CLASSIFICATION") {
 
-            if (L.version.indexOf("1.2") === -1) {
+            if (L.version === "0.7.7") {
                 this.removeSelectedLayersClipPolygon();
             }
 
@@ -2536,7 +2536,7 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
                     this._visibleLayersOnTheDisplayPtr[i].addPreRenderHook(NDVITimelineManager.l_hook);
                 }
 
-                if (L.version.indexOf("1.2") === -1) {
+                if (L.version === "0.7.7") {
                     this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
                     this.addSelectedLayersClipPolygon(this.layerBounds);
                 }
@@ -5215,6 +5215,10 @@ NDVITimelineManager.prototype._setLayerImageProcessing = function (layer, shotTy
         var that = this;
         layer.setRasterHook(
             function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
+
+                //var ptx = dstCanvas.getContext('2d');
+                //ptx.drawImage(srcImage, sx, sy, sw, sh, dx, dy, dw, dh);
+
                 that._tileImageProcessing(dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info, shotType, layer);
             });
     }
@@ -5241,7 +5245,7 @@ NDVITimelineManager.prototype._tileImageProcessing = function (dstCanvas, srcIma
             }
         }
 
-        this._applyPalette(url, dstCanvas, srcImage, shotType, info);
+        this._applyPalette(url, dstCanvas, srcImage, shotType, info, sx, sy, sw, sh, dx, dy, dw, dh);
     }
 };
 
@@ -5291,13 +5295,13 @@ NDVITimelineManager.prototype._applyClassificationPalette = function (url, dstCa
     }
 };
 
-NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanvas, shotType, info) {
+NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanvas, shotType, info, sx, sy, sw, sh, dx, dy, dw, dh) {
     //если есть url, значит есть палитра.
     var that = this;
     if (url) {
         var palette = this._palettes[url];
         shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-            info.destination.x, info.destination.y, that.lmap.getZoom(),
+            info.destination.x, info.destination.y, info.destination.z/*that.lmap.getZoom()*/,
             dstCanvas,
             function (r, g, b, a) {
                 if (r == 0 && g == 0 && b == 0) {
@@ -5305,7 +5309,7 @@ NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanva
                 } else {
                     return that.legendControl.getNDVIColor((r - 101) / 100);
                 }
-            }, shared.NEAREST);
+            }, shared.NEAREST, sx, sy);
     } else {
         dstCanvas = srcCanvas;
     }
