@@ -2987,8 +2987,7 @@ NDVITimelineManager.prototype.initializeRGB2ImagePrrocessing = function () {
     var that = this;
     layer.setRasterHook(function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
         shared.zoomTile(srcImage, info.source.x, info.source.y, info.source.z,
-            info.destination.x, info.destination.y, that.lmap.getZoom(), dstCanvas, null, shared.LINEAR);
-
+            info.destination.x, info.destination.y, info.destination.z, dstCanvas, null, shared.LINEAR, sx, sy);
     });
 };
 
@@ -5215,10 +5214,6 @@ NDVITimelineManager.prototype._setLayerImageProcessing = function (layer, shotTy
         var that = this;
         layer.setRasterHook(
             function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
-
-                //var ptx = dstCanvas.getContext('2d');
-                //ptx.drawImage(srcImage, sx, sy, sw, sh, dx, dy, dw, dh);
-
                 that._tileImageProcessing(dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info, shotType, layer);
             });
     }
@@ -5301,7 +5296,7 @@ NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanva
     if (url) {
         var palette = this._palettes[url];
         shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-            info.destination.x, info.destination.y, info.destination.z/*that.lmap.getZoom()*/,
+            info.destination.x, info.destination.y, info.destination.z,
             dstCanvas,
             function (r, g, b, a) {
                 if (r == 0 && g == 0 && b == 0) {
