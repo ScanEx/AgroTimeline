@@ -2957,16 +2957,16 @@ NDVITimelineManager.prototype.initializeImageProcessor = function () {
     this.landsatCloudMask = this.layerCollection[this._layersLegend.HR.mask];
     this.sentinelCloudMask = this.layerCollection[this._layersLegend.SENTINEL_NDVI.mask];
     this.landsatCloudMask.setRasterHook(function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
-        applyMask(dstCanvas, srcImage, info);
+        applyMask(dstCanvas, srcImage, info, sx, sy, sw, sh, dx, dy, dw, dh);
     });
     this.sentinelCloudMask.setRasterHook(function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
-        applyMask(dstCanvas, srcImage, info);
+        applyMask(dstCanvas, srcImage, info, sx, sy, sw, sh, dx, dy, dw, dh);
     });
 
     var that = this;
-    function applyMask(dstCanvas, srcCanvas, info) {
+    function applyMask(dstCanvas, srcCanvas, info, sx, sy, sw, sh, dx, dy, dw, dh) {
         shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-            info.destination.x, info.destination.y, that.lmap.getZoom(),
+            info.destination.x, info.destination.y, info.destination.z,
             dstCanvas,
             function (r, g, b, a) {
                 if (r === 0 || r === 1) {
@@ -2974,7 +2974,7 @@ NDVITimelineManager.prototype.initializeImageProcessor = function () {
                 } else {
                     return [r, g, b, a];
                 }
-            }, shared.NEAREST);
+            }, shared.NEAREST, sx, sy);
     }
 };
 
