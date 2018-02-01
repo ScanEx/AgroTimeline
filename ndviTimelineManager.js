@@ -5,6 +5,13 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     //leaflet map
     this.lmap = lmap;
 
+    this._projFunc;
+    if (!lmap.options.srs) {
+        this._projFunc = L.Projection.Mercator;
+    } else if (lmap.options.srs == 3857) {
+        this._projFunc = L.CRS.EPSG3857;
+    }
+
     this._container = container || document.getElementById("flash");
 
     this._chkQl = false;
@@ -1650,7 +1657,7 @@ NDVITimelineManager.prototype._showRedraw = function () {
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.INHOMOGENUITY) {
             this._showINHOMOGENUITY();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.CLASSIFICATION) {
-            this._showCLASSIFICATION();
+            //this._showCLASSIFICATION();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.CONDITIONS_OF_VEGETATION) {
             this._showCONDITIONS_OF_VEGETATION();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.FIRES_POINTS) {
@@ -1932,6 +1939,18 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
     this._selectedLayers.push(layer);
 
     this.showCloudMask(this._selectedDate);
+
+    this.checkSelectedLayerObservers();
+};
+
+NDVITimelineManager.prototype.checkSelectedLayerObservers = function () {
+    var that = this;
+    this._checkObserverHandler && clearTimeout(this._checkObserverHandler);
+    this._checkObserverHandler = setTimeout(function () {
+        for (var i = 0; i < that._selectedLayers.length; i++) {
+            L.gmx.layersVersion.chkVersion(that._selectedLayers[i]);
+        }
+    }, 500);
 };
 
 NDVITimelineManager.prototype._showPREVIEW = function () {
@@ -2049,6 +2068,8 @@ NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
     this._selectedLayers.push(layer);
 
     this.showCloudMask(this._selectedDate);
+
+    this.checkSelectedLayerObservers();
 };
 
 NDVITimelineManager.prototype._showNDVI_HR = function () {
@@ -2084,43 +2105,45 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
     this._selectedLayers.push(layer);
 
     this.showCloudMask(this._selectedDate);
+
+    this.checkSelectedLayerObservers();
 };
 
 NDVITimelineManager.prototype._showLANDSAT_MSAVI = function () {
     this._showLayerNDVI_HR("LANDSAT_MSAVI");
 };
 
-NDVITimelineManager.prototype._showCLASSIFICATION = function () {
+//NDVITimelineManager.prototype._showCLASSIFICATION = function () {
 
-    this.hideSelectedLayer();
+//    this.hideSelectedLayer();
 
-    this._selectedOption = "CLASSIFICATION";
+//    this._selectedOption = "CLASSIFICATION";
 
-    var layer = this.layerCollection[this._layersLegend["CLASSIFICATION"].name];
-    layer.removeFilter();
+//    var layer = this.layerCollection[this._layersLegend["CLASSIFICATION"].name];
+//    layer.removeFilter();
 
-    this.setRenderHook(layer, NDVITimelineManager.kr_hook, NDVITimelineManager.l_hook);
+//    this.setRenderHook(layer, NDVITimelineManager.kr_hook, NDVITimelineManager.l_hook);
 
-    var dateCn = this._layersLegend["CLASSIFICATION"].dateColumnName;
-    var dateId = layer._gmx.tileAttributeIndexes[dateCn];
+//    var dateCn = this._layersLegend["CLASSIFICATION"].dateColumnName;
+//    var dateId = layer._gmx.tileAttributeIndexes[dateCn];
 
-    var that = this;
-    layer.setFilter(function (item) {
-        var p = item.properties;
-        if (p[dateId] == that._selectedDateL) {
-            return true;
-        }
-        return false;
-    }).on('doneDraw', function () {
-        ndviTimelineManager.repaintAllVisibleLayers();
-    }).setDateInterval(
-        NDVITimelineManager.addDays(this._selectedDate, -1),
-        NDVITimelineManager.addDays(this._selectedDate, 1)
-        );
-    this.lmap.addLayer(layer);
-    layer.setZIndex(0);
-    this._selectedLayers.push(layer);
-};
+//    var that = this;
+//    layer.setFilter(function (item) {
+//        var p = item.properties;
+//        if (p[dateId] == that._selectedDateL) {
+//            return true;
+//        }
+//        return false;
+//    }).on('doneDraw', function () {
+//        ndviTimelineManager.repaintAllVisibleLayers();
+//    }).setDateInterval(
+//        NDVITimelineManager.addDays(this._selectedDate, -1),
+//        NDVITimelineManager.addDays(this._selectedDate, 1)
+//        );
+//    this.lmap.addLayer(layer);
+//    layer.setZIndex(0);
+//    this._selectedLayers.push(layer);
+//};
 
 NDVITimelineManager.prototype._showNDVI16 = function () {
 
@@ -2153,6 +2176,8 @@ NDVITimelineManager.prototype._showNDVI16 = function () {
             this._selectedLayers.push(layer);
         }
     }
+
+    this.checkSelectedLayerObservers();
 };
 
 NDVITimelineManager.prototype._showQUALITY16 = function () {
@@ -2179,6 +2204,8 @@ NDVITimelineManager.prototype._showQUALITY16 = function () {
     this.lmap.addLayer(layer);
     layer.setZIndex(0);
     this._selectedLayers.push(layer);
+
+    this.checkSelectedLayerObservers();
 };
 
 NDVITimelineManager.prototype._showRATING = function () {
@@ -2669,82 +2696,82 @@ NDVITimelineManager.prototype._refreshTimeline = function () {
 NDVITimelineManager.geomCache = [];
 
 //Эта функция возвращает массив полигонов
-NDVITimelineManager.inverseMercatorGeometry = function (geometry) {
-    var res = [];
-    if (geometry.type === "POLYGON") {
-        res.push(gmxAPI.from_merc_geometry({ "type": "POLYGON", "coordinates": geometry.coordinates }));
-    } else if (geometry.type === "MULTIPOLYGON") {
-        var poligons = geometry.coordinates;
-        for (var i = 0; i < poligons.length; i++) {
-            res.push(gmxAPI.from_merc_geometry({ "type": "POLYGON", "coordinates": poligons[i] }));
-        }
-    }
-    return res;
-};
+//NDVITimelineManager.inverseMercatorGeometry = function (geometry) {
+//    var res = [];
+//    if (geometry.type === "POLYGON") {
+//        res.push(gmxAPI.from_merc_geometry({ "type": "POLYGON", "coordinates": geometry.coordinates }));
+//    } else if (geometry.type === "MULTIPOLYGON") {
+//        var poligons = geometry.coordinates;
+//        for (var i = 0; i < poligons.length; i++) {
+//            res.push(gmxAPI.from_merc_geometry({ "type": "POLYGON", "coordinates": poligons[i] }));
+//        }
+//    }
+//    return res;
+//};
 
-NDVITimelineManager.prototype.getLayersCommonGeometry = function (layersArr, callback) {
+//NDVITimelineManager.prototype.getLayersCommonGeometry = function (layersArr, callback) {
 
-    if (gmxAPI.map.getZ() < NDVITimelineManager.MIN_ZOOM) {
-        return;
-    }
+//    if (gmxAPI.map.getZ() < NDVITimelineManager.MIN_ZOOM) {
+//        return;
+//    }
 
-    var that = this;
-    var defArr = [];
-    var geometryArray = [];
-    var equalLayers = [];
+//    var that = this;
+//    var defArr = [];
+//    var geometryArray = [];
+//    var equalLayers = [];
 
-    for (var i = 0; i < layersArr.length; i++) {
-        (function (index) {
-            var layerName = layersArr[index];
-            if (!equalLayers[layerName]) {
-                equalLayers[layerName] = true;
-                defArr[index] = new $.Deferred();
-                if (!NDVITimelineManager.geomCache[layerName]) {
-                    NDVITimelineManager.geomCache[layerName] = [];
-                    //Получаем геометрию полей с сервера
-                    var url = "http://maps.kosmosnimki.ru/VectorLayer/Search.ashx?WrapStyle=func" +
-                        "&layer=" + layerName +
-                        "&geometry=true";
+//    for (var i = 0; i < layersArr.length; i++) {
+//        (function (index) {
+//            var layerName = layersArr[index];
+//            if (!equalLayers[layerName]) {
+//                equalLayers[layerName] = true;
+//                defArr[index] = new $.Deferred();
+//                if (!NDVITimelineManager.geomCache[layerName]) {
+//                    NDVITimelineManager.geomCache[layerName] = [];
+//                    //Получаем геометрию полей с сервера
+//                    var url = "http://maps.kosmosnimki.ru/VectorLayer/Search.ashx?WrapStyle=func" +
+//                        "&layer=" + layerName +
+//                        "&geometry=true";
 
-                    sendCrossDomainJSONRequest(url, function (response) {
-                        var res = response.Result;
-                        var geom_index = res.fields.indexOf("geomixergeojson");
-                        for (var j = 0; j < res.values.length; j++) {
-                            var geom = NDVITimelineManager.inverseMercatorGeometry(res.values[j][geom_index]);
-                            NDVITimelineManager.geomCache[layerName].push.apply(NDVITimelineManager.geomCache[layerName], geom);
-                        }
-                        geometryArray[index] = NDVITimelineManager.geomCache[layerName];
-                        defArr[index].resolve();
-                    });
-                } else {
-                    geometryArray[index] = NDVITimelineManager.geomCache[layerName];
-                    defArr[index].resolve();
-                }
-            }
-        }(i));
-    }
+//                    sendCrossDomainJSONRequest(url, function (response) {
+//                        var res = response.Result;
+//                        var geom_index = res.fields.indexOf("geomixergeojson");
+//                        for (var j = 0; j < res.values.length; j++) {
+//                            var geom = NDVITimelineManager.inverseMercatorGeometry(res.values[j][geom_index]);
+//                            NDVITimelineManager.geomCache[layerName].push.apply(NDVITimelineManager.geomCache[layerName], geom);
+//                        }
+//                        geometryArray[index] = NDVITimelineManager.geomCache[layerName];
+//                        defArr[index].resolve();
+//                    });
+//                } else {
+//                    geometryArray[index] = NDVITimelineManager.geomCache[layerName];
+//                    defArr[index].resolve();
+//                }
+//            }
+//        }(i));
+//    }
 
-    $.when.apply($, defArr).then(function () {
-        var commonGeometry = { "type": "MULTIPOLYGON", "coordinates": [] };
-        //делаем общую геометрию
-        for (var i = 0; i < geometryArray.length; i++) {
-            var geom = geometryArray[i];
-            for (var j = 0; j < geom.length; j++) {
-                var gj = geom[j];
-                if (gj.type == "POLYGON") {
-                    commonGeometry.coordinates.push(gj.coordinates);
-                } else {
-                    //MULTYPOLYGON
-                    for (var k = 0; k < gj.coordinates.length; k++) {
-                        commonGeometry.coordinates.push(gj.coordinates[k]);
-                    }
-                }
-            }
-        }
+//    $.when.apply($, defArr).then(function () {
+//        var commonGeometry = { "type": "MULTIPOLYGON", "coordinates": [] };
+//        //делаем общую геометрию
+//        for (var i = 0; i < geometryArray.length; i++) {
+//            var geom = geometryArray[i];
+//            for (var j = 0; j < geom.length; j++) {
+//                var gj = geom[j];
+//                if (gj.type == "POLYGON") {
+//                    commonGeometry.coordinates.push(gj.coordinates);
+//                } else {
+//                    //MULTYPOLYGON
+//                    for (var k = 0; k < gj.coordinates.length; k++) {
+//                        commonGeometry.coordinates.push(gj.coordinates[k]);
+//                    }
+//                }
+//            }
+//        }
 
-        callback && callback.call(that, commonGeometry);
-    });
-};
+//        callback && callback.call(that, commonGeometry);
+//    });
+//};
 
 NDVITimelineManager.prototype.applyZoomHandler = function () {
     var that = this;
@@ -2803,7 +2830,9 @@ NDVITimelineManager.prototype.dateDivHoverCallback = function (e) {
             dateColumnName = ll._gmx.tileAttributeIndexes[dateColumnName];
 
             //собираем риски сосредоточенные в одном месте
-            var center = L.Projection.Mercator.project(this.lmap.getCenter());
+
+            var center = this._projFunc.project(this.lmap.getCenter());
+
             for (var i in items) {
                 var ii = items[i];
                 var d0 = e.currentTarget.tip.textContent.substring(0, 10);
@@ -3607,11 +3636,10 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                                 lip[this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["acqdate"]];
 
                             if (lip_dcln == date) {
-                                var center = L.Projection.Mercator.project(that.lmap.getCenter());
+                                var center = this._projFunc.project(this.lmap.getCenter());
                                 var geom = lip[lip.length - 1];
                                 if (NDVITimelineManager.isPointInGeometry(geom, center)) {
-                                    if (this._chkQl/*document.getElementById("chkQl").checked*/ ||
-                                        _GMX_RasterCatalogID && !this._chkQl/*document.getElementById("chkQl").checked*/ && lip[_GMX_RasterCatalogID].length) {
+                                    if (this._chkQl || _GMX_RasterCatalogID && !this._chkQl && lip[_GMX_RasterCatalogID].length) {
                                         filenames.push(getFilename(lip, this.layerCollection[selectedLayer]));
                                         that._currentRKIdArr.push(lip[_GMX_RasterCatalogID]);
                                     }
