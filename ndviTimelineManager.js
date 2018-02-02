@@ -91,7 +91,7 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     this._visibleLayersOnTheDisplayPtr = [];
 
     //инициализация модуля посторения тематики по средним NDVI
-    var ts = new ThematicStrategy(params.layers.HR.palette.ndvi.url, function (prop) {
+    var ts = new ThematicStrategy(this._projFunc, params.layers.HR.palette.ndvi.url, function (prop) {
         if (prop) {
             var color = that.legendControl.getNDVIColor(prop.ndvi_mean_clear);
             val = prop.ndvi_mean_clear * 100 + 101;
@@ -123,7 +123,7 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     this._doubleClick = false;
 
     //инициализация тематического модуля посторения тематики неоднородности
-    var tsneondn = new ThematicStrategy(null, function (prop) {
+    var tsneondn = new ThematicStrategy(this._projFunc, null, function (prop) {
         if (prop) {
             var val = prop.ndvi_std_clear;
             var c = "c0";

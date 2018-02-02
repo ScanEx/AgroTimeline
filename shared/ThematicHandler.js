@@ -3,10 +3,12 @@
     class ThematicStrategy
 ====================================
 */
-var ThematicStrategy = function (url, colorCallback) {
+var ThematicStrategy = function (projFunc, url, colorCallback) {
     this.palette = [];
     url && this.loadPalette(url);
     this.colorCallback = colorCallback;
+
+    this.projFunc = projFunc;
 
     //для последовательного вычисления
     this._requests = [];
@@ -311,7 +313,7 @@ ThematicHandler.prototype.setLayerStyleHook = function (layer) {
         } else {
             return data.style;
         }
-    }, 100);
+    }, -10);
 };
 
 ThematicHandler.prototype._applyStrategy = function (features, layerName) {

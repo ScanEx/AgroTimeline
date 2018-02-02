@@ -40,7 +40,7 @@ Rating.prototype.setLayerStyleHook = function (layer) {
         } else {
             return data.style;
         }
-    }, 100);
+    }, -10);
 };
 
 Rating.prototype.show = function () {
