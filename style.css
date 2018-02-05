@@ -426,6 +426,7 @@ div.timeline-axis-grid {
     right: 15px;
     border: solid 1px #C0BEBE;
     box-shadow: rgba(144, 141, 141, 0.7) 0px 0px 1.6px;
+    z-index: 100000000;
 }
 
 .comboOptionsPanel {
