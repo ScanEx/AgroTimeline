@@ -65,9 +65,13 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
         this._comboAsLayers[i] = [];
         var r = this._combo[i].rk;
         for (var j = 0; j < r.length; j++) {
-            var n = this._layersLegend[r[j]].name;
-            this._layerInCombo[n] = i;
-            this._comboAsLayers[i][j] = n;
+            if (this._layersLegend[r[j]]) {
+                var n = this._layersLegend[r[j]].name;
+                this._layerInCombo[n] = i;
+                this._comboAsLayers[i][j] = n;
+            } else {
+                console.log("Option: '" + r[j] + "' is undefined. Please check timeline parameters.");
+            }
         }
     }
 
@@ -1159,7 +1163,7 @@ NDVITimelineManager.prototype.setRenderHook = function (layer, callback_kr, call
 
 NDVITimelineManager.prototype.clearRenderHook = function () {
     var ndviLayer = this.layerCollection[this._layersLegend.HR.name];
-    var classLayer = this.layerCollection[this._layersLegend.CLASSIFICATION.name];
+    var classLayer = this._layersLegend.CLASSIFICATION && this.layerCollection[this._layersLegend.CLASSIFICATION.name];
     var sentinelNdviLayer = this.layerCollection[this._layersLegend.SENTINEL_NDVI.name];
 
     var landsatMsaviLayer = this.layerCollection[this._layersLegend.LANDSAT_MSAVI.name];
@@ -1883,6 +1887,11 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
     this._selectedOption = layerTypeName;
 
     var layer = this.layerCollection[this._layersLegend[layerTypeName].name];
+
+    if (this._layersLegend[layerTypeName].maxZoom) {
+        layer._gmx.maxNativeZoom = this._layersLegend[layerTypeName].maxZoom;
+    }
+
     layer.removeFilter();
 
     var dateCn = this._layersLegend[layerTypeName].dateColumnName;
@@ -1935,7 +1944,7 @@ NDVITimelineManager.prototype._showLayer = function (layerTypeName) {
     });
     layer.setDateInterval(NDVITimelineManager.addDays(this._selectedDate, -1), NDVITimelineManager.addDays(this._selectedDate, 1));
     this.lmap.addLayer(layer);
-    layer.setZIndex(0);
+    layer.setZIndex(-1);
     this._selectedLayers.push(layer);
 
     this.showCloudMask(this._selectedDate);
@@ -2043,6 +2052,10 @@ NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
 
     var layer = this.layerCollection[this._layersLegend[layerTypeName].name];
 
+    if (this._layersLegend[layerTypeName].maxZoom) {
+        layer._gmx.maxNativeZoom = this._layersLegend[layerTypeName].maxZoom;
+    }
+
     layer.removeFilter();
 
     this.setRenderHook(layer, NDVITimelineManager.kr_hook, NDVITimelineManager.l_hook);
@@ -2064,7 +2077,7 @@ NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
         NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
-    layer.setZIndex(0);
+    layer.setZIndex(-1);
     this._selectedLayers.push(layer);
 
     this.showCloudMask(this._selectedDate);
@@ -2079,6 +2092,10 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
     this._selectedOption = "HR";
 
     var layer = this.layerCollection[this._layersLegend.HR.name];
+
+    if (this._layersLegend.HR.maxZoom) {
+        layer._gmx.maxNativeZoom = this._layersLegend.HR.maxZoom;
+    }
 
     layer.removeFilter();
 
@@ -2101,7 +2118,7 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
         NDVITimelineManager.addDays(this._selectedDate, 1)
         );
     this.lmap.addLayer(layer);
-    layer.setZIndex(0);
+    layer.setZIndex(-1);
     this._selectedLayers.push(layer);
 
     this.showCloudMask(this._selectedDate);
@@ -2112,38 +2129,6 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
 NDVITimelineManager.prototype._showLANDSAT_MSAVI = function () {
     this._showLayerNDVI_HR("LANDSAT_MSAVI");
 };
-
-//NDVITimelineManager.prototype._showCLASSIFICATION = function () {
-
-//    this.hideSelectedLayer();
-
-//    this._selectedOption = "CLASSIFICATION";
-
-//    var layer = this.layerCollection[this._layersLegend["CLASSIFICATION"].name];
-//    layer.removeFilter();
-
-//    this.setRenderHook(layer, NDVITimelineManager.kr_hook, NDVITimelineManager.l_hook);
-
-//    var dateCn = this._layersLegend["CLASSIFICATION"].dateColumnName;
-//    var dateId = layer._gmx.tileAttributeIndexes[dateCn];
-
-//    var that = this;
-//    layer.setFilter(function (item) {
-//        var p = item.properties;
-//        if (p[dateId] == that._selectedDateL) {
-//            return true;
-//        }
-//        return false;
-//    }).on('doneDraw', function () {
-//        ndviTimelineManager.repaintAllVisibleLayers();
-//    }).setDateInterval(
-//        NDVITimelineManager.addDays(this._selectedDate, -1),
-//        NDVITimelineManager.addDays(this._selectedDate, 1)
-//        );
-//    this.lmap.addLayer(layer);
-//    layer.setZIndex(0);
-//    this._selectedLayers.push(layer);
-//};
 
 NDVITimelineManager.prototype._showNDVI16 = function () {
 
@@ -2172,7 +2157,7 @@ NDVITimelineManager.prototype._showNDVI16 = function () {
             });
             layer.setDateInterval(NDVITimelineManager.addDays(this._selectedDate, -1), NDVITimelineManager.addDays(this._selectedDate, 1));
             this.lmap.addLayer(layer);
-            layer.setZIndex(0);
+            layer.setZIndex(-1);
             this._selectedLayers.push(layer);
         }
     }
@@ -2202,7 +2187,7 @@ NDVITimelineManager.prototype._showQUALITY16 = function () {
     });
     layer.setDateInterval(NDVITimelineManager.addDays(this._selectedDate, -1), NDVITimelineManager.addDays(this._selectedDate, 1));
     this.lmap.addLayer(layer);
-    layer.setZIndex(0);
+    layer.setZIndex(-1);
     this._selectedLayers.push(layer);
 
     this.checkSelectedLayerObservers();
@@ -2986,53 +2971,47 @@ NDVITimelineManager.prototype.initializeImageProcessor = function () {
     this.landsatCloudMask = this.layerCollection[this._layersLegend.HR.mask];
     this.sentinelCloudMask = this.layerCollection[this._layersLegend.SENTINEL_NDVI.mask];
     this.landsatCloudMask.setRasterHook(function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
-        applyMask(dstCanvas, srcImage, info, sx, sy, sw, sh, dx, dy, dw, dh);
+        applyMask(dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info.source.z, info.destination.z);
     });
     this.sentinelCloudMask.setRasterHook(function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
-        applyMask(dstCanvas, srcImage, info, sx, sy, sw, sh, dx, dy, dw, dh);
+        applyMask(dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info.source.z, info.destination.z);
     });
 
     var that = this;
-    function applyMask(dstCanvas, srcCanvas, info, sx, sy, sw, sh, dx, dy, dw, dh) {
-        shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-            info.destination.x, info.destination.y, info.destination.z,
-            dstCanvas,
-            function (r, g, b, a) {
-                if (r === 0 || r === 1) {
-                    return [r, g, b, 0];
-                } else {
-                    return [r, g, b, a];
+    function applyMask(dstCanvas, srcCanvas, sx, sy, sw, sh, dx, dy, dw, dh, sz, dz) {
+
+        var ctx = srcCanvas.getContext('2d');
+
+        var imgd = ctx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+        var srcPix = imgd.data,
+            dstPix = new Array(dw * dh * 4);
+
+        var dZ2 = Math.pow(2, dz - sz);
+
+        for (var i = 0; i < 256; i++) {
+            for (var j = 0; j < 256; j++) {
+
+                var srcInd = ((Math.floor(i / dZ2) + sy) * 256 + Math.floor(j / dZ2) + sx) * 4;
+
+                var k = i * 256 + j;
+                var ind = k * 4;
+
+                dstPix[ind] = srcPix[srcInd];
+                dstPix[ind + 1] = srcPix[srcInd + 1];
+                dstPix[ind + 2] = srcPix[srcInd + 2];
+                dstPix[ind + 3] = srcPix[srcInd + 3];
+
+                if (dstPix[ind] === 0 || dstPix[ind] === 1) {
+                    dstPix[ind + 3] = 0;
                 }
-            }, shared.NEAREST, sx, sy);
+            }
+        }
+
+        var context = dstCanvas.getContext('2d');
+        var imageData = context.createImageData(dstCanvas.width, dstCanvas.height);
+        imageData.data.set(dstPix);
+        context.putImageData(imageData, 0, 0);
     }
-};
-
-NDVITimelineManager.prototype.initializeRGBImagePrrocessing = function () {
-    var layer = this.layerCollection[this._layersLegend.RGB.name];
-};
-
-NDVITimelineManager.prototype.initializeRGB2ImagePrrocessing = function () {
-    var layer = this.layerCollection[this._layersLegend.RGB2.name];
-    var that = this;
-    layer.setRasterHook(function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
-        shared.zoomTile(srcImage, info.source.x, info.source.y, info.source.z,
-            info.destination.x, info.destination.y, info.destination.z, dstCanvas, null, shared.LINEAR, sx, sy);
-    });
-};
-
-NDVITimelineManager.prototype.initializeShotsObserver = function () {
-    //for (var i = 0; i < this._combo.length; i++) {
-    //    var r = this._combo[i].rk;
-    //    for (var j = 0; j < r.length; j++) {
-    //        var rj = r[j];
-    //        var lrj = this._layersLegend[rj];
-    //        if (this._layersLegend[rj].viewTimeline) {
-    //            var n = lrj.name;
-    //        }
-    //    }
-    //}
-
-    this.bindTimelineCombo(this._selectedCombo);
 };
 
 NDVITimelineManager.prototype.unbindLayersTimeline = function () {
@@ -3286,13 +3265,6 @@ NDVITimelineManager.prototype.initializeTimeline = function (show) {
         //связываем слои NDVI с таймлайном и обработку(раскраску) тайлов этих слоев
         //я не зря разбил эти циклы на отдельные, онипригадятся в будущем кажый в отдельности
         this.initializeImageProcessor();
-
-        //сделаем обработку для раззумливания снимков отдельным обработчиком
-        this.initializeRGBImagePrrocessing();
-        this.initializeRGB2ImagePrrocessing();
-
-        //обсерверы на КР, нужно для определения кол-ва снимков,  и окончания загрузки на таймлайн
-        //this.initializeShotsObserver();
 
         this.bindTimelineCombo(this._selectedCombo);
 
@@ -4824,6 +4796,11 @@ NDVITimelineManager.prototype.showCloudMask = function (date) {
     var that = this;
 
     function showCloudLayer(layer, cutOff) {
+
+        if (that._layersLegend[that._selectedOption] && that._layersLegend[that._selectedOption].maxZoom) {
+            layer._gmx.maxNativeZoom = that._layersLegend[that._selectedOption].maxZoom;
+        }
+
         layer.removeFilter();
 
         if (cutOff) {
@@ -4852,7 +4829,7 @@ NDVITimelineManager.prototype.showCloudMask = function (date) {
             NDVITimelineManager.addDays(that._selectedDate, -1),
             NDVITimelineManager.addDays(that._selectedDate, 1)
             );
-        layer.setZIndex(1);
+        layer.setZIndex(0);
         that.lmap.addLayer(layer);
     };
 
@@ -5242,98 +5219,71 @@ NDVITimelineManager.prototype._setLayerImageProcessing = function (layer, shotTy
         var that = this;
         layer.setRasterHook(
             function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
-                that._tileImageProcessing(dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info, shotType, layer);
+                that._tileImageProcessing(dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, shotType);
             });
     }
 };
 
-NDVITimelineManager.prototype._tileImageProcessing = function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info, shotType, layer) {
+NDVITimelineManager.prototype._tileImageProcessing = function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, shotType) {
 
     var layerPalette = this._layersLegend[shotType].palette,
         url;
 
-    if (shotType === "CLASSIFICATION") {
-        var n = layerPalette.classification;
-        var url = n.url;
-        this._applyClassificationPalette(url, dstCanvas, srcImage, info);
-    } else {
-        if (layerPalette) {
-            var q = layerPalette.quality,
-                n = layerPalette.ndvi;
+    if (layerPalette) {
+        var q = layerPalette.quality,
+            n = layerPalette.ndvi;
 
-            if (n) {
-                url = n.url
-            } else if (q) {
-                url = q.url
+        if (n) {
+            url = n.url
+        } else if (q) {
+            url = q.url
+        }
+    }
+
+    this._applyPalette(url, dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh);
+};
+
+NDVITimelineManager.prototype._pal = function (inOutArr, k) {
+    if (inOutArr[k] == 0 && inOutArr[k + 1] == 0 && inOutArr[k + 2] == 0) {
+        inOutArr[k] = 0;
+        inOutArr[k + 1] = 179;
+        inOutArr[k + 2] = 255;
+        inOutArr[k + 3] = 255;
+    } else {
+        var c = this.legendControl.getNDVIColor((inOutArr[k] - 101) / 100);
+        inOutArr[k] = c[0];
+        inOutArr[k + 1] = c[1];
+        inOutArr[k + 2] = c[2];
+        inOutArr[k + 3] = c[3];
+    }
+};
+
+NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanvas, sx, sy, sw, sh, dx, dy, dw, dh) {
+    if (url) {
+        var palette = this._palettes[url];
+
+        var ctx = dstCanvas.getContext('2d');
+
+        ctx.drawImage(srcCanvas, sx, sy, sw, sh, dx, dy, dw, dh);
+
+        var imgd = ctx.getImageData(0, 0, dstCanvas.width, dstCanvas.height);
+        var pix = imgd.data;
+
+        for (var i = 0; i < dstCanvas.width; i++) {
+            for (var j = 0; j < dstCanvas.height; j++) {
+                var k = i * dstCanvas.width + j;
+                var ind = k * 4;
+                this._pal(pix, ind);
             }
         }
 
-        this._applyPalette(url, dstCanvas, srcImage, shotType, info, sx, sy, sw, sh, dx, dy, dw, dh);
-    }
-};
+        var context = dstCanvas.getContext('2d');
+        var imageData = context.createImageData(dstCanvas.width, dstCanvas.height);
+        imageData.data.set(pix);
+        context.putImageData(imageData, 0, 0);
 
-NDVITimelineManager.checkGreyImageData = function (data) {
-    for (var i = 0; i < data.length; i += 4) {
-        if (((data[i] & data[i + 1]) ^ data[i + 2])) {
-            return false;
-        }
-    }
-    return true;
-};
-
-NDVITimelineManager.prototype._applyClassificationPalette = function (url, dstCanvas, srcCanvas, info) {
-    var that = this;
-    var palette = this._palettes[url];
-    var canvas = document.createElement("canvas");
-    var w = 256,
-        h = 256;
-    canvas.width = w;
-    canvas.height = h;
-    var context = canvas.getContext('2d');
-    context.drawImage(srcCanvas, 0, 0, w, h);
-    var imgd = context.getImageData(0, 0, w, h);
-    var pix = imgd.data;
-
-    if (NDVITimelineManager.checkGreyImageData(pix)) {
-        shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-            info.destination.x, info.destination.y, that.lmap.getZoom(),
-            dstCanvas,
-            function (r, g, b, a) {
-                var px = r;
-                var pal = palette[px];
-                if (pal !== undefined) {
-                    if (r == 0 && g == 0 && b == 0) {
-                        return [0, 179, 255, 255];
-                    } else {
-                        return [pal.partRed, pal.partGreen, pal.partBlue, 255];
-                    }
-                }
-                return [0, 0, 0, 255];
-            }, shared.NEAREST);
-
-    } else {
-        shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-            info.destination.x, info.destination.y, that.lmap.getZoom(),
-            dstCanvas, null, shared.NEAREST);
-    }
-};
-
-NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanvas, shotType, info, sx, sy, sw, sh, dx, dy, dw, dh) {
-    //если есть url, значит есть палитра.
-    var that = this;
-    if (url) {
-        var palette = this._palettes[url];
-        shared.zoomTile(srcCanvas, info.source.x, info.source.y, info.source.z,
-            info.destination.x, info.destination.y, info.destination.z,
-            dstCanvas,
-            function (r, g, b, a) {
-                if (r == 0 && g == 0 && b == 0) {
-                    return [0, 179, 255, 255];
-                } else {
-                    return that.legendControl.getNDVIColor((r - 101) / 100);
-                }
-            }, shared.NEAREST, sx, sy);
     } else {
         dstCanvas = srcCanvas;
     }
 };
+

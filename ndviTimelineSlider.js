@@ -63,6 +63,15 @@ var NDVITimelineSlider = function (id, events, lmap) {
     pointer.classList.add("ntSliderPointerLight");
     element.appendChild(pointer);
 
+    L.DomEvent.disableClickPropagation(pointer);
+    L.DomEvent.disableScrollPropagation(pointer);
+
+    L.DomEvent.disableClickPropagation(pointer0);
+    L.DomEvent.disableScrollPropagation(pointer0);
+
+    L.DomEvent.disableClickPropagation(pointer1);
+    L.DomEvent.disableScrollPropagation(pointer1);
+
     var caption = document.createElement("div");
     caption.classList.add("ntSliderCaption");
     caption.classList.add("ntCaptionRight");

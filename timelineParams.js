@@ -3,6 +3,7 @@
     exMap: [{ host: "maps.kosmosnimki.ru", name: "PLDYO" }, { host: "maps.kosmosnimki.ru", name: "4C7E120502D5486AAA24698B984A3B7B" }],
     layers: {
         "MODIS": {
+            maxZoom: 11,
             viewTimeline: true,
             name: "A10C86983EB140019725D00CE3A58833",
             dateColumnName: "date",
@@ -13,6 +14,7 @@
             }
         },
         "MODIS_QUALITY": {
+            maxZoom: 11,
             sceneFieldName: "sceneid",
             name: "3471393ADBD546EC9E6D7935F30EA7BA",
             dateColumnName: "date",
@@ -23,6 +25,7 @@
             }
         },
         "HR": {
+            maxZoom: 13,
             name: "8288D69C7C0040EFBB7B7EE6671052E3",
             mask: "A05BB0207AEE4CFD93C045BF71576FDE",
             dateColumnName: "acqdate",
@@ -34,6 +37,7 @@
             }
         },
         "SENTINEL": {
+            maxZoom: 14,
             isSentinel: true,
             cloudsMin: 100,
             showQuicklooks: true,
@@ -43,6 +47,7 @@
             dateColumnName: "acqdate"
         },
         "SENTINEL_NDVI": {
+            maxZoom: 13,
             isSentinel: true,
             name: "EC68D0C097BE4F0B9E9DE4A0B9F591A2",
             mask: "14A988CBC5FD424D9EBE23CEC8168150",
@@ -56,12 +61,14 @@
             }
         },
         "SENTINEL_IR": {
+            maxZoom: 14,
             isSentinel: true,
             cloudsField: "clouds",
             name: "12ECA8F4ED7B487A913ADBD4072B605B",
             dateColumnName: "acqdate"
         },
         "RGB": {
+            maxZoom: 14,
             cloudsMin: 100,
             cloudsField: "CLOUDS",
             viewTimeline: true,
@@ -84,19 +91,10 @@
             dateColumnName: "acqdate"
         },
         "RGB2": {
+            maxZoom: 14,
             cloudsField: "CLOUDS",
             name: "47A9D4E5E5AE497A8A1A7EA49C7FC336",
             dateColumnName: "ACQDATE"
-        },
-        "CLASSIFICATION": {
-            name: "0C94757D72C34876AD1CFEEE9FD8E902",
-            dateColumnName: "acqdate",
-            palette: {
-                classification: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/CLASS_grade_1-5.icxleg',
-                    prodtype: "CLASSIFICATION"
-                }
-            }
         },
         "FIRES": {
             name: "F2840D287CD943C4B1122882C5B92565",
@@ -130,6 +128,7 @@
             }
         },
         "LANDSAT_MSAVI": {
+            maxZoom: 13,
             name: "E5450B8BDDE44E9A903BCF850327766E",
             //mask: "A05BB0207AEE4CFD93C045BF71576FDE",
             dateColumnName: "acqdate",
@@ -142,6 +141,7 @@
             sceneFieldName: "sceneid"
         },
         "SENTINEL_MSAVI": {
+            maxZoom: 13,
             isSentinel: true,
             name: "F350F1FB55944351AE10AC66C1BAB76B",
             //mask: "14A988CBC5FD424D9EBE23CEC8168150",
@@ -163,7 +163,7 @@
         resolution: "landsat",
         clouds: true,
         caption: "Космосъемка 10-30 м",
-        rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI", "SENTINEL_IR", "LANDSAT_PREVIEW", "SENTINEL_PREVIEW", "LANDSAT_MSAVI", "SENTINEL_MSAVI"]
+        rk: ["HR", "RGB", "RGB2", "SENTINEL", "SENTINEL_NDVI", "SENTINEL_IR", "LANDSAT_PREVIEW", "SENTINEL_PREVIEW", "LANDSAT_MSAVI", "SENTINEL_MSAVI"]
     }, {
         caption: "Космосъемка 250 м",
         resolution: "modis",

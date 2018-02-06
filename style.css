@@ -941,6 +941,7 @@ div.timeline-axis-grid {
     border: solid 1px rgb(216, 195, 195);
     border-radius: 7px;
     z-index: 200000;
+    font-size: 13px;
 }
 
 .ntOptionsArrowDiv {
