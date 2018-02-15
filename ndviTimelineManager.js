@@ -1227,7 +1227,7 @@ NDVITimelineManager.prototype.getHozLayers = function () {
                         if (!($.isEmptyObject(v.MetaProperties.project)) && ($.trim(v.MetaProperties.project.Value) == "InsuranceGeo" ||
                             $.trim(v.MetaProperties.project.Value) == "cosmosagro")) {
 
-                            layers[v.name].setZIndex(1);
+                            layers[v.name].setZIndex(100);
 
                             that._layersHookList[v.name] = layers[v.name];
                             fieldLayers.push(layers[v.name]);
