@@ -353,6 +353,8 @@ ThematicHandler.prototype._applyLayer = function (layer) {
     var b = layer.getBounds();
     var min = L.Projection.Mercator.project(b._southWest),
         max = L.Projection.Mercator.project(b._northEast);
+    //var min = this._thematicStrategy.projFunc.project(b._southWest),
+    //    max = this._thematicStrategy.projFunc.project(b._northEast);
 
     var p = [{ "x": min.x, "y": min.y }, { "x": min.x, "y": max.y },
              { "x": max.x, "y": max.y }, { "x": max.x, "y": min.y }];

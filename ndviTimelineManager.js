@@ -2980,11 +2980,16 @@ NDVITimelineManager.prototype.initializeImageProcessor = function () {
     var that = this;
     function applyMask(dstCanvas, srcCanvas, sx, sy, sw, sh, dx, dy, dw, dh, sz, dz) {
 
-        var ctx = srcCanvas.getContext('2d');
+        var srcPix;
+        if (srcCanvas instanceof Image) {
+            srcPix = shared.getPixelsFromImage(srcCanvas);
+        } else {
+            var ctx = srcCanvas.getContext('2d');
+            var imgd = ctx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+            srcPix = imgd.data;
+        }
 
-        var imgd = ctx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
-        var srcPix = imgd.data,
-            dstPix = new Array(dw * dh * 4);
+        dstPix = new Array(dw * dh * 4);
 
         var dZ2 = Math.pow(2, dz - sz);
 
