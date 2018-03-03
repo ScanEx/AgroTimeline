@@ -394,14 +394,14 @@ ThematicHandler.prototype._applyLayer = function (layer) {
         var source = that.dataSource;
 
         if (!that.manualOnly) {
-            var url = "http://maps.kosmosnimki.ru/rest/ver1/layers/~/search?api_key=BB3RFQQXTR";
+            var url = "http://maps.kosmosnimki.ru/rest/ver1/layers/~/search?";
             var tale = '&tables=[{"LayerName":"' + source + '","Alias":"n"},{"LayerName":"88903D1BF4334AEBA79E1527EAD27F99","Alias":"f","Join":"Inner","On":"[n].[field_id] = [f].[gmx_id]"}]&' +
                         'columns=[{"Value":"[f].[Farm]"},{"Value":"[f].[Region]"},{"Value":"[f].[Subregion]"},{"Value":"[f].[layer_id]"},{"Value":"[f].[' + identityField + ']"},' +
                         '{"Value":"[n].[ndvi_mean_clear]"},{"Value":"[n].[ndvi_std_clear]"},{"Value":"[n].[ndvi_min_clear]"},{"Value":"[n].[ndvi_max_clear]"},{"Value":"[n].[image_cover_pct]"},{"Value":"[n].[valid_area_pct]"}]';
 
             url += "&query=[date]='" + that._dateStr + "' AND [layer_id]='" + layerName + "' AND [image_cover_pct]>=50.0" + tale;
 
-            $.getJSON(url, function (response) {
+            fetch(url, { credentials: 'include' }).then(function (response) { return response.json(); }).then(function (response) {
                 //раскраска по полученным с сервера данным
                 if (!that.sourceLayersArr[layerName]) {
                     return;

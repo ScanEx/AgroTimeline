@@ -75,19 +75,19 @@ Rating.prototype.start = function (layersArr, dateStr) {
     var useData2016 = true;
     var year = parseInt(dateStr.split('.')[2]);
 
-    var url = "http://maps.kosmosnimki.ru/rest/ver1/layers/~/search?api_key=BB3RFQQXTR";
+    var url = "http://maps.kosmosnimki.ru/rest/ver1/layers/~/search?";
     var tale = '&tables=[{"LayerName":"' + that.dataSource + '","Alias":"n"},{"LayerName":"88903D1BF4334AEBA79E1527EAD27F99","Alias":"f","Join":"Inner","On":"[n].[field_id] = [f].[gmx_id]"}]&' +
         'columns=[{"Value":"[f].[layer_id]"},{"Value":"[f].[layer_gmx_id]"},' +
         (useData2016 ?
-        '{"Value":"[n].[ndvi_mean_clear]"},{"Value":"[n].[valid_area_pct]"}]' :
-        '{"Value":"[n].[Value]"}]');
+            '{"Value":"[n].[ndvi_mean_clear]"},{"Value":"[n].[valid_area_pct]"}]' :
+            '{"Value":"[n].[Value]"}]');
     if (!useData2016) {
         url += "&query=[date]='" + dateStr + "' AND (" + layersStr + ") AND [completeness]>=50.0" + tale;
     } else {
         url += "&query=[date]='" + dateStr + "' AND (" + layersStr + ") AND [image_cover_pct]>=50.0" + tale;
     }
 
-    $.getJSON(url, function (response) {
+    fetch(url, { credentials: 'include' }).then(function (response) { return response.json(); }).then(function (response) {
         var features = response.features;
 
         var value;
