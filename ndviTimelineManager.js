@@ -83,7 +83,7 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     //this._comboSql = [];
     this._comboFilenames = [];
 
-    this._radioButtonLabels = [];
+    this._radioButtonLabels = {};
 
     //текущий индекс увеличения
     this._currentZoom;
@@ -199,7 +199,7 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     //radio - указатель на элемент переключателя,
     //caption - просто указатель на идентификатор года
     //count - указатель на элемент идентификатор кол-ва снимков NDVI за этот год
-    this._yearsPanel = [];
+    this._yearsPanel = {};
 
     //текущий год активный
     this.defaultYear = (new Date()).getFullYear();
@@ -2282,7 +2282,7 @@ NDVITimelineManager.prototype._refreshOptionsPanel = function () {
     //применяем стили активности
     var lbs = this._radioButtonLabels;
     for (var i in lbs) {
-        if (lbs[i].label.comboIndex != -1) {
+        if (lbs[i] && lbs[i].label && lbs[i].label.comboIndex != -1) {
             this.setRadioLabelActive(i, this._selectedCombo == lbs[i].label.comboIndex);
         }
     }
