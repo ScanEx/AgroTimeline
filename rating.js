@@ -87,6 +87,10 @@ Rating.prototype.start = function (layersArr, dateStr) {
         url += "&query=[date]='" + dateStr + "' AND (" + layersStr + ") AND [image_cover_pct]>=50.0" + tale;
     }
 
+    var sync = shared.getCookie("sync");
+    sync = sync ? "&sync=" + sync : "";
+    url += sync;
+
     fetch(url, { credentials: 'include' }).then(function (response) { return response.json(); }).then(function (response) {
         var features = response.features;
 
