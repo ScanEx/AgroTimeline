@@ -1294,8 +1294,8 @@ NDVITimelineManager.prototype.initializeIntegralScheme = function () {
 
 NDVITimelineManager.prototype.setVisibleYear = function (year) {
 
-    if (year === this._selectedYear)
-        return;
+    //if (year === this._selectedYear)
+    //    return;
 
     this.setTimeLineYear(year);
     this._selectedYear = year;
