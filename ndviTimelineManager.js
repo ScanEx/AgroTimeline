@@ -690,6 +690,8 @@ NDVITimelineManager.prototype.getState = function () {
 NDVITimelineManager.prototype.loadState = function (data) {
     var that = this;
 
+    this.switcher.show();
+
     function restoreOptionsMenu() {
         if (data.optionsMenu) {
             for (var i in data.optionsMenu) {
@@ -1081,7 +1083,7 @@ NDVITimelineManager.prototype._initSwitcher = function () {
                 NDVITimelineManager.fires_ht = {};
                 that.timeLine.updateFilters();
                 window.resizeAll && resizeAll();
-            }, 200);
+            }, 300);
 
             $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 135);
 
