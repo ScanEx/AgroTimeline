@@ -6,6 +6,8 @@ var LegendControl = function (agroTimeline) {
 
     var _visibility = false;
 
+    var _hideAll = false;
+
     this._manual = false;
 
     this.timeline = agroTimeline;
@@ -39,15 +41,27 @@ var LegendControl = function (agroTimeline) {
         }
     };
 
+    this.hide = function () {
+        _hideAll = true;
+        this.setVisibility(false);
+    };
+
     this.setVisibility = function (visibility) {
-        if (visibility != _visibility) {
-            _visibility = visibility;
-            if (visibility) {
-                this._btn.classList.add("legendControlButton-active");
-            } else {
-                this._btn.classList.remove("legendControlButton-active");
+
+        if (_hideAll) {
+            this._dialog.setVisibility(false);
+            this._btn.classList.add("legendControlButton-active");
+        } else {
+
+            if (visibility != _visibility) {
+                _visibility = visibility;
+                if (visibility) {
+                    this._btn.classList.add("legendControlButton-active");
+                } else {
+                    this._btn.classList.remove("legendControlButton-active");
+                }
+                this._dialog.setVisibility(visibility);
             }
-            this._dialog.setVisibility(visibility);
         }
     };
 

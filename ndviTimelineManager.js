@@ -1032,6 +1032,8 @@ NDVITimelineManager.prototype._main = function () {
         t.options.showCurrentTime = false;
         t.setAutoScale(false);
         t.options.showCurrentTime = false;
+
+        this.legendControl.hide();
     }
 
     this.timeLine.getContainer().append(this.legendControl.getContainer());
