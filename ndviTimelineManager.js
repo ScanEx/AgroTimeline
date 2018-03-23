@@ -690,7 +690,7 @@ NDVITimelineManager.prototype.getState = function () {
 NDVITimelineManager.prototype.loadState = function (data) {
     var that = this;
 
-    this.switcher.show();
+    this.switcher && this.switcher.show();
 
     function restoreOptionsMenu() {
         if (data.optionsMenu) {
