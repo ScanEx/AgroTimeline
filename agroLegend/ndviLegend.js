@@ -22,6 +22,7 @@ var NDVILegend = function (options) {
                     }
                 }
                 that.palettes[ii] = {
+                    'title': options.palettes[ii].title || "",
                     'startIndex': startIndex,
                     'min': options.palettes[ii].min || 0.0,
                     'max': options.palettes[ii].max || 1.0,

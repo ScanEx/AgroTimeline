@@ -4757,8 +4757,20 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
                     that.timeLine.getContainer()[0].querySelector("#light_msaviRadio").style.display = "block";
                 }
             }
+        }, {
+            "id": "chkExperimantal",
+            "class": "ntOptionsHR ntOptionsMODIS",
+            "type": "checkbox",
+            "text": "Экспериментальные палитры",
+            "click": function (e) {
+                var elArr = that.legendControl._dialog.el.querySelectorAll(".alpBlock-experimental");
+                if (!e.checked) {
+                    elArr.forEach(function (e) { e.style.display = "none" });
+                } else {
+                    elArr.forEach(function (e) { e.style.display = "block" });
+                }
+            }
         }];
-
 
     if (!this._userRole) {
         items.push({

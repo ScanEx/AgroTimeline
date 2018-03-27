@@ -142,7 +142,7 @@ LegendDialog.prototype.setCaption = function (str) {
 
 LegendDialog.prototype._create = function () {
 
-    this.$content = $("<div></div>");
+    this.$content = $('<div class="alpPane"></div>');
 
     $(this.$content.get(0)).empty();
 

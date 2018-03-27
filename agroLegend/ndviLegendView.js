@@ -2,20 +2,38 @@ var NDVILegendView = function () {
 
     var lang = L.gmxLocale.getLanguage();
 
+    var _palettes = [{
+        'title': NDVILegendView.locale[lang].EstestvennayaShkala,
+        'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml",
+        'min': 0.0,
+        'max': 1.0
+    }, {
+        'title': NDVILegendView.locale[lang].AnaliticheskayaShkala,
+        'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_BLUE_interp_legend.icxleg.xml",
+        'min': 0.0,
+        'max': 1.0,
+        'isStatic': false
+    }, {
+        'title': "Экспериментальная шкала NDVI",
+        'tag': "experimental",
+        'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/EXPERIMENTAL_NDVI_interp_legend.icxleg.xml",
+        'min': 0.0,
+        'max': 1.0,
+        'display': "none"
+    }, {
+        'title': "Экспериментальная шкала MSAVI",
+        'tag': "experimental",
+        'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/EXPERIMENTAL_NDVI_MSAVI_interp_legend.icxleg.xml",
+        'min': 0.0,
+        'max': 1.0,
+        'display': "none"
+    }];
+
     inheritance.base(this, new NDVILegend({
         'name': NDVILegendView.locale[lang].CvetovajaShkalaNdvi,
         'width': 480,
-        'height': 220,
-        'palettes': [{
-            'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml",
-            'min': 0.0,
-            'max': 1.0
-        }, {
-            'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_BLUE_interp_legend.icxleg.xml",
-            'min': 0.0,
-            'max': 1.0,
-            'isStatic': false
-        }]
+        'height': 235,
+        'palettes': _palettes
     }));
 
     var SLIDER_CONTAINER_SIZE = 404;
@@ -28,29 +46,58 @@ var NDVILegendView = function () {
 
     this.events = new Events(["changepalette", "changerange"]);
 
-    this.template = '<div><div class="alpBlock">\
-                      <div class="alpRadioTab"><input type="radio" class="alpRadio" name="alpRadio" value="0" checked/></div>\
-                      <div class="alpColorTab">\
-                        <div class="alpCaption">' + NDVILegendView.locale[lang].EstestvennayaShkala + '</div>\
-                        <div class="alpPaletteSlider alpS-0"></div>\
-                        <div class="alpPaletteColors alpP-0"></div>\
-                        <div class="alpPaletteValues alpV-0"></div>\
-                      </div>\
-                    </div>\
-                    \
-                    <div class="alpBlock">\
-                      <div class="alpRadioTab"><input type="radio" class="alpRadio" name="alpRadio" value="1"/></div>\
-                      <div class="alpColorTab">\
-                        <div class="alpCaption">' + NDVILegendView.locale[lang].AnaliticheskayaShkala + '</div>\
-                        <div class="alpPaletteSlider alpS-1"></div>\
-                        <div class="alpPaletteColors alpP-1"></div>\
-                        <div class="alpPaletteValues alpV-1">\
-                          <div class="alpInp" style="margin-left: -15px; margin-right: 15px;"><input type="text" class="alpMin"/></div>\
-                          <div class="alpValues"></div>\
-                          <div class="alpInp" style="margin-left: 15px"><input type="text" class="alpMax"/><\div>\
-                        </div>\
-                      </div>\
-                    </div></div>';
+    this.staticBlockTemplate =
+        '<div class="alpBlock alpBlock-{tag}" style="display:{display}">\
+             <div class="alpRadioTab">\
+               <input type= "radio" class="alpRadio" name= "alpRadio" value= "{id}" checked/>\
+             </div>\
+             <div class="alpColorTab">\
+               <div class="alpCaption">{title}</div>\
+               <div class="alpPaletteSlider alpS-{id}"></div>\
+               <div class="alpPaletteColors alpP-{id}"></div>\
+               <div class="alpPaletteValues alpV-{id}"></div>\
+             </div>\
+           </div>';
+
+    this.nonStaticBlockTemplate =
+        '<div class="alpBlock alpBlock-{tag}" style="display:{display}">\
+           <div class="alpRadioTab">\
+             <input type= "radio" class="alpRadio" name= "alpRadio" value= "{id}" />\
+           </div>\
+           <div class="alpColorTab">\
+             <div class="alpCaption">{title}</div>\
+             <div class="alpPaletteSlider alpS-{id}"></div>\
+             <div class="alpPaletteColors alpP-{id}"></div>\
+             <div class="alpPaletteValues alpV-{id}">\
+               <div class="alpInp" style="margin-left: -15px; margin-right: 15px;"><input type="text" class="alpMin" /></div>\
+               <div class="alpValues"></div>\
+               <div class="alpInp" style="margin-left: 15px"><input type="text" class="alpMax" /></div>\
+             </div>\
+           </div>\
+         </div>';
+
+    this.template = "<div>";
+    for (var i = 0; i < _palettes.length; i++) {
+        var p = _palettes[i];
+        var t;
+        if (p.isStatic) {
+            t = replaceSubstring(this.staticBlockTemplate, {
+                'id': i.toString(),
+                'title': p.title || "",
+                'tag': p.tag || "default",
+                'display': p.display || "block"
+            });
+        } else {
+            t = replaceSubstring(this.nonStaticBlockTemplate, {
+                'id': i.toString(),
+                'title': p.title || "",
+                'tag': p.tag || "default",
+                'display': p.display || "block"
+            });
+        }
+        this.template += t;
+    }
+    this.template += "</div>";
 
     this.model.events.on("loadend", this, function (e) {
         this._renderPalettes();
