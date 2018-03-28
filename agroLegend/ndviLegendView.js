@@ -15,14 +15,14 @@ var NDVILegendView = function () {
         'isStatic': false
     }, {
         'title': "Экспериментальная шкала NDVI",
-        'tag': "experimental",
+        'tag': "experimental-ndvi",
         'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/EXPERIMENTAL_NDVI_interp_legend.icxleg.xml",
         'min': 0.0,
         'max': 1.0,
         'display': "none"
     }, {
         'title': "Экспериментальная шкала MSAVI",
-        'tag': "experimental",
+        'tag': "experimental-msavi",
         'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/EXPERIMENTAL_NDVI_MSAVI_interp_legend.icxleg.xml",
         'min': 0.0,
         'max': 1.0,
@@ -336,6 +336,23 @@ var NDVILegendView = function () {
         this.refreshRangeValues();
         this._refreshPaletteShades();
     };
+
+    this.displayTags = function (tagArr) {
+        this.el.querySelectorAll(".alpBlock").forEach(function (e) {
+            var visible = false;
+            for (var i = 0; i < tagArr.length; i++) {
+                if (e.classList.contains("alpBlock-" + tagArr[i])) {
+                    visible = true;
+                    break;
+                }
+            }
+            if (visible) {
+                e.style.display = "block";
+            } else {
+                e.style.display = "none";
+            }
+        });
+    }
 };
 
 inheritance.extend(NDVILegendView, LegendView);

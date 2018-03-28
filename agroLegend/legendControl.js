@@ -119,6 +119,9 @@ var LegendControl = function (agroTimeline) {
             if (!that._manual) {
                 that.setVisibility(true);
             }
+
+            t.refreshExperimentalPalettes();;
+
         } else if (so == "RATING") {
             that.showButton();
             that.applyLegend(that._ratingLegendView);

@@ -100,7 +100,7 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
             var color = that.legendControl.getNDVIColor(prop.ndvi_mean_clear);
             val = prop.ndvi_mean_clear * 100 + 101;
             if (val == 0 || val == -100) {
-                return shared.RGB2HEX(0, 179, 255);
+                return null;
             } else {
                 if (color[3]) {
                     return shared.RGB2HEX(color[0], color[1], color[2]);
@@ -163,6 +163,8 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     this._neodnrHandler.katalogName = this._layersLegend.HR.name;
 
     this._ratingHandler = new Rating();
+
+    this._experimentalPalettesVisibility = false;
 
     //раскрашиватель по уклонам
     //this._slopeManager = new SlopeManager();
@@ -713,6 +715,10 @@ NDVITimelineManager.prototype.loadState = function (data) {
             that.qlCheckClick(document.getElementById("chkQl"));
         }
 
+        if (data.optionsMenu.chkExperimantal) {
+            that.showExperimentalPalettes(true);
+        }
+
         data.optionsMenu = null;
     };
 
@@ -736,6 +742,7 @@ NDVITimelineManager.prototype.loadState = function (data) {
             this._refreshPaletteShades();
             this._renderAnaliticalPalette();
             this.refreshRangeValues();
+            that.showExperimentalPalettes(that._experimentalPalettesVisibility);
         });
     }
 
@@ -1150,8 +1157,6 @@ NDVITimelineManager.prototype.setRenderHook = function (layer, callback_kr, call
             }
         }
 
-        layer.addRenderHook(callback_kr);
-
         for (var i = 0; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
 
             var l = this._visibleLayersOnTheDisplayPtr[i];
@@ -1162,6 +1167,8 @@ NDVITimelineManager.prototype.setRenderHook = function (layer, callback_kr, call
 
             this._visibleLayersOnTheDisplayPtr[i].addPreRenderHook(callback2);
         }
+
+        layer.addRenderHook(callback_kr);
     }
 };
 
@@ -2022,7 +2029,7 @@ NDVITimelineManager.cloudMaskKr_hook = function (tile, info) {
         NDVITimelineManager.cloudMaskTolesBG[id] = tile;
         tile.style.display = 'none';
         if (L.version !== "0.7.7") {
-            ndviTimelineManager.repaintVisibleLayers(tile.zKey);
+            ndviTimelineManager.repaintVisibleLayers(info.zKey);
         }
     }
 };
@@ -2033,7 +2040,7 @@ NDVITimelineManager.kr_hook = function (tile, info) {
         NDVITimelineManager.tolesBG[id] = tile;
         tile.style.display = 'none';
         if (L.version !== "0.7.7") {
-            ndviTimelineManager.repaintVisibleLayers(tile.zKey);
+            ndviTimelineManager.repaintVisibleLayers(info.zKey);
         }
     }
 };
@@ -4763,12 +4770,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
             "type": "checkbox",
             "text": "Экспериментальные палитры",
             "click": function (e) {
-                var elArr = that.legendControl._dialog.el.querySelectorAll(".alpBlock-experimental");
-                if (!e.checked) {
-                    elArr.forEach(function (e) { e.style.display = "none" });
-                } else {
-                    elArr.forEach(function (e) { e.style.display = "block" });
-                }
+                that.showExperimentalPalettes(e.checked);
             }
         }];
 
@@ -4810,6 +4812,33 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
             }
         }
     });
+};
+
+NDVITimelineManager.prototype.refreshExperimentalPalettes = function () {
+    if (this._selectedOption === "SENTINEL_MSAVI" || this._selectedOption === "LANDSAT_MSAVI") {
+        this.legendControl._ndviLegendView.displayTags(["experimental-msavi"]);
+        this.legendControl._ndviLegendView.model.setSelectedPaletteIndex(3);
+    } else if (this._experimentalPalettesVisibility) {
+        this.legendControl._ndviLegendView.displayTags(["default", "experimental-ndvi"]);
+        var currIndex = this.legendControl._ndviLegendView.model.getSelectedPaletteIndex();
+        if (currIndex === 3) {
+            this.legendControl._ndviLegendView.model.setSelectedPaletteIndex(0);
+        }
+    } else {
+        this.legendControl._ndviLegendView.displayTags(["default"]);
+        var currIndex = this.legendControl._ndviLegendView.model.getSelectedPaletteIndex();
+        if (currIndex === 3) {
+            this.legendControl._ndviLegendView.model.setSelectedPaletteIndex(0);
+        }
+    }
+    this.legendControl._ndviLegendView._refreshPaletteShades();
+};
+
+NDVITimelineManager.prototype.showExperimentalPalettes = function (visibility) {
+    if (this._experimentalPalettesVisibility != visibility) {
+        this._experimentalPalettesVisibility = visibility;
+        this.refreshExperimentalPalettes();
+    }
 };
 
 NDVITimelineManager.prototype.showCloudMask = function (date) {
