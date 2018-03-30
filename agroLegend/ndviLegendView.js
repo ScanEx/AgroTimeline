@@ -338,7 +338,12 @@ var NDVILegendView = function () {
     };
 
     this.displayTags = function (tagArr) {
-        this.el.querySelectorAll(".alpBlock").forEach(function (e) {
+
+        var s = this.el.querySelectorAll(".alpBlock");
+
+        for (var kk = 0; kk < s.length; kk++) {
+            var e = s[kk];
+
             var visible = false;
             for (var i = 0; i < tagArr.length; i++) {
                 if (e.classList.contains("alpBlock-" + tagArr[i])) {
@@ -351,7 +356,7 @@ var NDVILegendView = function () {
             } else {
                 e.style.display = "none";
             }
-        });
+        }
     }
 };
 
