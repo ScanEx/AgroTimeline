@@ -632,6 +632,15 @@ NDVITimelineManager.prototype.listenForPeramlink = function () {
     });
 };
 
+NDVITimelineManager.prototype.getSelectedProductName = function () {
+    return $('input[name=shotsOptions_' + this._selectedCombo + ']').filter(':checked')[0].parentNode.parentNode.querySelector(".ntLblShotsType").innerHTML.trim().toLowerCase();
+};
+
+NDVITimelineManager.prototype.getSelectedDateStr = function () {
+    var d = this._selectedDate;
+    return NDVITimelineManager.formatDate(d.getDate(), d.getMonth() + 1, d.getFullYear());
+};
+
 NDVITimelineManager.prototype.getState = function () {
     var optionsMenu = {};
     $(".ntOptionsMenu").find("input[type='checkbox']").each(function (e, v) {
@@ -1159,6 +1168,9 @@ NDVITimelineManager.prototype.setRenderHook = function (layer, callback_kr, call
 
         for (var i = 0; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
 
+            console.log("_visibleLayersOnTheDisplayPtr");
+            console.log(this._visibleLayersOnTheDisplayPtr);
+
             var l = this._visibleLayersOnTheDisplayPtr[i];
 
             var styles = l.getStyles();
@@ -1434,6 +1446,7 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
 
                 function successPermalink() {
                     if (that._activatePermalink) {
+                        that.refreshVisibleLayersOnDisplay();
                         if (that._activatePermalink()) {
                             clearInterval(that._extremeRefreshHandler);
                             that._activatePermalink = null;
@@ -2057,43 +2070,51 @@ NDVITimelineManager.l_hook = function (tile, info) {
 
 NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
 
-    this.hideSelectedLayer();
-
-    this._selectedOption = layerTypeName;
-
-    var layer = this.layerCollection[this._layersLegend[layerTypeName].name];
-
-    if (this._layersLegend[layerTypeName].maxZoom) {
-        layer._gmx.maxNativeZoom = this._layersLegend[layerTypeName].maxZoom;
-    }
-
-    layer.removeFilter();
-
-    this.setRenderHook(layer, NDVITimelineManager.kr_hook, NDVITimelineManager.l_hook);
-
-    var dateCn = this._layersLegend[layerTypeName].dateColumnName;
-    var dateId = layer._gmx.tileAttributeIndexes[dateCn];
-
-    var that = this;
-    layer.setFilter(function (item) {
-        var p = item.properties;
-        if (p[dateId] == that._selectedDateL) {
-            return true;
-        }
-        return false;
-    }).on('doneDraw', function () {
-        ndviTimelineManager.repaintAllVisibleLayers();
-    }).setDateInterval(
-        NDVITimelineManager.addDays(this._selectedDate, -1),
-        NDVITimelineManager.addDays(this._selectedDate, 1)
+    if (this._selectedOption === layerTypeName) {
+        var layer = this.layerCollection[this._layersLegend[layerTypeName].name];
+        layer.setDateInterval(
+            NDVITimelineManager.addDays(this._selectedDate, -1),
+            NDVITimelineManager.addDays(this._selectedDate, 1)
         );
-    this.lmap.addLayer(layer);
-    layer.setZIndex(-1);
-    this._selectedLayers.push(layer);
+    } else {
+        this.hideSelectedLayer();
 
-    this.showCloudMask(this._selectedDate);
+        this._selectedOption = layerTypeName;
 
-    this.checkSelectedLayerObservers();
+        var layer = this.layerCollection[this._layersLegend[layerTypeName].name];
+
+        if (this._layersLegend[layerTypeName].maxZoom) {
+            layer._gmx.maxNativeZoom = this._layersLegend[layerTypeName].maxZoom;
+        }
+
+        layer.removeFilter();
+
+        this.setRenderHook(layer, NDVITimelineManager.kr_hook, NDVITimelineManager.l_hook);
+
+        var dateCn = this._layersLegend[layerTypeName].dateColumnName;
+        var dateId = layer._gmx.tileAttributeIndexes[dateCn];
+
+        var that = this;
+        layer.setFilter(function (item) {
+            var p = item.properties;
+            if (p[dateId] == that._selectedDateL) {
+                return true;
+            }
+            return false;
+        }).on('doneDraw', function () {
+            ndviTimelineManager.repaintAllVisibleLayers();
+        }).setDateInterval(
+            NDVITimelineManager.addDays(this._selectedDate, -1),
+            NDVITimelineManager.addDays(this._selectedDate, 1)
+            );
+        this.lmap.addLayer(layer);
+        layer.setZIndex(-1);
+        this._selectedLayers.push(layer);
+
+        this.showCloudMask(this._selectedDate);
+
+        this.checkSelectedLayerObservers();
+    }
 };
 
 NDVITimelineManager.prototype._showNDVI_HR = function () {
