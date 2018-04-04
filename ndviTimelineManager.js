@@ -3004,9 +3004,11 @@ NDVITimelineManager.prototype.initializeImageProcessor = function () {
     this.sentinelCloudMask = this.layerCollection[this._layersLegend.SENTINEL_NDVI.mask];
     this.landsatCloudMask.setRasterHook(function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
         applyMask(dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info.source.z, info.destination.z);
+        return dstCanvas;
     });
     this.sentinelCloudMask.setRasterHook(function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
         applyMask(dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info.source.z, info.destination.z);
+        return dstCanvas;
     });
 
     var that = this;
