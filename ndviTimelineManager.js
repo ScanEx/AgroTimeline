@@ -5291,6 +5291,7 @@ NDVITimelineManager.prototype._setLayerImageProcessing = function (layer, shotTy
         layer.setRasterHook(
             function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
                 that._tileImageProcessing(dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, shotType);
+                return dstCanvas;
             });
     }
 };
