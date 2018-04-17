@@ -724,7 +724,7 @@ NDVITimelineManager.prototype.loadState = function (data) {
             that.qlCheckClick(document.getElementById("chkQl"));
         }
 
-        if (data.optionsMenu.chkExperimantal) {
+        if (data.optionsMenu && data.optionsMenu.chkExperimental) {
             that.showExperimentalPalettes(true);
         }
 
@@ -1016,6 +1016,15 @@ NDVITimelineManager.prototype._main = function () {
 
     this.resize();
 
+    if (window.iconSidebarWidget) {
+        window.iconSidebarWidget.on("opened", function () {
+            that.resize();
+        });
+        window.iconSidebarWidget.on("closed", function () {
+            that.resize();
+        });
+    }
+
     var m = this.optionsMenu.getMenuContainer();
 
     m.style.right = 60 + "px";
@@ -1064,7 +1073,9 @@ NDVITimelineManager.prototype._main = function () {
 };
 
 NDVITimelineManager.prototype.resize = function () {
-    if (window.layersShown && !(navigator.userAgent.match(/iPad/i) != null)) {
+    if (window.iconSidebarWidget) {
+        this.setWidth(document.documentElement.clientWidth - window.iconSidebarWidget.getWidth());
+    } else if (window.layersShown && !(navigator.userAgent.match(/iPad/i) != null)) {
         this.setWidth(document.documentElement.clientWidth - 360);
     } else {
         this.setWidth(document.documentElement.clientWidth - 12);
@@ -4788,7 +4799,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
                 }
             }
         }, {
-            "id": "chkExperimantal",
+            "id": "chkExperimental",
             "class": "ntOptionsHR ntOptionsMODIS",
             "type": "checkbox",
             "text": "Экспериментальные палитры",
