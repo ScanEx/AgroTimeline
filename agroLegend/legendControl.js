@@ -4,6 +4,11 @@ var LegendControl = function (agroTimeline) {
     var _BOTTOM = 150,
         _RIGHT = 12;
 
+    if (window.cosmosagro) {
+        _BOTTOM = 153;
+        _RIGHT = 56;
+    }
+
     var _visibility = false;
 
     var _hideAll = false;
@@ -85,12 +90,19 @@ var LegendControl = function (agroTimeline) {
         this._dialog.setPositionRightBottom(_RIGHT, _BOTTOM);
     };
 
+    var _x = null;
     this._ndviLegendView.events.on("changepalette", null, function () {
-        agroTimeline.repaint();
+        clearTimeout(_x);
+        _x = setTimeout(function () {
+            agroTimeline.repaint();
+        }, 180);
     });
 
     this._ndviLegendView.events.on("changerange", null, function () {
-        agroTimeline.repaint();
+        clearTimeout(_x);
+        _x = setTimeout(function () {
+            agroTimeline.repaint();
+        }, 180);
     });
 
     agroTimeline.events.on("changeselection", null, function (t) {

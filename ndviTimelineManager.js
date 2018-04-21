@@ -1,6 +1,6 @@
 var NDVITimelineManager = function (lmap, params, userRole, container) {
 
-    this.events = new Events(["changeselection", "clearselection"]);
+    this.events = new Events(["created", "changeselection", "clearselection", "changevisibility"]);
 
     //leaflet map
     this.lmap = lmap;
@@ -1070,6 +1070,8 @@ NDVITimelineManager.prototype._main = function () {
     if (this._activatePermalink) {
         this.startFinishLoading();
     }
+
+    this.events.dispatch(this.events.created, this);
 };
 
 NDVITimelineManager.prototype.resize = function () {
@@ -1116,6 +1118,8 @@ NDVITimelineManager.prototype._initSwitcher = function () {
 
             $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 135);
 
+            that.events.dispatch(that.events.changevisibility, true);
+
             window.resizeAll && resizeAll();
         },
         "onhide": function (manually) {
@@ -1138,6 +1142,8 @@ NDVITimelineManager.prototype._initSwitcher = function () {
             that.timeLine.toggleVisibility(false);
 
             $(".leaflet-iconLayers.leaflet-iconLayers_bottomleft").css("margin-bottom", 10);
+
+            that.events.dispatch(that.events.changevisibility, false);
 
             window.resizeAll && resizeAll();
         }
