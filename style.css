@@ -97,7 +97,7 @@ div.timeline-event-content {
     bottom: 23px !important;
     right: 8px !important;
     width: 42px !important;
-    /*height:42px !important;*/
+    display: none;
 }
 
 .timeline-container {
