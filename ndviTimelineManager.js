@@ -2552,6 +2552,10 @@ NDVITimelineManager.prototype.getVisibility = function (l) {
     return this.lmap.hasLayer(this.layerCollection[l]);
 };
 
+NDVITimelineManager.prototype.getTimelineVisibility = function (l) {
+    return !this.switcher.isCollapsed();
+};
+
 NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
     var that = this;
 
