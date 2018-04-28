@@ -5,9 +5,10 @@ var footer = require('gulp-footer');
 var streamqueue = require('streamqueue');
 var html2jsobject = require('gulp-html2jsobject');
 
-var styles = ['style.css', 'agroLegend/agroLegend.css'];
+var styles = ['./timeline/timeline.css', './timeline/gmxTimelineControl.css', 'style.css', 'agroLegend/agroLegend.css'];
 
-var scripts = ['shared/shared.js', 'shared/RequestsQueue.js', 'shared/ThematicHandler.js', 'shared/styleHookManager.js',
+var scripts = ['./timeline/timeline.js', './timeline/LineItem.js', './timeline/gmxTimelineControl.js',
+    'shared/shared.js', 'shared/RequestsQueue.js', 'shared/ThematicHandler.js', 'shared/styleHookManager.js',
     'agroLegend/ndviSlider.js', 'agroLegend/legendDialog.js', 'agroLegend/events.js', 'agroLegend/inheritance.js',
     'agroLegend/replaceSubstring.js', 'agroLegend/legendModel.js', 'agroLegend/legendView.js', 'agroLegend/odnorodnostLegendView.js',
     'agroLegend/ratingLegendView.js', 'agroLegend/ndviLegend.js', 'agroLegend/ndviLegendView.js', 'agroLegend/legendControl.js',

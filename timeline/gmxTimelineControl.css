@@ -1,0 +1,70 @@
+﻿.timeline-container
+{
+    width: 500px;
+    background-color: rgba(1, 106, 138, 0.498039);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#7F016A8A,endColorstr=#7F016A8A);
+}
+
+.timeline-container .timeline-controls {
+    margin-bottom: 4px;
+}
+
+.timeline-container div.timeline-axis-text-major,
+.timeline-container div.timeline-axis-text,
+.timeline-container .timeline-controls,
+.timeline-container .CalendarWidget-iconScrollLeft, 
+.timeline-container .CalendarWidget-iconScrollRight
+{
+    color: white;
+}
+
+.timeline-container div.timeline-frame
+{
+    border: none;
+}
+
+.timeline-container  div.timeline-event-line
+{
+    border-color: yellow;
+}
+
+.timeline-container  div.timeline-event-selected
+{
+    border-color: magenta;
+}
+
+.timeline-container  .timeline-controls > *
+{
+    vertical-align: middle;
+}
+
+.timeline-shift-icon
+{
+    margin-top: 2px;
+}
+
+.timeline-container  .timeline-controls label, .timeline-container  .timeline-controls span
+{
+    color: white;
+    margin-left: 3px;
+}
+
+/*.timeline-container  .timeline-controls input
+{
+    margin-bottom: 4px;
+}*/
+
+.timeline-container #timeline-only-selected
+{
+    margin-left: 10px;
+}
+
+.timeline-container .timeline-calendar
+{
+    display: inline-block;
+}
+
+.timeline-container span.count-container
+{
+    margin-left: 0px;
+}
