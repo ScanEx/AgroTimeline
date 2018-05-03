@@ -40,6 +40,10 @@ var NDVILegend = function (options) {
         that.events.dispatch(that.events.loadend, that);
     });
 
+    this.getSelectedPalette = function () {
+        return this.palettes[this._selectedPaletteIndex];
+    };
+
     this.getNDVIColor = function (ndviValue) {
         var p = this.palettes[this._selectedPaletteIndex];
         var d = p.max - p.min;

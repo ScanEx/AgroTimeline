@@ -219,6 +219,73 @@ var NDVILegendView = function () {
 
     this.initialize();
 
+    function _precision(a) {
+        if (!isFinite(a)) return 0;
+        var e = 1, p = 0;
+        while (Math.round(a * e) / e !== a) { e *= 10; p++; }
+        return p;
+    };
+
+    this.getLegendHTML = function (p, className) {
+        var el = document.createElement('div');
+        className && el.classList.add(className);
+        el.innerHTML =
+            '<div class="alpColorTab">\
+                <div class="alpCaption">'+ p.title + '</div>\
+                <div class="alpPaletteColors alpP-static"></div>\
+                <div class="alpPaletteValues alpV-static"></div>\
+             </div>';
+
+        var colorLine = '<div class="alpPaletteShade"></div><div class="alpPaletteShade"></div>',
+            valueLine = "";
+        var pi = p,
+            startIndex = -1,
+            size;
+        var scale = pi.scale,
+            min = pi.min,
+            max = pi.max;
+
+        for (var j = 0; j < scale.length; j++) {
+            var scalej = scale[j];
+            if (scalej) {
+                if (startIndex == -1) {
+                    startIndex = j;
+                    size = scale.length - startIndex;
+                }
+                colorLine += '<div class="alpColorCell" style="background-color:' + Legend.RGBToHex(scalej.partRed, scalej.partGreen, scalej.partBlue) + '"></div>';
+                var v = "";
+                if (startIndex != -1 && ((j - startIndex) % 10) == 0) {
+                    v = _lerp((j - startIndex) / size, max, min);
+                    if (v == 0.0 || v == 1.0) {
+                        v = parseInt(v);
+                    }
+                    if (j > startIndex && j < scale.length - 1) {
+                        v = v.toFixed(1);
+                        v = '<div style="margin-left:-7px">' + v + '</div>';
+                    } else {
+                        if ((j - startIndex) === 0) {
+                            v = min;
+                        } else {
+                            v = max;
+                            if (v < 1.0) {
+                                var offset = 10;
+                                if (_precision(v) > 1) {
+                                    offset = 15;
+                                }
+                                v = '<div style="margin-left:-' + offset + 'px">' + v + '</div>';
+                            }
+                        }
+                    }
+                }
+                valueLine += '<div class="alpValueCell">' + v + '</div>';
+            }
+        }
+        el.querySelector(".alpP-static").innerHTML = colorLine;
+        el.querySelector(".alpV-static").innerHTML = valueLine;
+
+        return el;
+    };
+
     this._renderStaticPalette = function () {
         var p = this.model.palettes;
 
