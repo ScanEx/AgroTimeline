@@ -2,34 +2,57 @@ var NDVILegendView = function () {
 
     var lang = L.gmxLocale.getLanguage();
 
-    var _palettes = [{
-        'title': NDVILegendView.locale[lang].EstestvennayaShkala,
-        'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml",
-        'min': 0.0,
-        'max': 1.0
-    }, {
-        'title': NDVILegendView.locale[lang].AnaliticheskayaShkala,
-        'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_BLUE_interp_legend.icxleg.xml",
-        'min': 0.0,
-        'max': 1.0,
-        'isStatic': false
-    }, {
-        'title': "Экспериментальная шкала NDVI",
-        'tag': "experimental-ndvi",
-        'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/EXPERIMENTAL_NDVI_interp_legend.icxleg.xml",
-        'min': 0.0,
-        'max': 1.0,
-        'display': "none",
-        'isStatic': false
-    }, {
-        'title': "Экспериментальная шкала MSAVI",
-        'tag': "experimental-msavi",
-        'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/EXPERIMENTAL_NDVI_MSAVI_interp_legend.icxleg.xml",
-        'min': 0.0,
-        'max': 1.0,
-        'display': "none",
-        'isStatic': false
-    }];
+    if (window.cosmosagro) {
+        var _palettes = [{
+            'title': NDVILegendView.locale[lang].EstestvennayaShkala,
+            'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/EXPERIMENTAL_NDVI_interp_legend.icxleg.xml",
+            'min': 0.0,
+            'max': 1.0
+        }, {
+            'title': NDVILegendView.locale[lang].AnaliticheskayaShkala,
+            'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_BLUE_interp_legend.icxleg.xml",
+            'min': 0.0,
+            'max': 1.0,
+            'isStatic': false
+        }, {
+            'title': "Экспериментальная шкала MSAVI",
+            'tag': "experimental-msavi",
+            'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/EXPERIMENTAL_NDVI_MSAVI_interp_legend.icxleg.xml",
+            'min': 0.0,
+            'max': 1.0,
+            'display': "none",
+            'isStatic': false
+        }];
+    } else {
+        var _palettes = [{
+            'title': NDVILegendView.locale[lang].EstestvennayaShkala,
+            'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml",
+            'min': 0.0,
+            'max': 1.0
+        }, {
+            'title': NDVILegendView.locale[lang].AnaliticheskayaShkala,
+            'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_BLUE_interp_legend.icxleg.xml",
+            'min': 0.0,
+            'max': 1.0,
+            'isStatic': false
+        }, {
+            'title': "Экспериментальная шкала NDVI",
+            'tag': "experimental-ndvi",
+            'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/EXPERIMENTAL_NDVI_interp_legend.icxleg.xml",
+            'min': 0.0,
+            'max': 1.0,
+            'display': "none",
+            'isStatic': false
+        }, {
+            'title': "Экспериментальная шкала MSAVI",
+            'tag': "experimental-msavi",
+            'url': "http://maps.kosmosnimki.ru/api/plugins/palettes/EXPERIMENTAL_NDVI_MSAVI_interp_legend.icxleg.xml",
+            'min': 0.0,
+            'max': 1.0,
+            'display': "none",
+            'isStatic': false
+        }];
+    }
 
     inheritance.base(this, new NDVILegend({
         'name': NDVILegendView.locale[lang].CvetovajaShkalaNdvi,
