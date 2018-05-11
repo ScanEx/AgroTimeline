@@ -1260,18 +1260,22 @@ NDVITimelineManager.prototype.getHozLayers = function () {
     var layers = this.layerCollection;
     $.each(layers, function (i, l) {
         var v = l.getGmxProperties();
-        if (!that._layersHookList[v.name]) {
-            if (!($.isEmptyObject(v.MetaProperties)))
-                if (!($.isEmptyObject(v.MetaProperties.product)))
-                    if ($.trim(v.MetaProperties.product.Value) == "fields" || $.trim(v.MetaProperties.product.Value) == "fields_aggregation")
-                        if (!($.isEmptyObject(v.MetaProperties.project)) && ($.trim(v.MetaProperties.project.Value) == "InsuranceGeo" ||
-                            $.trim(v.MetaProperties.project.Value) == "cosmosagro")) {
+        if (v.GeometryType && v.GeometryType === "point") {
+            l.setZIndex(101 + l.options.zIndex);
+        } else {
+            if (!that._layersHookList[v.name]) {
+                if (!($.isEmptyObject(v.MetaProperties)))
+                    if (!($.isEmptyObject(v.MetaProperties.product)))
+                        if ($.trim(v.MetaProperties.product.Value) == "fields" || $.trim(v.MetaProperties.product.Value) == "fields_aggregation")
+                            if (!($.isEmptyObject(v.MetaProperties.project)) && ($.trim(v.MetaProperties.project.Value) == "InsuranceGeo" ||
+                                $.trim(v.MetaProperties.project.Value) == "cosmosagro")) {
 
-                            layers[v.name].setZIndex(100);
+                                layers[v.name].setZIndex(100);
 
-                            that._layersHookList[v.name] = layers[v.name];
-                            fieldLayers.push(layers[v.name]);
-                        }
+                                that._layersHookList[v.name] = layers[v.name];
+                                fieldLayers.push(layers[v.name]);
+                            }
+            }
         }
     });
     return fieldLayers;
