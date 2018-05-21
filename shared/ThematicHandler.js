@@ -328,7 +328,7 @@ ThematicHandler.prototype._applyStrategy = function (features, layerName) {
         }
         var opacity = (color ? (color[3] || 1.0) : 0.0);
         this._layersStyleData[layerName][prop[identityField]] = {
-            fillStyle: shared.DEC2RGBA(color, opacity),
+            fillStyle: shared.DEC2RGB(color),
             fillOpacity: opacity
         };
     }

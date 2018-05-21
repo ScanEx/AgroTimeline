@@ -5342,44 +5342,34 @@ NDVITimelineManager.prototype._tileImageProcessing = function (dstCanvas, srcIma
     this._applyPalette(url, dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh);
 };
 
-NDVITimelineManager.prototype._pal = function (inOutArr, k) {
-    if (inOutArr[k] == 0 && inOutArr[k + 1] == 0 && inOutArr[k + 2] == 0) {
-        inOutArr[k] = 0;
-        inOutArr[k + 1] = 179;
-        inOutArr[k + 2] = 255;
-        inOutArr[k + 3] = 255;
-    } else {
-        var c = this.legendControl.getNDVIColor((inOutArr[k] - 101) / 100);
-        inOutArr[k] = c[0];
-        inOutArr[k + 1] = c[1];
-        inOutArr[k + 2] = c[2];
-        inOutArr[k + 3] = c[3];
-    }
-};
-
 NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanvas, sx, sy, sw, sh, dx, dy, dw, dh) {
     if (url) {
         var palette = this._palettes[url];
 
         var ctx = dstCanvas.getContext('2d');
-
         ctx.drawImage(srcCanvas, sx, sy, sw, sh, dx, dy, dw, dh);
 
         var imgd = ctx.getImageData(0, 0, dstCanvas.width, dstCanvas.height);
         var pix = imgd.data;
 
-        for (var i = 0; i < dstCanvas.width; i++) {
-            for (var j = 0; j < dstCanvas.height; j++) {
-                var k = i * dstCanvas.width + j;
-                var ind = k * 4;
-                this._pal(pix, ind);
+        for (var k = pix.length - 1; k > 0; k-=4) {
+            if (pix[k] === 0 && pix[k - 1] === 0 && pix[k - 2] === 0) {
+                pix[k] = 255;
+                pix[k - 1] = 255;
+                pix[k - 2] = 179;
+                pix[k - 3] = 0;
+            } else {
+                var c = this.legendControl.getNDVIColor((pix[k-1] - 101) / 100);
+                pix[k] = c[3];
+                pix[k - 1] = c[2];
+                pix[k - 2] = c[1];
+                pix[k - 3] = c[0];
             }
         }
 
-        var context = dstCanvas.getContext('2d');
-        var imageData = context.createImageData(dstCanvas.width, dstCanvas.height);
+        var imageData = ctx.createImageData(dstCanvas.width, dstCanvas.height);
         imageData.data.set(pix);
-        context.putImageData(imageData, 0, 0);
+        ctx.putImageData(imageData, 0, 0);
 
     } else {
         dstCanvas = srcCanvas;
