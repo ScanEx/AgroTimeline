@@ -254,7 +254,6 @@ var NDVILegendView = function () {
         className && el.classList.add(className);
         el.innerHTML =
             '<div class="alpColorTab">\
-                <div class="alpCaption">'+ p.title + '</div>\
                 <div class="alpPaletteColors alpP-static"></div>\
                 <div class="alpPaletteValues alpV-static"></div>\
              </div>';
@@ -479,12 +478,12 @@ inheritance.extend(NDVILegendView, LegendView);
 NDVILegendView.locale = {
     'rus': {
         'CvetovajaShkalaNdvi': "Цветовая шкала NDVI",
-        'EstestvennayaShkala': "Естественная шкала",
+        'EstestvennayaShkala': "Стандартная шкала",
         'AnaliticheskayaShkala': "Аналитическая шкала"
     },
     'eng': {
         'CvetovajaShkalaNdvi': "Color NDVI Scale",
-        'EstestvennayaShkala': "True color scale",
+        'EstestvennayaShkala': "Standard scale",
         'AnaliticheskayaShkala': "Analitical scale"
     }
 };
