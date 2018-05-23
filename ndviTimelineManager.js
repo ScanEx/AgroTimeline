@@ -1261,7 +1261,29 @@ NDVITimelineManager.prototype.getHozLayers = function () {
     $.each(layers, function (i, l) {
         var v = l.getGmxProperties();
         if (v.GeometryType && v.GeometryType === "point") {
+
             l.setZIndex(101 + l.options.zIndex);
+
+            if (v.IsPhotoLayer) {
+                l.bindClusters({
+                    iconCreateFunction: function (cluster) {
+                        var photoClusterIcon = L.divIcon({
+                            html: '<img src="//maps.kosmosnimki.ru/api/img/camera18.png" class="photo-icon"/><div class="marker-cluster-photo">' + cluster.getChildCount() + '</div>',
+                            className: 'photo-div-icon',
+                            iconSize: [14, 12],
+                            iconAnchor: [0, 0]
+                        });
+                        return photoClusterIcon;
+                    },
+                    maxClusterRadius: 40,
+                    spiderfyOnMaxZoom: true,
+                    spiderfyZoom: 14,
+                    spiderfyDistanceMultiplier: 1.2,
+                    disableClusteringAtZoom: 19,
+                    maxZoom: 19
+                });
+            }
+
         } else {
             if (!that._layersHookList[v.name]) {
                 if (!($.isEmptyObject(v.MetaProperties)))
@@ -5352,14 +5374,14 @@ NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanva
         var imgd = ctx.getImageData(0, 0, dstCanvas.width, dstCanvas.height);
         var pix = imgd.data;
 
-        for (var k = pix.length - 1; k > 0; k-=4) {
+        for (var k = pix.length - 1; k > 0; k -= 4) {
             if (pix[k] === 0 && pix[k - 1] === 0 && pix[k - 2] === 0) {
                 pix[k] = 255;
                 pix[k - 1] = 255;
                 pix[k - 2] = 179;
                 pix[k - 3] = 0;
             } else {
-                var c = this.legendControl.getNDVIColor((pix[k-1] - 101) / 100);
+                var c = this.legendControl.getNDVIColor((pix[k - 1] - 101) / 100);
                 pix[k] = c[3];
                 pix[k - 1] = c[2];
                 pix[k - 2] = c[1];

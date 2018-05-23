@@ -478,12 +478,12 @@ inheritance.extend(NDVILegendView, LegendView);
 NDVILegendView.locale = {
     'rus': {
         'CvetovajaShkalaNdvi': "Цветовая шкала NDVI",
-        'EstestvennayaShkala': "Стандартная шкала",
+        'EstestvennayaShkala': "Базовая шкала",
         'AnaliticheskayaShkala': "Аналитическая шкала"
     },
     'eng': {
         'CvetovajaShkalaNdvi': "Color NDVI Scale",
-        'EstestvennayaShkala': "Standard scale",
+        'EstestvennayaShkala': "Basic scale",
         'AnaliticheskayaShkala': "Analitical scale"
     }
 };
