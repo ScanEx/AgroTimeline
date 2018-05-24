@@ -267,6 +267,12 @@ var NDVILegendView = function () {
             min = pi.min,
             max = pi.max;
 
+        var PRECISION = 2;
+
+        if (min === 0 && max === 1) {
+            PRECISION = 1;
+        }
+
         for (var j = 0; j < scale.length; j++) {
             var scalej = scale[j];
             if (scalej) {
@@ -282,7 +288,7 @@ var NDVILegendView = function () {
                         v = parseInt(v);
                     }
                     if (j > startIndex && j < scale.length - 1) {
-                        v = v.toFixed(1);
+                        v = v.toFixed(PRECISION);
                         v = '<div style="margin-left:-7px">' + v + '</div>';
                     } else {
                         if ((j - startIndex) === 0) {
