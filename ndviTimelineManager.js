@@ -3070,26 +3070,27 @@ NDVITimelineManager.prototype.initializeImageProcessor = function () {
             srcPix = imgd.data;
         }
 
-        dstPix = new Array(dw * dh * 4);
+        var SIZE = 256 * 256;
+
+        dstPix = new Array(SIZE * 4);
 
         var dZ2 = Math.pow(2, dz - sz);
 
-        for (var i = 0; i < 256; i++) {
-            for (var j = 0; j < 256; j++) {
+        for (var k = 0; k < SIZE; k++) {
 
-                var srcInd = ((Math.floor(i / dZ2) + sy) * 256 + Math.floor(j / dZ2) + sx) * 4;
+            var j = k % 256,
+                i = ~~(k / 256);
 
-                var k = i * 256 + j;
-                var ind = k * 4;
+            var srcInd = ((~~(i / dZ2) + sy) * 256 + ~~(j / dZ2) + sx) << 2,
+                ind = k << 2;
 
-                dstPix[ind] = srcPix[srcInd];
-                dstPix[ind + 1] = srcPix[srcInd + 1];
-                dstPix[ind + 2] = srcPix[srcInd + 2];
-                dstPix[ind + 3] = srcPix[srcInd + 3];
+            dstPix[ind] = srcPix[srcInd];
+            dstPix[ind + 1] = srcPix[srcInd + 1];
+            dstPix[ind + 2] = srcPix[srcInd + 2];
+            dstPix[ind + 3] = srcPix[srcInd + 3];
 
-                if (dstPix[ind] === 0 || dstPix[ind] === 1) {
-                    dstPix[ind + 3] = 0;
-                }
+            if (dstPix[ind] === 0 || dstPix[ind] === 1) {
+                dstPix[ind + 3] = 0;
             }
         }
 
@@ -4834,7 +4835,10 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
                     that.timeLine.getContainer()[0].querySelector("#light_msaviRadio").style.display = "block";
                 }
             }
-        }, {
+        }];
+
+    if (!window.cosmosagro) {
+        items.push({
             "id": "chkExperimental",
             "class": "ntOptionsHR ntOptionsMODIS",
             "type": "checkbox",
@@ -4842,7 +4846,8 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
             "click": function (e) {
                 that.showExperimentalPalettes(e.checked);
             }
-        }];
+        });
+    }
 
     if (!this._userRole) {
         items.push({
@@ -5339,13 +5344,13 @@ NDVITimelineManager.prototype._setLayerImageProcessing = function (layer, shotTy
         var that = this;
         layer.setRasterHook(
             function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
-                that._tileImageProcessing(dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, shotType);
+                that._tileImageProcessing(dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info.source.z, info.destination.z, shotType);
                 return dstCanvas;
             });
     }
 };
 
-NDVITimelineManager.prototype._tileImageProcessing = function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, shotType) {
+NDVITimelineManager.prototype._tileImageProcessing = function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, sz, dz, shotType) {
 
     var layerPalette = this._layersLegend[shotType].palette,
         url;
@@ -5361,37 +5366,80 @@ NDVITimelineManager.prototype._tileImageProcessing = function (dstCanvas, srcIma
         }
     }
 
-    this._applyPalette(url, dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh);
+    this._applyPalette(url, dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, sz, dz);
 };
 
-NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanvas, sx, sy, sw, sh, dx, dy, dw, dh) {
+NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanvas, sx, sy, sw, sh, dx, dy, dw, dh, sz, dz) {
     if (url) {
         var palette = this._palettes[url];
 
-        var ctx = dstCanvas.getContext('2d');
-        ctx.drawImage(srcCanvas, sx, sy, sw, sh, dx, dy, dw, dh);
+        //var ctx = dstCanvas.getContext('2d');
+        //ctx.drawImage(srcCanvas, sx, sy, sw, sh, dx, dy, dw, dh);
 
-        var imgd = ctx.getImageData(0, 0, dstCanvas.width, dstCanvas.height);
-        var pix = imgd.data;
+        //var imgd = ctx.getImageData(0, 0, dstCanvas.width, dstCanvas.height);
+        //var pix = imgd.data;
 
-        for (var k = pix.length - 1; k > 0; k -= 4) {
-            if (pix[k] === 0 && pix[k - 1] === 0 && pix[k - 2] === 0) {
-                pix[k] = 255;
-                pix[k - 1] = 255;
-                pix[k - 2] = 179;
-                pix[k - 3] = 0;
+        //for (var k = pix.length - 1; k > 0; k -= 4) {
+        //    if (pix[k] === 0 && pix[k - 1] === 0 && pix[k - 2] === 0) {
+        //        pix[k] = 255;
+        //        pix[k - 1] = 255;
+        //        pix[k - 2] = 179;
+        //        pix[k - 3] = 0;
+        //    } else {
+        //        var c = this.legendControl.getNDVIColor((pix[k - 1] - 101) / 100);
+        //        pix[k] = c[3];
+        //        pix[k - 1] = c[2];
+        //        pix[k - 2] = c[1];
+        //        pix[k - 3] = c[0];
+        //    }
+        //}
+
+        //var imageData = ctx.createImageData(dstCanvas.width, dstCanvas.height);
+        //imageData.data.set(pix);
+        //ctx.putImageData(imageData, 0, 0);
+
+        var srcPix;
+        if (srcCanvas instanceof Image) {
+            srcPix = shared.getPixelsFromImage(srcCanvas);
+        } else {
+            var ctx = srcCanvas.getContext('2d');
+            var imgd = ctx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+            srcPix = imgd.data;
+        }
+
+        var SIZE = 256 * 256;
+
+        dstPix = new Array(SIZE * 4);
+
+        var dZ2 = Math.pow(2, dz - sz);
+
+        for (var k = 0; k < SIZE; k++) {
+
+            var j = k % 256,
+                i = ~~(k / 256);
+
+            var srcInd = ((~~(i / dZ2) + sy) * 256 + ~~(j / dZ2) + sx) << 2,
+                ind = k << 2;
+
+
+            if (srcPix[srcInd] === 0 && srcPix[srcInd + 1] === 0 && srcPix[srcInd + 2] === 0) {
+                dstPix[ind] = 0;
+                dstPix[ind + 1] = 179;
+                dstPix[ind + 2] = 255;
+                dstPix[ind + 3] = 255;
             } else {
-                var c = this.legendControl.getNDVIColor((pix[k - 1] - 101) / 100);
-                pix[k] = c[3];
-                pix[k - 1] = c[2];
-                pix[k - 2] = c[1];
-                pix[k - 3] = c[0];
+                var c = this.legendControl.getNDVIColor((srcPix[srcInd] - 101) / 100);
+                dstPix[ind] = c[0];
+                dstPix[ind + 1] = c[1];
+                dstPix[ind + 2] = c[2];
+                dstPix[ind + 3] = c[3];
             }
         }
 
-        var imageData = ctx.createImageData(dstCanvas.width, dstCanvas.height);
-        imageData.data.set(pix);
-        ctx.putImageData(imageData, 0, 0);
+        var context = dstCanvas.getContext('2d');
+        var imageData = context.createImageData(dstCanvas.width, dstCanvas.height);
+        imageData.data.set(dstPix);
+        context.putImageData(imageData, 0, 0);
 
     } else {
         dstCanvas = srcCanvas;
