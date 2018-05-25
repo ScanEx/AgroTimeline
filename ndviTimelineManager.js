@@ -2611,7 +2611,9 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
     }
 
     if (this._selectedLayers.length && !NDVITimelineManager.equal(that._visibleLayersOnTheDisplay, prevLayers)) {
-        if (this._selectedOption == "HR" || this._selectedOption == "CLASSIFICATION") {
+
+        /*this._selectedOption == "HR" || this._selectedOption == "CLASSIFICATION"*/
+        if (this._layersLegend[this._selectedOption].clip) {
 
             if (L.version === "0.7.7") {
                 this.removeSelectedLayersClipPolygon();

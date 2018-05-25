@@ -25,6 +25,7 @@
             }
         },
         "HR": {
+            clip: true,
             maxZoom: 13,
             name: "8288D69C7C0040EFBB7B7EE6671052E3",
             mask: "A05BB0207AEE4CFD93C045BF71576FDE",
@@ -47,6 +48,7 @@
             dateColumnName: "acqdate"
         },
         "SENTINEL_NDVI": {
+            clip: true,
             maxZoom: 13,
             isSentinel: true,
             name: "EC68D0C097BE4F0B9E9DE4A0B9F591A2",
@@ -128,6 +130,7 @@
             }
         },
         "LANDSAT_MSAVI": {
+            clip: true,
             maxZoom: 13,
             name: "E5450B8BDDE44E9A903BCF850327766E",
             //mask: "A05BB0207AEE4CFD93C045BF71576FDE",
@@ -141,6 +144,7 @@
             sceneFieldName: "sceneid"
         },
         "SENTINEL_MSAVI": {
+            clip: true,
             maxZoom: 13,
             isSentinel: true,
             name: "F350F1FB55944351AE10AC66C1BAB76B",
