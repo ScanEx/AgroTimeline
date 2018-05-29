@@ -136,9 +136,9 @@ var NDVILegendView = function () {
         var radios = this.el.querySelectorAll('input[type=radio][name="alpRadio"]');
         Array.prototype.forEach.call(radios, function (radio) {
             radio.addEventListener('change', function () {
-                that.model._selectedPaletteIndex = parseInt(this.value);
+                that.model.setSelectedPaletteIndex(parseInt(this.value));
                 that._refreshPaletteShades();
-                that.events.dispatch(that.events.changepalette, that.model._selectedPaletteIndex);
+                that.events.dispatch(that.events.changepalette, that.model.getSelectedPaletteIndex());
             });
         });
 

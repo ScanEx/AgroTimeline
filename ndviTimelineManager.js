@@ -76,7 +76,7 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     }
 
     //загруженные палитры по url'ам
-    this._palettes = {};
+    //this._palettes = {};
 
     //текущий выбранный комбо слой
     this._selectedCombo = params.selectedCombo != undefined ? params.selectedCombo : 1;
@@ -747,7 +747,7 @@ NDVITimelineManager.prototype.loadState = function (data) {
                 this.model.palettes[i].sliderMin = sliderMin;
                 this.model.palettes[i].sliderMax = sliderMax;
             }
-            this.model._selectedPaletteIndex = parseInt(data.ndviLegend.selectedPalette);
+            this.model.setSelectedPaletteIndex(parseInt(data.ndviLegend.selectedPalette));
             this._refreshPaletteShades();
             this._renderAnaliticalPalette();
             this.refreshRangeValues();
@@ -1168,20 +1168,20 @@ NDVITimelineManager.prototype.setCloudMaskRenderHook = function (layer, callback
 
 NDVITimelineManager.prototype.setRenderHook = function (layer, callback_kr, callback2) {
 
-    if (L.version === "0.7.7") {
-        if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI" || this._selectedOption == "LANDSAT_MSAVI" || this._selectedOption == "SENTINEL_MSAVI") {
-            this.layerBounds && layer.removeClipPolygon(this.layerBounds);
-        }
+    //if (L.version === "0.7.7") {
+    if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI" || this._selectedOption == "LANDSAT_MSAVI" || this._selectedOption == "SENTINEL_MSAVI") {
+        this.layerBounds && layer.removeClipPolygon(this.layerBounds);
     }
+    //}
 
     if (this._cutOff) {
 
-        if (L.version === "0.7.7") {
-            if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI" || this._selectedOption == "LANDSAT_MSAVI" || this._selectedOption == "SENTINEL_MSAVI") {
-                this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
-                layer.addClipPolygon(this.layerBounds);
-            }
+        //if (L.version === "0.7.7") {
+        if (this._selectedOption == "CLASSIFICATION" || this._selectedOption == "HR" || this._selectedOption == "SENTINEL_NDVI" || this._selectedOption == "LANDSAT_MSAVI" || this._selectedOption == "SENTINEL_MSAVI") {
+            this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
+            layer.addClipPolygon(this.layerBounds);
         }
+        //}
 
         for (var i = 0; i < this._visibleLayersOnTheDisplayPtr.length; i++) {
 
@@ -2615,9 +2615,9 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
         /*this._selectedOption == "HR" || this._selectedOption == "CLASSIFICATION"*/
         if (this._layersLegend[this._selectedOption].clip) {
 
-            if (L.version === "0.7.7") {
-                this.removeSelectedLayersClipPolygon();
-            }
+            //if (L.version === "0.7.7") {
+            this.removeSelectedLayersClipPolygon();
+            //}
 
             if (this._cutOff) {
 
@@ -2629,10 +2629,10 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
                     this._visibleLayersOnTheDisplayPtr[i].addPreRenderHook(NDVITimelineManager.l_hook);
                 }
 
-                if (L.version === "0.7.7") {
-                    this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
-                    this.addSelectedLayersClipPolygon(this.layerBounds);
-                }
+                //if (L.version === "0.7.7") {
+                this.layerBounds = NDVITimelineManager.getLayerBounds(this._visibleLayersOnTheDisplayPtr);
+                this.addSelectedLayersClipPolygon(this.layerBounds);
+                //}
             }
         }
     }
@@ -5330,121 +5330,57 @@ NDVITimelineManager.prototype._filterTimeline = function (elem, layer) {
 };
 
 NDVITimelineManager.prototype._setLayerImageProcessing = function (layer, shotType) {
-    if (this._layersLegend[shotType].palette) {
-        var layerPalette = this._layersLegend[shotType].palette;
-        var q = layerPalette.quality,
-            n = layerPalette.ndvi,
-            c = layerPalette.classification;
 
-        n && (this._palettes[n.url] = []);
-        q && (this._palettes[q.url] = []);
-        c && (this._palettes[c.url] = []);
+    var SIZE = 256 * 256,
+        oneBy256 = 1.0 / 256;
 
-        n && (shared.loadPaletteSync(n.url, null, this._palettes[n.url]));
-        q && (shared.loadPaletteSync(q.url, null, this._palettes[q.url]));
-        c && (shared.loadPaletteSync(c.url, null, this._palettes[c.url]));
-        var that = this;
-        layer.setRasterHook(
-            function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
-                that._tileImageProcessing(dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info.source.z, info.destination.z, shotType);
-                return dstCanvas;
-            });
-    }
-};
+    var dstPix = new Array(SIZE * 4);
 
-NDVITimelineManager.prototype._tileImageProcessing = function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, sz, dz, shotType) {
+    var getNDVIColor = this.legendControl.getNDVIColor.bind(this.legendControl);
 
-    var layerPalette = this._layersLegend[shotType].palette,
-        url;
+    layer.setRasterHook(
+        function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
 
-    if (layerPalette) {
-        var q = layerPalette.quality,
-            n = layerPalette.ndvi;
-
-        if (n) {
-            url = n.url
-        } else if (q) {
-            url = q.url
-        }
-    }
-
-    this._applyPalette(url, dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, sz, dz);
-};
-
-NDVITimelineManager.prototype._applyPalette = function (url, dstCanvas, srcCanvas, sx, sy, sw, sh, dx, dy, dw, dh, sz, dz) {
-    if (url) {
-        var palette = this._palettes[url];
-
-        //var ctx = dstCanvas.getContext('2d');
-        //ctx.drawImage(srcCanvas, sx, sy, sw, sh, dx, dy, dw, dh);
-
-        //var imgd = ctx.getImageData(0, 0, dstCanvas.width, dstCanvas.height);
-        //var pix = imgd.data;
-
-        //for (var k = pix.length - 1; k > 0; k -= 4) {
-        //    if (pix[k] === 0 && pix[k - 1] === 0 && pix[k - 2] === 0) {
-        //        pix[k] = 255;
-        //        pix[k - 1] = 255;
-        //        pix[k - 2] = 179;
-        //        pix[k - 3] = 0;
-        //    } else {
-        //        var c = this.legendControl.getNDVIColor((pix[k - 1] - 101) / 100);
-        //        pix[k] = c[3];
-        //        pix[k - 1] = c[2];
-        //        pix[k - 2] = c[1];
-        //        pix[k - 3] = c[0];
-        //    }
-        //}
-
-        //var imageData = ctx.createImageData(dstCanvas.width, dstCanvas.height);
-        //imageData.data.set(pix);
-        //ctx.putImageData(imageData, 0, 0);
-
-        var srcPix;
-        if (srcCanvas instanceof Image) {
-            srcPix = shared.getPixelsFromImage(srcCanvas);
-        } else {
-            var ctx = srcCanvas.getContext('2d');
-            var imgd = ctx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
-            srcPix = imgd.data;
-        }
-
-        var SIZE = 256 * 256;
-
-        dstPix = new Array(SIZE * 4);
-
-        var dZ2 = Math.pow(2, dz - sz);
-
-        for (var k = 0; k < SIZE; k++) {
-
-            var j = k % 256,
-                i = ~~(k / 256);
-
-            var srcInd = ((~~(i / dZ2) + sy) * 256 + ~~(j / dZ2) + sx) << 2,
-                ind = k << 2;
-
-
-            if (srcPix[srcInd] === 0 && srcPix[srcInd + 1] === 0 && srcPix[srcInd + 2] === 0) {
-                dstPix[ind] = 0;
-                dstPix[ind + 1] = 179;
-                dstPix[ind + 2] = 255;
-                dstPix[ind + 3] = 255;
+            var srcPix;
+            if (srcImage instanceof Image) {
+                srcPix = shared.getPixelsFromImage(srcImage);
             } else {
-                var c = this.legendControl.getNDVIColor((srcPix[srcInd] - 101) / 100);
-                dstPix[ind] = c[0];
-                dstPix[ind + 1] = c[1];
-                dstPix[ind + 2] = c[2];
-                dstPix[ind + 3] = c[3];
+                var ctx = srcImage.getContext('2d');
+                var imgd = ctx.getImageData(0, 0, srcImage.width, srcImage.height);
+                srcPix = imgd.data;
             }
-        }
 
-        var context = dstCanvas.getContext('2d');
-        var imageData = context.createImageData(dstCanvas.width, dstCanvas.height);
-        imageData.data.set(dstPix);
-        context.putImageData(imageData, 0, 0);
+            var dZ2 = 1.0 / Math.pow(2, info.destination.z - info.source.z);
 
-    } else {
-        dstCanvas = srcCanvas;
-    }
+            for (var k = 0; k < SIZE; k++) {
+
+                var j = k % 256,
+                    i = ~~(k * oneBy256);
+
+                var srcInd = ((~~(i * dZ2) + sy) * 256 + ~~(j * dZ2) + sx) << 2,
+                    ind = k << 2;
+
+
+                if (srcPix[srcInd] === 0 && srcPix[srcInd + 1] === 0 && srcPix[srcInd + 2] === 0) {
+                    dstPix[ind] = 0;
+                    dstPix[ind + 1] = 179;
+                    dstPix[ind + 2] = 255;
+                    dstPix[ind + 3] = 255;
+                } else {
+                    var c = getNDVIColor(srcPix[srcInd] * 0.01 - 1.01);
+                    dstPix[ind] = c[0];
+                    dstPix[ind + 1] = c[1];
+                    dstPix[ind + 2] = c[2];
+                    dstPix[ind + 3] = c[3];
+                }
+            }
+
+            var context = dstCanvas.getContext('2d');
+            var imageData = context.createImageData(dstCanvas.width, dstCanvas.height);
+            imageData.data.set(dstPix);
+            context.putImageData(imageData, 0, 0);
+
+
+            return dstCanvas;
+        });
 };
-

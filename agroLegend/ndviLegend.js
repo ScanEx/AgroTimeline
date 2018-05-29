@@ -7,6 +7,14 @@ var NDVILegend = function (options) {
 
     this._selectedPaletteIndex = 0;
 
+    var _p = null;
+    var _d = 0;
+    var _oneBy_d = 0.0;
+    var _sliderMin = 0;
+    var _sliderMax = 0;
+    var _startIndex = 0;
+    var BLACK = [0, 0, 0, 0];
+
     var defArr = [],
         that = this;
     for (var i = 0; i < options.palettes.length; i++) {
@@ -37,6 +45,7 @@ var NDVILegend = function (options) {
     }
 
     $.when.apply($, defArr).then(function () {
+        that.setSelectedPaletteIndex(0);
         that.events.dispatch(that.events.loadend, that);
     });
 
@@ -45,34 +54,43 @@ var NDVILegend = function (options) {
     };
 
     this.getNDVIColor = function (ndviValue) {
-        var p = this.palettes[this._selectedPaletteIndex];
-        var d = p.max - p.min;
-        var palValue = (ndviValue - p.min) / d;
-        var sliderMin = p.min + p.sliderMin * d,
-            sliderMax = p.min + p.sliderMax * d;
-        var rangeValue = p.min + palValue * d;
 
-        if (rangeValue < sliderMin && p.sliderMin > 0 ||
-            rangeValue > sliderMax && p.sliderMax < 1) {
-            return [0, 0, 0, 0];
+        var palValue = (ndviValue - _p.min) * _oneBy_d,
+            rangeValue = _p.min + palValue * _d;
+
+        if (rangeValue < _sliderMin && _p.sliderMin > 0 ||
+            rangeValue > _sliderMax && _p.sliderMax < 1) {
+            return BLACK;
         }
 
-        var index = Math.round((p.scale.length - p.startIndex) * palValue + p.startIndex);
-        if (index < p.startIndex) {
-            index = p.startIndex;
-        } else if (index >= p.scale.length) {
-            index = p.scale.length - 1;
+        var index = Math.round((_startIndex) * palValue + _p.startIndex);
+
+        if (index < _p.startIndex) {
+            index = _p.startIndex;
+        } else if (index >= _p.scale.length) {
+            index = _p.scale.length - 1;
         }
-        var res = [0, 0, 0, 0];
-        var c = p.scale[index];
+
+        var c = _p.scale[index];
+
         if (c)
-            res = [c.partRed, c.partGreen, c.partBlue, 255];
+            return [c.partRed, c.partGreen, c.partBlue, 255];
+        else
+            return BLACK;
+    };
 
-        return res;
+    this.update = function () {
+        _p = this.palettes[this._selectedPaletteIndex];
+        _d = _p.max - _p.min;
+        _sliderMin = _p.min + _p.sliderMin * _d;
+        _sliderMax = _p.min + _p.sliderMax * _d;
+        _oneBy_d = 1 / _d;
+        _startIndex = _p.scale.length - _p.startIndex;
     };
 
     this.setSelectedPaletteIndex = function (index) {
         this._selectedPaletteIndex = index;
+        this.update();
     };
 
     this.getSelectedPaletteIndex = function () {
@@ -82,11 +100,13 @@ var NDVILegend = function (options) {
     this.setRange = function (index, min, max) {
         this.palettes[index].min = min;
         this.palettes[index].max = max;
+        this.update();
     };
 
     this.setSliderRange = function (index, min, max) {
         this.palettes[index].sliderMin = min;
         this.palettes[index].sliderMax = max;
+        this.update();
     };
 };
 
