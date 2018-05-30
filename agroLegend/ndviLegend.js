@@ -79,6 +79,43 @@ var NDVILegend = function (options) {
             return BLACK;
     };
 
+    this.setNDVIColor = function (ndviValue, dstPix, ind) {
+
+        var palValue = (ndviValue - _p.min) * _oneBy_d,
+            rangeValue = _p.min + palValue * _d;
+
+        if (rangeValue < _sliderMin && _p.sliderMin > 0 ||
+            rangeValue > _sliderMax && _p.sliderMax < 1) {
+            dstPix[ind] = 0;
+            dstPix[ind + 1] = 0;
+            dstPix[ind + 2] = 0;
+            dstPix[ind + 3] = 0;
+            return;
+        }
+
+        var index = Math.round((_startIndex) * palValue + _p.startIndex);
+
+        if (index < _p.startIndex) {
+            index = _p.startIndex;
+        } else if (index >= _p.scale.length) {
+            index = _p.scale.length - 1;
+        }
+
+        var c = _p.scale[index];
+
+        if (c) {
+            dstPix[ind] = c.partRed;
+            dstPix[ind + 1] = c.partGreen;
+            dstPix[ind + 2] = c.partBlue;
+            dstPix[ind + 3] = 255;
+        } else {
+            dstPix[ind] = 0;
+            dstPix[ind + 1] = 0;
+            dstPix[ind + 2] = 0;
+            dstPix[ind + 3] = 0;
+        }
+    };
+
     this.update = function () {
         _p = this.palettes[this._selectedPaletteIndex];
         _d = _p.max - _p.min;

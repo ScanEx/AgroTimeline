@@ -5336,7 +5336,7 @@ NDVITimelineManager.prototype._setLayerImageProcessing = function (layer, shotTy
 
     var dstPix = new Array(SIZE * 4);
 
-    var getNDVIColor = this.legendControl.getNDVIColor.bind(this.legendControl);
+    var setNDVIColor = this.legendControl._ndviLegendView.model.setNDVIColor.bind(this.legendControl._ndviLegendView.model);
 
     layer.setRasterHook(
         function (dstCanvas, srcImage, sx, sy, sw, sh, dx, dy, dw, dh, info) {
@@ -5360,18 +5360,13 @@ NDVITimelineManager.prototype._setLayerImageProcessing = function (layer, shotTy
                 var srcInd = ((~~(i * dZ2) + sy) * 256 + ~~(j * dZ2) + sx) << 2,
                     ind = k << 2;
 
-
                 if (srcPix[srcInd] === 0 && srcPix[srcInd + 1] === 0 && srcPix[srcInd + 2] === 0) {
                     dstPix[ind] = 0;
                     dstPix[ind + 1] = 179;
                     dstPix[ind + 2] = 255;
                     dstPix[ind + 3] = 255;
                 } else {
-                    var c = getNDVIColor(srcPix[srcInd] * 0.01 - 1.01);
-                    dstPix[ind] = c[0];
-                    dstPix[ind + 1] = c[1];
-                    dstPix[ind + 2] = c[2];
-                    dstPix[ind + 3] = c[3];
+                    setNDVIColor(srcPix[srcInd] * 0.01 - 1.01, dstPix, ind);
                 }
             }
 
