@@ -72,10 +72,10 @@
         "RGB": {
             maxZoom: 14,
             cloudsMin: 100,
-            cloudsField: "CLOUDS",
+            cloudsField: "clouds",
             viewTimeline: true,
             name: "04DDB23F49F84B9A9122CBA6BC26D3ED",
-            dateColumnName: "ACQDATE"
+            dateColumnName: "acqdate"
         },
         "LANDSAT_PREVIEW": {
             viewTimeline: true,

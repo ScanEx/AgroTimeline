@@ -1264,25 +1264,25 @@ NDVITimelineManager.prototype.getHozLayers = function () {
 
             l.setZIndex(101 + l.options.zIndex);
 
-            if (v.IsPhotoLayer) {
-                l.bindClusters({
-                    iconCreateFunction: function (cluster) {
-                        var photoClusterIcon = L.divIcon({
-                            html: '<img src="//maps.kosmosnimki.ru/api/img/camera18.png" class="photo-icon"/><div class="marker-cluster-photo">' + cluster.getChildCount() + '</div>',
-                            className: 'photo-div-icon',
-                            iconSize: [14, 12],
-                            iconAnchor: [0, 0]
-                        });
-                        return photoClusterIcon;
-                    },
-                    maxClusterRadius: 40,
-                    spiderfyOnMaxZoom: true,
-                    spiderfyZoom: 14,
-                    spiderfyDistanceMultiplier: 1.2,
-                    disableClusteringAtZoom: 19,
-                    maxZoom: 19
-                });
-            }
+            //if (v.IsPhotoLayer) {
+            //    l.bindClusters({
+            //        iconCreateFunction: function (cluster) {
+            //            var photoClusterIcon = L.divIcon({
+            //                html: '<img src="//maps.kosmosnimki.ru/api/img/camera18.png" class="photo-icon"/><div class="marker-cluster-photo">' + cluster.getChildCount() + '</div>',
+            //                className: 'photo-div-icon',
+            //                iconSize: [14, 12],
+            //                iconAnchor: [0, 0]
+            //            });
+            //            return photoClusterIcon;
+            //        },
+            //        maxClusterRadius: 40,
+            //        spiderfyOnMaxZoom: true,
+            //        spiderfyZoom: 14,
+            //        spiderfyDistanceMultiplier: 1.2,
+            //        disableClusteringAtZoom: 19,
+            //        maxZoom: 19
+            //    });
+            //}
 
         } else {
             if (!that._layersHookList[v.name]) {
@@ -2613,7 +2613,7 @@ NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
     if (this._selectedLayers.length && !NDVITimelineManager.equal(that._visibleLayersOnTheDisplay, prevLayers)) {
 
         /*this._selectedOption == "HR" || this._selectedOption == "CLASSIFICATION"*/
-        if (this._layersLegend[this._selectedOption].clip) {
+        if (this._layersLegend[this._selectedOption] && this._layersLegend[this._selectedOption].clip) {
 
             //if (L.version === "0.7.7") {
             this.removeSelectedLayersClipPolygon();
@@ -3157,6 +3157,9 @@ NDVITimelineManager.prototype.bindTimelineCombo = function (selectedCombo) {
                 var dateCn = that._layerConfigs[layerName].dateColumnName;
                 if (dateCn) {
                     dateCn = layer._gmx.tileAttributeIndexes[dateCn];
+                    if (!dateCn) {
+                        console.log("warning: '" + dateCn + "' doesnt exists in '" + layerName + "'");
+                    }
                     filters.push(function (item) {
                         var t = that.timeLine.getTimelineController().getTimeline();
                         var date = item.properties[dateCn] * 1000;
