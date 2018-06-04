@@ -2741,11 +2741,12 @@ NDVITimelineManager.prototype.onMoveEnd = function () {
 
     that.setDatesStickHoverCallback();
 
-    setTimeout(function () {
-        that.refreshSelections();
-    }, 500);
-
     this._refreshTimeline();
+
+    //setTimeout(function () {
+    this.refreshSelections();
+    //}, 500);
+
 };
 
 NDVITimelineManager.prototype._refreshTimeline = function () {
@@ -3226,6 +3227,9 @@ NDVITimelineManager.prototype.deactivateUnknownRadios = function () {
 };
 
 NDVITimelineManager.prototype.refreshSelections = function () {
+
+    if (window.exportMode)
+        return;
 
     var layerNames = this.getViewTimelineLayers(this._selectedCombo);
 
