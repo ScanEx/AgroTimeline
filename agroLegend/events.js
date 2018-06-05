@@ -9,7 +9,8 @@ var Events = function (eventNames) {
      * @protected
      * @type {Array.<string>}
      */
-    this._eventNames = eventNames ? [].concat(eventNames) : [];
+    this._eventNames = [];
+
     eventNames && this.registerNames(eventNames);
 
     /**

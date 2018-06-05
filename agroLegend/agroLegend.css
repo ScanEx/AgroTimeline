@@ -203,3 +203,19 @@
     overflow-y: auto;
     overflow-x: hidden;
 }
+
+.alpSlider .alpSliderValue {
+    position: relative;
+    font-size: 10px;
+    width: 35px;
+}
+
+.alpSlider.alpLeft .alpSliderValue {
+    text-align: right;
+    margin-left: -37px;
+}
+
+.alpSlider.alpRight .alpSliderValue {
+    text-align: left;
+    margin-left: 10px;
+}

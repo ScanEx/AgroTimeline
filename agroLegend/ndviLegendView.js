@@ -374,6 +374,7 @@ var NDVILegendView = function () {
                 var rp = this.getPixelRange();
                 that._applyPaletteShade(palIndex, rp[0], rp[1]);
             }
+            that._showDistribution(this);
         });
     }
 
@@ -476,7 +477,62 @@ var NDVILegendView = function () {
                 e.style.display = "none";
             }
         }
-    }
+    };
+
+    this.bindSelectionHandler = function (handler) {
+        this._selectionHandler = handler;
+    };
+
+    this._showDistribution = function (slider) {
+        //TEST
+        var r = slider.getRange().map(function (v) { return Math.round(v * 100.0) });
+        slider.setValues(r[0], r[1]);
+    };
+
+    this.appendDistribution = function () {
+        this._selectionHandler;
+    };
+
+    this._getNDVIExtent = function () {
+
+        function _success(data) {
+            console.log(data);
+        };
+
+        var request = {
+            BorderFromLayers: [{ "LayerID": "123ABC", "gmx_id": [1, 2, 3] }],
+            "Items": [
+                {
+                    "Name": "1",
+                    "Layers": ["AQWW", "111"],
+                    "Bands": ["r", "g", "b"],
+                    "Return": ["Hist256"],
+                    "NoData": [0, 0, 0]
+                    //,
+                    //"Alpha": {
+                    //    "Layers": ["id"],
+                    //    "PixelFormat": "Indexed8bit",
+                    //    "MissingValueAsNoData": true,
+                    //    "NoData": [[0, 1, 5], [125, 125, 125]]
+                    //}
+                }]
+        };
+
+
+        var params = {
+            'WrapStyle': 'window',
+            'Request': request
+        };
+
+        if (nsGmx.Auth && nsGmx.Auth.getResourceServer) {
+            nsGmx.Auth.getResourceServer('geomixer').sendPostRequest('plugins/getrasterhist.ashx', params).fail(function () {
+                console.log("ndvi data fetch is failed");
+            }).then(_success);
+        } else {
+            sendCrossDomainPostRequest(window.serverBase + 'plugins/getrasterhist.ashx', params, _success);
+        }
+
+    };
 };
 
 inheritance.extend(NDVILegendView, LegendView);

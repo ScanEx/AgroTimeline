@@ -38,6 +38,7 @@ var NdviSlider = function (container, containerWidth, range, properties) {
     _getWidth = function () {
         return containerWidth || container.clientWidth;
     };
+
     //два слайдера
     var _p0 = document.createElement("div");
     _p0.classList.add("alpSlider");
@@ -45,17 +46,34 @@ var NdviSlider = function (container, containerWidth, range, properties) {
     container.appendChild(_p0);
     _bindEvents(_p0);
 
+    //показатель первого  бегунка
+    var _valP0 = document.createElement("div");
+    _valP0.classList.add("alpSliderValue");
+    _p0.classList.add("alpRight");
+    _valP0.innerHTML = "0%";
+
+    //второй бегунок
     var _p1 = document.createElement("div");
     _p1.classList.add("alpSlider");
     _p1.style.left = (range[1] * _getWidth()) + "px";
     container.appendChild(_p1);
     _bindEvents(_p1);
 
+    //показатель второго бегунка
+    var _valP1 = document.createElement("div");
+    _valP1.classList.add("alpSliderValue");
+    _p1.classList.add("alpLeft");
+    _valP1.innerHTML = "100%";
+
+    _p0.appendChild(_valP0);
+    _p1.appendChild(_valP1);
+
     this.setRange = function (min, max) {
         range[0] = min;
         range[1] = max;
         _p0.style.left = (min * _getWidth()) + "px";
         _p1.style.left = (max * _getWidth()) + "px";
+        _refreshValues();
     };
 
     this.getPixelRange = function () {
@@ -73,6 +91,11 @@ var NdviSlider = function (container, containerWidth, range, properties) {
         return [range[0], range[1]];
     };
 
+    this.setValues = function (v0, v1) {
+        _p0.querySelector(".alpSliderValue").innerHTML = v0 + "%";
+        _p1.querySelector(".alpSliderValue").innerHTML = v1 + "%";
+    };
+
     var _setValue = function (left) {
         if (slide) {
             if (left < 0) {
@@ -88,13 +111,45 @@ var NdviSlider = function (container, containerWidth, range, properties) {
                 temp = min;
 
             if (min > max) {
+                var temp = _p0;
+                _p0 = _p1;
+                _p1 = temp;
+
                 temp = min;
                 min = max;
                 max = temp;
             }
 
+            _refreshValues();
+
             range[0] = min;
             range[1] = max;
+        }
+    };
+
+    function _refreshValues() {
+        if (Math.abs(range[1] - range[0]) < 0.1) {
+            _p0.classList.remove("alpRight");
+            _p0.classList.add("alpLeft");
+            _p1.classList.remove("alpLeft");
+            _p1.classList.add("alpRight");
+        } else {
+
+            if (range[0] < 0.02) {
+                _p0.classList.remove("alpLeft");
+                _p0.classList.add("alpRight");
+            } else {
+                _p0.classList.remove("alpRight");
+                _p0.classList.add("alpLeft");
+            }
+
+            if (range[1] > 0.98) {
+                _p1.classList.remove("alpRight");
+                _p1.classList.add("alpLeft");
+            } else {
+                _p1.classList.remove("alpLeft");
+                _p1.classList.add("alpRight");
+            }
         }
     };
 

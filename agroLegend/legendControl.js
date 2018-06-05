@@ -15,6 +15,8 @@ var LegendControl = function (agroTimeline) {
 
     this._manual = false;
 
+    var _isNDVI = false;
+
     this.timeline = agroTimeline;
 
     this._dialog = new LegendDialog();
@@ -70,6 +72,10 @@ var LegendControl = function (agroTimeline) {
         }
     };
 
+    this.getVisibility = function () {
+        return _visibility;
+    };
+
     this.showButton = function () {
         this._btn.style.display = "block";
     };
@@ -107,6 +113,7 @@ var LegendControl = function (agroTimeline) {
 
     agroTimeline.events.on("changeselection", null, function (t) {
         var so = t._selectedOption;
+        _isNDVI = false;
         if (so == "CONDITIONS_OF_VEGETATION") {
             that.showButton();
             that.applyLegend(that._conditionsOfVegetationLegendView);
@@ -120,12 +127,14 @@ var LegendControl = function (agroTimeline) {
                 that.setVisibility(false);
             }
         } else if (so == "NDVI16") {
+            _isNDVI = true;
             that.showButton();
             that.applyLegend(that._ndviLegendView);
             if (!that._manual) {
                 that.setVisibility(false);
             }
         } else if (so == "HR" || so == "MEAN_NDVI" || so == "SENTINEL_NDVI" || so == "LANDSAT_MSAVI" || so == "SENTINEL_MSAVI") {
+            _isNDVI = true;
             that.showButton();
             that.applyLegend(that._ndviLegendView);
             if (!that._manual) {
@@ -157,5 +166,25 @@ var LegendControl = function (agroTimeline) {
 
     this.getNDVIColor = function (ndviValue) {
         return this._ndviLegendView.model.getNDVIColor(ndviValue);
+    };
+
+    this.isNDVI = function () {
+        return _visibility && _isNDVI;
+    };
+
+    this.bindSelectionHandler = function (handler) {
+        this._ndviLegendView.bindSelectionHandler(handler);
+
+        handler.events.on("changeselection", this, function () {
+            if (this.isNDVI()) {
+                this._ndviLegendView.appendDistribution();
+            }
+        });
+
+        this.timeline.events.on("changeselection", this, function (t) {
+            if (this.isNDVI()) {
+                this._ndviLegendView.appendDistribution();
+            }
+        });
     };
 };
