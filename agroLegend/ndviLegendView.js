@@ -63,6 +63,8 @@ var NDVILegendView = function () {
 
     var SLIDER_CONTAINER_SIZE = 404;
 
+    this._ndviDistr = null;
+
     this.sliders = [];
 
     var _lerp = function (t, h1, h0) {
@@ -483,30 +485,119 @@ var NDVILegendView = function () {
         this._selectionHandler = handler;
     };
 
+    this.refreshDistribution = function () {
+        for (var i = this.sliders.length - 1; i >= 0; --i) {
+            this._showDistribution(this.sliders[i]);
+        }
+    };
+
     this._showDistribution = function (slider) {
-        //TEST
-        var r = slider.getRange().map(function (v) { return Math.round(v * 100.0) });
-        slider.setValues(r[0], r[1]);
+        if (this._ndviDistr) {
+            var min = this.model.palettes[slider.properties.paletteIndex].min,
+                max = this.model.palettes[slider.properties.paletteIndex].max;
+            var h = this._ndviDistr.Bands.r.Hist256;
+            var allPixels = this._ndviDistr.ValidPixels;
+
+            var r = slider.getRange();
+            var sum = 0,
+                sum0 = 0,
+                sum1 = 0;
+
+            var SIZE = 255,
+                SIZE_ONE = SIZE + 1;
+
+            var R0 = Math.round(r[0] * SIZE),
+                R1 = Math.round(r[1] * SIZE);
+
+            for (var i = 0; i < SIZE_ONE; i++) {
+                sum += h[i];
+                if (i >= R0) {
+                    sum0 = sum;
+                    break
+                }
+            }
+
+            for (var j = i + 1; j < SIZE_ONE; j++) {
+                sum += h[j];
+                if (j >= R1) {
+                    sum1 = sum;
+                    break;
+                }
+            }
+
+            var r0 = sum0 / allPixels,
+                r1 = sum1 / allPixels;
+
+            slider.setValues(Math.round(r0 * 100.0) + '%', Math.round(r1 * 100.0) + '%');
+        } else {
+            slider.setValues("", "");
+        }
     };
 
     this.appendDistribution = function () {
-        this._selectionHandler;
+        var date = this._selectionHandler.TEST_getSelectionDate(),
+            layers = this._selectionHandler.TEST_getSelectionLayers();
+        var _this = this;
+        this._getHist256(date, layers[0], function (data) {
+            _this._ndviDistr = data;
+            _this.refreshDistribution();
+        });
     };
 
-    this._getNDVIExtent = function () {
+    this._getHist256 = function (date, layer, callback) {
 
-        function _success(data) {
-            console.log(data);
+        this._ndviDistr = null;
+
+        this.refreshDistribution();
+
+        var sel = this._selectionHandler.TEST_getSelectedFieldsLayers();
+
+        if (sel.length === 0) return;
+
+        var intersectionQuery = "";
+        for (var i = 0; i < sel.length; i++) {
+            var si = sel[i];
+            for (var j = 0; j < si.gmx_id.length; j++) {
+                intersectionQuery += "intersects([geomixergeojson],GeometryFromVectorLayer('" + si.LayerID + "'," + si.gmx_id[j] + "))";
+                if (j < si.gmx_id.length - 1) {
+                    intersectionQuery += " or ";
+                }
+            }
+
+            if (i < sel.length - 1) {
+                intersectionQuery += " or ";
+            }
+        }
+
+        var query = '"acqdate"=' + "'" + date + "'" + " and (" + intersectionQuery + ")";
+
+        var _params = {
+            "WrapStyle": "window",
+            "layer": layer,
+            "geometry": false,
+            "query": query
         };
 
-        var request = {
-            BorderFromLayers: [{ "LayerID": "123ABC", "gmx_id": [1, 2, 3] }],
-            "Items": [
-                {
-                    "Name": "1",
-                    "Layers": ["AQWW", "111"],
-                    "Bands": ["r", "g", "b"],
-                    "Return": ["Hist256"],
+        if (nsGmx.Auth && nsGmx.Auth.getResourceServer) {
+            nsGmx.Auth.getResourceServer('geomixer').sendPostRequest("/VectorLayer/Search.ashx", _params).then(_search_success);
+        } else {
+            sendCrossDomainPostRequest("http://maps.kosmosnimki.ru/VectorLayer/Search.ashx", _params, _search_success);
+        }
+
+        function _search_success(data) {
+            var v = data.Result.values,
+                r = [],
+                GMX_RasterCatalogID = data.Result.fields.indexOf('GMX_RasterCatalogID');
+            for (var i = 0; i < v.length; i++) {
+                r.push(v[i][GMX_RasterCatalogID]);
+            }
+
+            var request = {
+                BorderFromLayers: sel,
+                "Items": [{
+                    "Layers": r,
+                    "Bands": ["r"],
+                    "Return": ["Hist", "Stat"],
                     "NoData": [0, 0, 0]
                     //,
                     //"Alpha": {
@@ -516,22 +607,25 @@ var NDVILegendView = function () {
                     //    "NoData": [[0, 1, 5], [125, 125, 125]]
                     //}
                 }]
+            };
+
+            var params = {
+                'WrapStyle': 'window',
+                'Request': JSON.stringify(request)
+            };
+
+            if (nsGmx.Auth && nsGmx.Auth.getResourceServer) {
+                nsGmx.Auth.getResourceServer('geomixer').sendPostRequest('plugins/getrasterhist.ashx', params).fail(function () {
+                    console.log("ndvi data fetch is failed");
+                }).then(_getrasterhist_success);
+            } else {
+                sendCrossDomainPostRequest(window.serverBase + 'plugins/getrasterhist.ashx', params, _getrasterhist_success);
+            }
+
+            function _getrasterhist_success(resp) {
+                callback && callback(resp.Result[0]);
+            };
         };
-
-
-        var params = {
-            'WrapStyle': 'window',
-            'Request': request
-        };
-
-        if (nsGmx.Auth && nsGmx.Auth.getResourceServer) {
-            nsGmx.Auth.getResourceServer('geomixer').sendPostRequest('plugins/getrasterhist.ashx', params).fail(function () {
-                console.log("ndvi data fetch is failed");
-            }).then(_success);
-        } else {
-            sendCrossDomainPostRequest(window.serverBase + 'plugins/getrasterhist.ashx', params, _success);
-        }
-
     };
 };
 

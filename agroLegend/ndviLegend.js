@@ -8,7 +8,6 @@ var NDVILegend = function (options) {
     this._selectedPaletteIndex = 0;
 
     var _p = null;
-    var _d = 0;
     var _oneBy_d = 0.0;
     var _sliderMin = 0;
     var _sliderMax = 0;
@@ -55,15 +54,14 @@ var NDVILegend = function (options) {
 
     this.getNDVIColor = function (ndviValue) {
 
-        var palValue = (ndviValue - _p.min) * _oneBy_d,
-            rangeValue = _p.min + palValue * _d;
+        var palValue = (ndviValue - _p.min) * _oneBy_d;
 
-        if (rangeValue < _sliderMin && _p.sliderMin > 0 ||
-            rangeValue > _sliderMax && _p.sliderMax < 1) {
+        if (ndviValue < _sliderMin && _p.sliderMin > 0 ||
+            ndviValue > _sliderMax && _p.sliderMax < 1) {
             return BLACK;
         }
 
-        var index = Math.round((_startIndex) * palValue + _p.startIndex);
+        var index = Math.round(_startIndex * palValue + _p.startIndex);
 
         if (index < _p.startIndex) {
             index = _p.startIndex;
@@ -81,11 +79,8 @@ var NDVILegend = function (options) {
 
     this.setNDVIColor = function (ndviValue, dstPix, ind) {
 
-        var palValue = (ndviValue - _p.min) * _oneBy_d,
-            rangeValue = _p.min + palValue * _d;
-
-        if (rangeValue < _sliderMin && _p.sliderMin > 0 ||
-            rangeValue > _sliderMax && _p.sliderMax < 1) {
+        if (ndviValue < _sliderMin && _p.sliderMin > 0 ||
+            ndviValue > _sliderMax && _p.sliderMax < 1) {
             dstPix[ind] = 0;
             dstPix[ind + 1] = 0;
             dstPix[ind + 2] = 0;
@@ -93,7 +88,9 @@ var NDVILegend = function (options) {
             return;
         }
 
-        var index = Math.round((_startIndex) * palValue + _p.startIndex);
+        var palValue = (ndviValue - _p.min) * _oneBy_d;
+
+        var index = Math.round(_startIndex * palValue + _p.startIndex);
 
         if (index < _p.startIndex) {
             index = _p.startIndex;
@@ -118,7 +115,7 @@ var NDVILegend = function (options) {
 
     this.update = function () {
         _p = this.palettes[this._selectedPaletteIndex];
-        _d = _p.max - _p.min;
+        var _d = _p.max - _p.min;
         _sliderMin = _p.min + _p.sliderMin * _d;
         _sliderMax = _p.min + _p.sliderMax * _d;
         _oneBy_d = 1 / _d;

@@ -92,8 +92,8 @@ var NdviSlider = function (container, containerWidth, range, properties) {
     };
 
     this.setValues = function (v0, v1) {
-        _p0.querySelector(".alpSliderValue").innerHTML = v0 + "%";
-        _p1.querySelector(".alpSliderValue").innerHTML = v1 + "%";
+        _p0.querySelector(".alpSliderValue").innerHTML = v0;
+        _p1.querySelector(".alpSliderValue").innerHTML = v1;
     };
 
     var _setValue = function (left) {
