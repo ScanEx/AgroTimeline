@@ -162,6 +162,9 @@ var LegendControl = function (agroTimeline) {
 
     agroTimeline.events.on("clearselection", null, function (t) {
         that.hideButton();
+        if (that._ndviLegendView) {
+            that._ndviLegendView.clearDistribution();
+        }
     });
 
     this.getNDVIColor = function (ndviValue) {
@@ -169,7 +172,7 @@ var LegendControl = function (agroTimeline) {
     };
 
     this.isNDVI = function () {
-        return _visibility && _isNDVI;
+        return _isNDVI;
     };
 
     this.bindSelectionHandler = function (handler) {

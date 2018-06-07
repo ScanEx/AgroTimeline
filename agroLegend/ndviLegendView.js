@@ -64,6 +64,7 @@ var NDVILegendView = function () {
     var SLIDER_CONTAINER_SIZE = 404;
 
     this._ndviDistr = null;
+    this._requestID = 0;
 
     this.sliders = [];
 
@@ -411,6 +412,7 @@ var NDVILegendView = function () {
 
         if (p != null) {
             _render(p);
+            this._showDistribution(this.sliders[p]);
         } else {
             for (var i = 0; i < _palettes.length; i++) {
                 if (!_palettes.isStatic) {
@@ -506,20 +508,17 @@ var NDVILegendView = function () {
             var SIZE = 255,
                 SIZE_ONE = SIZE + 1;
 
-            var R0 = Math.round(r[0] * SIZE),
-                R1 = Math.round(r[1] * SIZE);
-
             for (var i = 0; i < SIZE_ONE; i++) {
                 sum += h[i];
-                if (i >= R0) {
+                if ((i * 0.01 - 1.01) >= min + r[0] * (max - min)) {
                     sum0 = sum;
                     break
                 }
             }
 
-            for (var j = i + 1; j < SIZE_ONE; j++) {
-                sum += h[j];
-                if (j >= R1) {
+            for (i = i + 1; i < SIZE_ONE; i++) {
+                sum += h[i];
+                if ((i * 0.01 - 1.01) >= min + r[1] * (max - min)) {
                     sum1 = sum;
                     break;
                 }
@@ -544,88 +543,64 @@ var NDVILegendView = function () {
         });
     };
 
+    this.clearHist = function () {
+        this._ndviDistr = null;
+        this._requestID = 0;
+    };
+
+    this.clearDistribution = function () {
+        this.clearHist();
+        this.refreshDistribution();
+    };
+
     this._getHist256 = function (date, layer, callback) {
 
-        this._ndviDistr = null;
-
+        this.clearHist();
         this.refreshDistribution();
 
         var sel = this._selectionHandler.TEST_getSelectedFieldsLayers();
 
-        if (sel.length === 0) return;
+        if (sel.length === 0 || !layer) return;
 
-        var intersectionQuery = "";
-        for (var i = 0; i < sel.length; i++) {
-            var si = sel[i];
-            for (var j = 0; j < si.gmx_id.length; j++) {
-                intersectionQuery += "intersects([geomixergeojson],GeometryFromVectorLayer('" + si.LayerID + "'," + si.gmx_id[j] + "))";
-                if (j < si.gmx_id.length - 1) {
-                    intersectionQuery += " or ";
+        this._requestID++;
+
+        var prop = layer.getGmxProperties();
+
+        var layersExt = [{ "LayerID": prop.LayerID, "Filter": "[" + prop.TemporalColumnName + "]='" + date + "'", "FilterByBorder": true }];
+
+        var request = {
+            BorderFromLayers: sel,
+            "Items": [{
+                "Name": this._requestID,
+                "LayersExt": layersExt,
+                "Bands": ["r"],
+                "Return": ["Hist"],
+                "NoData": [0, 0, 0]
+            }]
+        };
+
+        var url = 'http://maps.kosmosnimki.ru/plugins/getrasterhist.ashx';
+
+        var formData = new FormData();
+        formData.append('WrapStyle', 'None');
+        formData.append('Request', JSON.stringify(request));
+        formData.append('sync', shared.getCookie("sync"));
+
+        var _this = this;
+
+        fetch(url, {
+            body: formData,
+            credentials: 'include',
+            method: 'POST'
+        })
+            .then(function (resp) {
+                return resp.json();
+            })
+            .then(function (resp) {
+                if (_this._requestID === parseInt(resp.Result[0].Name)) {
+                    callback && callback(resp.Result[0]);
                 }
-            }
-
-            if (i < sel.length - 1) {
-                intersectionQuery += " or ";
-            }
-        }
-
-        var query = '"acqdate"=' + "'" + date + "'" + " and (" + intersectionQuery + ")";
-
-        var _params = {
-            "WrapStyle": "window",
-            "layer": layer,
-            "geometry": false,
-            "query": query
-        };
-
-        if (nsGmx.Auth && nsGmx.Auth.getResourceServer) {
-            nsGmx.Auth.getResourceServer('geomixer').sendPostRequest("/VectorLayer/Search.ashx", _params).then(_search_success);
-        } else {
-            sendCrossDomainPostRequest("http://maps.kosmosnimki.ru/VectorLayer/Search.ashx", _params, _search_success);
-        }
-
-        function _search_success(data) {
-            var v = data.Result.values,
-                r = [],
-                GMX_RasterCatalogID = data.Result.fields.indexOf('GMX_RasterCatalogID');
-            for (var i = 0; i < v.length; i++) {
-                r.push(v[i][GMX_RasterCatalogID]);
-            }
-
-            var request = {
-                BorderFromLayers: sel,
-                "Items": [{
-                    "Layers": r,
-                    "Bands": ["r"],
-                    "Return": ["Hist", "Stat"],
-                    "NoData": [0, 0, 0]
-                    //,
-                    //"Alpha": {
-                    //    "Layers": ["id"],
-                    //    "PixelFormat": "Indexed8bit",
-                    //    "MissingValueAsNoData": true,
-                    //    "NoData": [[0, 1, 5], [125, 125, 125]]
-                    //}
-                }]
-            };
-
-            var params = {
-                'WrapStyle': 'window',
-                'Request': JSON.stringify(request)
-            };
-
-            if (nsGmx.Auth && nsGmx.Auth.getResourceServer) {
-                nsGmx.Auth.getResourceServer('geomixer').sendPostRequest('plugins/getrasterhist.ashx', params).fail(function () {
-                    console.log("ndvi data fetch is failed");
-                }).then(_getrasterhist_success);
-            } else {
-                sendCrossDomainPostRequest(window.serverBase + 'plugins/getrasterhist.ashx', params, _getrasterhist_success);
-            }
-
-            function _getrasterhist_success(resp) {
-                callback && callback(resp.Result[0]);
-            };
-        };
+            });
     };
 };
 
