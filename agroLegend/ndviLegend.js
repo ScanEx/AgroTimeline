@@ -104,12 +104,23 @@ var NDVILegend = function (options) {
     };
 
 
-    this.setNDVIColor = function (ndviValue, dstPix, ind) {
+    this.setNDVIColor = function (ndviGrey, dstPix, ind) {
 
         if (this._selectedPaletteIndex === 1001) {
-            //...
+            if (this._ndviDistr) {
+                var c = this._ndviDistr.palette[ndviGrey];
+                dstPix[ind] = c.r;
+                dstPix[ind + 1] = c.g;
+                dstPix[ind + 2] = c.b;
+                dstPix[ind + 3] = c.a;
+            } else {
+                dstPix[ind] = 0;
+                dstPix[ind + 1] = 0;
+                dstPix[ind + 2] = 0;
+                dstPix[ind + 3] = 0;
+            }
         } else {
-
+            var ndviValue = ndviGrey * 0.01 - 1.01;
             if (ndviValue < _sliderMin && _p.sliderMin > 0 ||
                 ndviValue > _sliderMax && _p.sliderMax < 1) {
                 dstPix[ind] = 0;

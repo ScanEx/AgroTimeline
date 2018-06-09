@@ -5373,7 +5373,7 @@ NDVITimelineManager.prototype._setLayerImageProcessing = function (layer, shotTy
                     dstPix[ind + 2] = 255;
                     dstPix[ind + 3] = 255;
                 } else {
-                    setNDVIColor(srcPix[srcInd] * 0.01 - 1.01, dstPix, ind);
+                    setNDVIColor(srcPix[srcInd], dstPix, ind);
                 }
             }
 

@@ -118,12 +118,12 @@ var NDVILegendView = function () {
                  <div style="background-color:#2E8B20"></div>\
                </div>\
                <div class="alpPaletteValues">\
-                 <div style="margin-left: 0px; text-align: left; padding: 0;">0%</div>\
-                 <div>20%</div>\
-                 <div>40%</div>\
-                 <div>60%</div>\
-                 <div>80%</div>\
-                 <div style="padding: 0;text-align: right;">100%</div>\
+                 <div style="margin-left: 0px; text-align: left; padding: 0;"></div>\
+                 <div></div>\
+                 <div></div>\
+                 <div></div>\
+                 <div></div>\
+                 <div style="padding: 0;text-align: right;"></div>\
                </div>\
              </div>\
            </div>'
@@ -302,15 +302,8 @@ var NDVILegendView = function () {
     this._setDistributionNDVIValues = function (values) {
         var i = 0;
         this.el.querySelectorAll(".alpBlock-distribution .alpPaletteValues div").forEach(function (e) {
-            e.innerHTML = values[i][0] + "(" + values[i][1] + "%)";
-            i += 1;
+            e.innerHTML = values[i++];
         });
-    };
-
-    this.getDistributionNDVIColor = function (ndvi) {
-        //
-        //...
-        //
     };
 
     this.initialize();
@@ -558,9 +551,12 @@ var NDVILegendView = function () {
     };
 
     this.refreshDistribution = function () {
+
         for (var i = this.sliders.length - 1; i >= 0; --i) {
             this._showDistribution(this.sliders[i]);
         }
+
+        this._createNDVIDistributionPalette();
     };
 
     this._createNDVIDistributionPalette = function () {
@@ -570,16 +566,22 @@ var NDVILegendView = function () {
             var allPixels = this.model._ndviDistr.ValidPixels;
             this.model._ndviDistr.palette = new Array(255);
 
-            var colors = [
-                [0, 0, 0, 0],
-                shared.htmlColorToRgba("#FE0001"),
-                shared.htmlColorToRgba("#F5D238"),
-                shared.htmlColorToRgba("#D3FEBF"),
-                shared.htmlColorToRgba("#4FE003"),
-                shared.htmlColorToRgba("#2E8B20")];
+            var c1 = shared.htmlColorToRgba("#FE0001"),
+                c2 = shared.htmlColorToRgba("#F5D238"),
+                c3 = shared.htmlColorToRgba("#D3FEBF"),
+                c4 = shared.htmlColorToRgba("#4FE003"),
+                c5 = shared.htmlColorToRgba("#2E8B20");
 
-            var ndviArr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-            var distrArr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+            var colors = [
+                { 'r': 0, 'g': 0, 'b': 0, 'a': 0 },
+                { 'r': c1[0], 'g': c1[1], 'b': c1[2], 'a': c1[3] },
+                { 'r': c2[0], 'g': c2[1], 'b': c2[2], 'a': c2[3] },
+                { 'r': c3[0], 'g': c3[1], 'b': c3[2], 'a': c3[3] },
+                { 'r': c4[0], 'g': c4[1], 'b': c4[2], 'a': c4[3] },
+                { 'r': c5[0], 'g': c5[1], 'b': c5[2], 'a': c5[3] }
+            ];
+
+            var arr = ["0(0%)", "", "", "", "", ""];
             var _D = [0.0, 0.20, 0.40, 0.60, 0.80, 1.00];
 
             var curr = 1;
@@ -587,16 +589,18 @@ var NDVILegendView = function () {
             var SIZE = 256;
 
             for (var i = 0; i < SIZE; i++) {
-                this.model._ndviDistr.palette[i] = colors[curr];
+
+                this.model._ndviDistr.palette[i] = colors[curr] || colors[0];
 
                 var p = hAcc[i] / allPixels;
 
                 if (p >= _D[curr]) {
-                    ndviArr[curr] = (i - 1) * 0.01 - 1.01;
-                    distrArr[curr] = hAcc[i - 1] / allPixels;
+                    arr[curr] = ((i - 1) * 0.01 - 1.01).toFixed(1) + "(" + Math.round(hAcc[i - 1] / allPixels * 100.0) + "%)";
                     curr++;
                 }
             }
+
+            this._setDistributionNDVIValues(arr);
         }
     };
 
@@ -614,7 +618,6 @@ var NDVILegendView = function () {
 
             r0 = this.model._ndviDistr.Hist256Acc[i0] / allPixels;
             r1 = this.model._ndviDistr.Hist256Acc[i1] / allPixels;
-
 
             slider.setValues(Math.round(r0 * 100.0) + '%', Math.round(r1 * 100.0) + '%');
         } else {
@@ -640,12 +643,17 @@ var NDVILegendView = function () {
             _this._createNDVIDistributionPalette();
 
             _this.refreshDistribution();
+
+            if (_this.model.getSelectedPaletteIndex() == 1001) {
+                _this.events.dispatch(_this.events.changepalette, _this.model.getSelectedPaletteIndex());
+            }
         });
     };
 
     this.clearHist = function () {
         this.model._ndviDistr = null;
         this._requestID = 0;
+        this._setDistributionNDVIValues(['', '', '', '', '', '']);
     };
 
     this.clearDistribution = function () {
