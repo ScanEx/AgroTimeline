@@ -63,7 +63,6 @@ var NDVILegendView = function () {
 
     var SLIDER_CONTAINER_SIZE = 404;
 
-    this._ndviDistr = null;
     this._requestID = 0;
 
     this.sliders = [];
@@ -77,7 +76,7 @@ var NDVILegendView = function () {
     this.staticBlockTemplate =
         '<div class="alpBlock alpBlock-{tag}" style="display:{display}">\
              <div class="alpRadioTab">\
-               <input type= "radio" class="alpRadio" name= "alpRadio" value= "{id}" checked/>\
+               <input type= "radio" class="alpRadio" name= "alpRadio" value="{id}" checked/>\
              </div>\
              <div class="alpColorTab">\
                <div class="alpCaption">{title}</div>\
@@ -90,7 +89,7 @@ var NDVILegendView = function () {
     this.nonStaticBlockTemplate =
         '<div class="alpBlock alpBlock-{tag}" style="display:{display}">\
            <div class="alpRadioTab">\
-             <input type= "radio" class="alpRadio" name= "alpRadio" value= "{id}" />\
+             <input type= "radio" class="alpRadio" name= "alpRadio" value="{id}" />\
            </div>\
            <div class="alpColorTab">\
              <div class="alpCaption">{title}</div>\
@@ -104,10 +103,36 @@ var NDVILegendView = function () {
            </div>\
          </div>';
 
+    this.distributionTemplate =
+        '<div class="alpBlock alpBlock-{tag}" style="display:{display}">\
+             <div class="alpRadioTab">\
+               <input type= "radio" class="alpRadio" name= "alpRadio" value="{id}"/>\
+             </div>\
+             <div class="alpColorTab">\
+               <div class="alpCaption">Распределение NDVI</div>\
+               <div class="alpPaletteColors">\
+                 <div style="background-color:#FE0001"></div>\
+                 <div style="background-color:#F5D238"></div>\
+                 <div style="background-color:#D3FEBF"></div>\
+                 <div style="background-color:#4FE003"></div>\
+                 <div style="background-color:#2E8B20"></div>\
+               </div>\
+               <div class="alpPaletteValues">\
+                 <div style="margin-left: 0px; text-align: left; padding: 0;">0%</div>\
+                 <div>20%</div>\
+                 <div>40%</div>\
+                 <div>60%</div>\
+                 <div>80%</div>\
+                 <div style="padding: 0;text-align: right;">100%</div>\
+               </div>\
+             </div>\
+           </div>'
+
     this.template = "<div>";
     for (var i = 0; i < _palettes.length; i++) {
         var p = _palettes[i];
         var t;
+
         if (p.isStatic) {
             t = replaceSubstring(this.staticBlockTemplate, {
                 'id': i.toString(),
@@ -240,7 +265,52 @@ var NDVILegendView = function () {
             })(i);
         }
 
+
+        function insertAfter(el, referenceNode) {
+            referenceNode.parentNode.insertBefore(el, referenceNode.nextSibling);
+        }
+
+        var distrEl = this._renderDistributionLegend();
+
+        //insertAfter
+        insertAfter(distrEl, this.el.childNodes[0]);
+
         return this;
+    };
+
+    this._renderDistributionLegend = function () {
+        var t = replaceSubstring(this.distributionTemplate, {
+            'id': 1001,
+            'title': p.title || "",
+            'tag': "distribution",
+            'display': "block"
+        });
+
+        var $el = $($.parseHTML(t));
+
+        var that = this;
+
+        $el[0].querySelector('input[type=radio][name="alpRadio"]').addEventListener('change', function () {
+            that.model.setSelectedPaletteIndex(parseInt(this.value));
+            that._refreshPaletteShades();
+            that.events.dispatch(that.events.changepalette, that.model.getSelectedPaletteIndex());
+        });
+
+        return $el[0];
+    };
+
+    this._setDistributionNDVIValues = function (values) {
+        var i = 0;
+        this.el.querySelectorAll(".alpBlock-distribution .alpPaletteValues div").forEach(function (e) {
+            e.innerHTML = values[i][0] + "(" + values[i][1] + "%)";
+            i += 1;
+        });
+    };
+
+    this.getDistributionNDVIColor = function (ndvi) {
+        //
+        //...
+        //
     };
 
     this.initialize();
@@ -493,39 +563,58 @@ var NDVILegendView = function () {
         }
     };
 
+    this._createNDVIDistributionPalette = function () {
+        if (this.model._ndviDistr) {
+
+            var hAcc = this.model._ndviDistr.Hist256Acc;
+            var allPixels = this.model._ndviDistr.ValidPixels;
+            this.model._ndviDistr.palette = new Array(255);
+
+            var colors = [
+                [0, 0, 0, 0],
+                shared.htmlColorToRgba("#FE0001"),
+                shared.htmlColorToRgba("#F5D238"),
+                shared.htmlColorToRgba("#D3FEBF"),
+                shared.htmlColorToRgba("#4FE003"),
+                shared.htmlColorToRgba("#2E8B20")];
+
+            var ndviArr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+            var distrArr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+            var _D = [0.0, 0.20, 0.40, 0.60, 0.80, 1.00];
+
+            var curr = 1;
+
+            var SIZE = 256;
+
+            for (var i = 0; i < SIZE; i++) {
+                this.model._ndviDistr.palette[i] = colors[curr];
+
+                var p = hAcc[i] / allPixels;
+
+                if (p >= _D[curr]) {
+                    ndviArr[curr] = (i - 1) * 0.01 - 1.01;
+                    distrArr[curr] = hAcc[i - 1] / allPixels;
+                    curr++;
+                }
+            }
+        }
+    };
+
     this._showDistribution = function (slider) {
-        if (this._ndviDistr) {
+        if (this.model._ndviDistr) {
             var min = this.model.palettes[slider.properties.paletteIndex].min,
                 max = this.model.palettes[slider.properties.paletteIndex].max;
-            var h = this._ndviDistr.Bands.r.Hist256;
-            var allPixels = this._ndviDistr.ValidPixels;
+            var h = this.model._ndviDistr.Bands.r.Hist256;
+            var allPixels = this.model._ndviDistr.ValidPixels;
 
             var r = slider.getRange();
-            var sum = 0,
-                sum0 = 0,
-                sum1 = 0;
 
-            var SIZE = 255,
-                SIZE_ONE = SIZE + 1;
+            var i0 = Math.floor((min + r[0] * (max - min) + 1.01) / 0.01),
+                i1 = Math.floor((min + r[1] * (max - min) + 1.01) / 0.01);
 
-            for (var i = 0; i < SIZE_ONE; i++) {
-                sum += h[i];
-                if ((i * 0.01 - 1.01) >= min + r[0] * (max - min)) {
-                    sum0 = sum;
-                    break
-                }
-            }
+            r0 = this.model._ndviDistr.Hist256Acc[i0] / allPixels;
+            r1 = this.model._ndviDistr.Hist256Acc[i1] / allPixels;
 
-            for (i = i + 1; i < SIZE_ONE; i++) {
-                sum += h[i];
-                if ((i * 0.01 - 1.01) >= min + r[1] * (max - min)) {
-                    sum1 = sum;
-                    break;
-                }
-            }
-
-            var r0 = sum0 / allPixels,
-                r1 = sum1 / allPixels;
 
             slider.setValues(Math.round(r0 * 100.0) + '%', Math.round(r1 * 100.0) + '%');
         } else {
@@ -538,13 +627,24 @@ var NDVILegendView = function () {
             layers = this._selectionHandler.TEST_getSelectionLayers();
         var _this = this;
         this._getHist256(date, layers[0], function (data) {
-            _this._ndviDistr = data;
+            _this.model._ndviDistr = data;
+
+            _this.model._ndviDistr.Hist256Acc = null;
+            _this.model._ndviDistr.Hist256Acc = new Array(256);
+            var sum = 0;
+            for (var i = 0; i < 255; i++) {
+                sum += data.Bands.r.Hist256[i];
+                _this.model._ndviDistr.Hist256Acc[i] = sum;
+            }
+
+            _this._createNDVIDistributionPalette();
+
             _this.refreshDistribution();
         });
     };
 
     this.clearHist = function () {
-        this._ndviDistr = null;
+        this.model._ndviDistr = null;
         this._requestID = 0;
     };
 
