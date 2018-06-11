@@ -590,14 +590,14 @@ var NDVILegendView = function () {
 
             for (var i = 0; i < SIZE; i++) {
 
-                this.model._ndviDistr.palette[i] = colors[curr] || colors[0];
-
                 var p = hAcc[i] / allPixels;
 
                 if (p >= _D[curr]) {
-                    arr[curr] = ((i - 1) * 0.01 - 1.01).toFixed(1) + "(" + Math.round(hAcc[i - 1] / allPixels * 100.0) + "%)";
+                    arr[curr] = ((i - 1) * 0.01 - 1.01).toFixed(2) + "(" + Math.round(hAcc[i - 1] / allPixels * 100.0) + "%)";
                     curr++;
                 }
+
+                this.model._ndviDistr.palette[i] = colors[curr] || colors[0];
             }
 
             this._setDistributionNDVIValues(arr);

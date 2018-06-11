@@ -120,7 +120,9 @@ var NDVILegend = function (options) {
                 dstPix[ind + 3] = 0;
             }
         } else {
+
             var ndviValue = ndviGrey * 0.01 - 1.01;
+
             if (ndviValue < _sliderMin && _p.sliderMin > 0 ||
                 ndviValue > _sliderMax && _p.sliderMax < 1) {
                 dstPix[ind] = 0;
