@@ -226,7 +226,6 @@
 
 
     .alpBlock-distribution .alpPaletteColors {
-        margin-top: 14px;
     }
 
         .alpBlock-distribution .alpPaletteColors div {
@@ -241,5 +240,19 @@
         width: 40px;
         padding-right: 21px;
         padding-left: 21px;
+        text-align: center;
+    }
+
+
+.alpPaletteDistrValues {
+    width: 404px;
+    height: 14px;
+    position: relative;
+}
+
+    .alpPaletteDistrValues div {
+        float: left;
+        width: 20%;
+        height: 14px;
         text-align: center;
     }
