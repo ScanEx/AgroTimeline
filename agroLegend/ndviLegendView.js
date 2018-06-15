@@ -103,7 +103,7 @@ var NDVILegendView = function () {
            </div>\
          </div>';
 
-    this._ndviDistributionPalette = ["#ca0005", "#fef015", "#3a8534", "#0d69a5", "#88106a"];
+    this._ndviDistributionPalette = ["#FE0001", "#F5D238", "#D3FEBF", "#4FE003", "#2E8B20"];
 
     this.distributionTemplate =
         '<div class="alpBlock alpBlock-{tag}" style="display:{display}">\
@@ -120,6 +120,7 @@ var NDVILegendView = function () {
                  <div></div>\
                </div >\
                <div class="alpPaletteColors">\
+                 <div class="alpPaletteShade"></div>\
                  <div style="background-color:{0}"></div>\
                  <div style="background-color:{1}"></div>\
                  <div style="background-color:{2}"></div>\
@@ -508,6 +509,13 @@ var NDVILegendView = function () {
 
     this._refreshPaletteShades = function () {
         var index = this.model.getSelectedPaletteIndex();
+
+        if (index !== 1001) {
+            this.el.querySelector(".alpBlock.alpBlock-distribution .alpPaletteShade").style.width = SLIDER_CONTAINER_SIZE + "px";
+        } else {
+            this.el.querySelector(".alpBlock.alpBlock-distribution .alpPaletteShade").style.width = 0 + "px";
+        }
+
         for (var i = 0; i < this.sliders.length; i++) {
             if (index === i) {
                 var rp = this.sliders[i].getPixelRange();
