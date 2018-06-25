@@ -315,16 +315,16 @@ var NDVILegendView = function () {
     };
 
     this._setDistributionNDVIValues = function (values, distributionValues) {
-        var i = 0;
-        this.el.querySelectorAll(".alpBlock-distribution .alpPaletteValues div").forEach(function (e) {
-            e.innerHTML = values[i++];
-        });
+        var arr = this.el.querySelectorAll(".alpBlock-distribution .alpPaletteValues div");
+        for (var i = 0; i < arr.length; i++) {
+            arr[i].innerHTML = values[i];
+        }
 
         if (distributionValues) {
-            i = 0;
-            this.el.querySelectorAll(".alpPaletteDistrValues div").forEach(function (e) {
-                e.innerHTML = distributionValues[i++];
-            });
+            arr = this.el.querySelectorAll(".alpPaletteDistrValues div");
+            for (i = 0; i < arr.length; i++) {
+                arr[i].innerHTML = distributionValues[i];
+            }
         }
     };
 
