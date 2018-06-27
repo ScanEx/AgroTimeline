@@ -71,7 +71,7 @@ var NDVILegendView = function () {
         return h0 + t * (h1 - h0);
     };
 
-    this.events = new Events(["changepalette", "changerange"]);
+    this.events = new Events(["changepalette", "changerange", "loadend"]);
 
     this.staticBlockTemplate =
         '<div class="alpBlock alpBlock-{tag}" style="display:{display}">\
@@ -107,7 +107,8 @@ var NDVILegendView = function () {
 
     this.distributionTemplate =
         '<div class="alpBlock alpBlock-{tag}" style="display:{display}">\
-             <div class="alpRadioTab">\
+             <div class="alpRadioTab alpRadioDisabled">\
+               <div class="alpRadioShade"></div>\
                <input type= "radio" class="alpRadio" name= "alpRadio" value="{id}"/>\
              </div>\
              <div class="alpColorTab">\
@@ -314,14 +315,14 @@ var NDVILegendView = function () {
         return $el[0];
     };
 
-    this._setDistributionNDVIValues = function (values, distributionValues) {
-        var arr = this.el.querySelectorAll(".alpBlock-distribution .alpPaletteValues div");
+    this._setDistributionNDVIValues = function (el, values, distributionValues) {
+        var arr = el.querySelectorAll(".alpBlock-distribution .alpPaletteValues div");
         for (var i = 0; i < arr.length; i++) {
             arr[i].innerHTML = values[i];
         }
 
         if (distributionValues) {
-            arr = this.el.querySelectorAll(".alpPaletteDistrValues div");
+            arr = el.querySelectorAll(".alpPaletteDistrValues div");
             for (i = 0; i < arr.length; i++) {
                 arr[i].innerHTML = distributionValues[i];
             }
@@ -337,69 +338,116 @@ var NDVILegendView = function () {
         return p;
     };
 
-    this.getLegendHTML = function (p, className) {
-        var el = document.createElement('div');
-        className && el.classList.add(className);
-        el.innerHTML =
-            '<div class="alpColorTab">\
+    this.getLegendHTML = function (className) {
+        var index = this.model._selectedPaletteIndex;
+
+        if (index === 1001) {
+            var el = document.createElement('div');
+            className && el.classList.add(className);
+
+            el.innerHTML = replaceSubstring(
+                '<div class="alpBlock alpBlock-distribution" style="height: 56px;">\
+             <div class="alpColorTab">\
+               <div class="alpPaletteDistrValues">\
+                 <div></div>\
+                 <div></div>\
+                 <div></div>\
+                 <div></div>\
+                 <div></div>\
+               </div >\
+               <div class="alpPaletteColors">\
+                 <div style="background-color:{0}"></div>\
+                 <div style="background-color:{1}"></div>\
+                 <div style="background-color:{2}"></div>\
+                 <div style="background-color:{3}"></div>\
+                 <div style="background-color:{4}"></div>\
+               </div>\
+               <div class="alpPaletteValues">\
+                 <div style="margin-left: 0px; text-align: left; padding: 0;"></div>\
+                 <div></div>\
+                 <div></div>\
+                 <div></div>\
+                 <div></div>\
+                 <div style="padding: 0;text-align: right;"></div>\
+               </div>\
+             </div>\
+           </div>', {
+                    '0': this._ndviDistributionPalette[0],
+                    '1': this._ndviDistributionPalette[1],
+                    '2': this._ndviDistributionPalette[2],
+                    '3': this._ndviDistributionPalette[3],
+                    '4': this._ndviDistributionPalette[4]
+                });
+
+            this._createNDVIDistributionPalette(el);
+
+            return el;
+        } else {
+            var p = this.model.palettes[index];
+
+            var el = document.createElement('div');
+            className && el.classList.add(className);
+            el.innerHTML =
+                '<div class="alpColorTab">\
                 <div class="alpPaletteColors alpP-static"></div>\
                 <div class="alpPaletteValues alpV-static"></div>\
              </div>';
 
-        var colorLine = '<div class="alpPaletteShade"></div><div class="alpPaletteShade"></div>',
-            valueLine = "";
-        var pi = p,
-            startIndex = -1,
-            size;
-        var scale = pi.scale,
-            min = pi.min,
-            max = pi.max;
+            var colorLine = '<div class="alpPaletteShade"></div><div class="alpPaletteShade"></div>',
+                valueLine = "";
+            var pi = p,
+                startIndex = -1,
+                size;
+            var scale = pi.scale,
+                min = pi.min,
+                max = pi.max;
 
-        var PRECISION = 2;
+            var PRECISION = 2;
 
-        if (min === 0 && max === 1) {
-            PRECISION = 1;
-        }
+            if (min === 0 && max === 1) {
+                PRECISION = 1;
+            }
 
-        for (var j = 0; j < scale.length; j++) {
-            var scalej = scale[j];
-            if (scalej) {
-                if (startIndex == -1) {
-                    startIndex = j;
-                    size = scale.length - startIndex;
-                }
-                colorLine += '<div class="alpColorCell" style="background-color:' + Legend.RGBToHex(scalej.partRed, scalej.partGreen, scalej.partBlue) + '"></div>';
-                var v = "";
-                if (startIndex != -1 && ((j - startIndex) % 10) == 0) {
-                    v = _lerp((j - startIndex) / size, max, min);
-                    if (v == 0.0 || v == 1.0) {
-                        v = parseInt(v);
+            for (var j = 0; j < scale.length; j++) {
+                var scalej = scale[j];
+                if (scalej) {
+                    if (startIndex == -1) {
+                        startIndex = j;
+                        size = scale.length - startIndex;
                     }
-                    if (j > startIndex && j < scale.length - 1) {
-                        v = v.toFixed(PRECISION);
-                        v = '<div style="margin-left:-7px">' + v + '</div>';
-                    } else {
-                        if ((j - startIndex) === 0) {
-                            v = min;
+                    colorLine += '<div class="alpColorCell" style="background-color:' + Legend.RGBToHex(scalej.partRed, scalej.partGreen, scalej.partBlue) + '"></div>';
+                    var v = "";
+                    if (startIndex != -1 && ((j - startIndex) % 10) == 0) {
+                        v = _lerp((j - startIndex) / size, max, min);
+                        if (v == 0.0 || v == 1.0) {
+                            v = parseInt(v);
+                        }
+                        if (j > startIndex && j < scale.length - 1) {
+                            v = v.toFixed(PRECISION);
+                            v = '<div style="margin-left:-7px">' + v + '</div>';
                         } else {
-                            v = max;
-                            if (v < 1.0) {
-                                var offset = 10;
-                                if (_precision(v) > 1) {
-                                    offset = 15;
+                            if ((j - startIndex) === 0) {
+                                v = min;
+                            } else {
+                                v = max;
+                                if (v < 1.0) {
+                                    var offset = 10;
+                                    if (_precision(v) > 1) {
+                                        offset = 15;
+                                    }
+                                    v = '<div style="margin-left:-' + offset + 'px">' + v + '</div>';
                                 }
-                                v = '<div style="margin-left:-' + offset + 'px">' + v + '</div>';
                             }
                         }
                     }
+                    valueLine += '<div class="alpValueCell">' + v + '</div>';
                 }
-                valueLine += '<div class="alpValueCell">' + v + '</div>';
             }
-        }
-        el.querySelector(".alpP-static").innerHTML = colorLine;
-        el.querySelector(".alpV-static").innerHTML = valueLine;
+            el.querySelector(".alpP-static").innerHTML = colorLine;
+            el.querySelector(".alpV-static").innerHTML = valueLine;
 
-        return el;
+            return el;
+        }
     };
 
     this._renderStaticPalette = function () {
@@ -585,10 +633,10 @@ var NDVILegendView = function () {
             this._showDistribution(this.sliders[i]);
         }
 
-        this._createNDVIDistributionPalette();
+        this._createNDVIDistributionPalette(this.el);
     };
 
-    this._createNDVIDistributionPalette = function () {
+    this._createNDVIDistributionPalette = function (el) {
         if (this.model._ndviDistr) {
 
             var hAcc = this.model._ndviDistr.Hist256Acc;
@@ -651,6 +699,7 @@ var NDVILegendView = function () {
             };
 
             this._setDistributionNDVIValues(
+                el,
                 ndviArr.map(function (e) {
                     return e.toFixed(2)
                 }),
@@ -695,7 +744,7 @@ var NDVILegendView = function () {
                 _this.model._ndviDistr.Hist256Acc[i] = sum;
             }
 
-            _this._createNDVIDistributionPalette();
+            _this._createNDVIDistributionPalette(_this.el);
 
             _this.refreshDistribution();
 
@@ -708,7 +757,7 @@ var NDVILegendView = function () {
     this.clearHist = function () {
         this.model._ndviDistr = null;
         this._requestID = 0;
-        this._setDistributionNDVIValues(['', '', '', '', '', ''], ['', '', '', '', '', '']);
+        this._setDistributionNDVIValues(this.el, ['', '', '', '', '', ''], ['', '', '', '', '', '']);
     };
 
     this.clearDistribution = function () {
@@ -725,11 +774,15 @@ var NDVILegendView = function () {
 
         if (sel.length === 0 || !layer) {
 
+            this.el.querySelector(".alpBlock.alpBlock-distribution .alpRadioTab").classList.add("alpRadioDisabled");
+
             if (this.model.getSelectedPaletteIndex() === 1001) {
                 this.events.dispatch(this.events.changepalette, this.model.getSelectedPaletteIndex());
             }
 
             return;
+        } else {
+            this.el.querySelector(".alpBlock.alpBlock-distribution .alpRadioTab").classList.remove("alpRadioDisabled");
         }
 
         this._requestID++;
