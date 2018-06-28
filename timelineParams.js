@@ -94,9 +94,9 @@
         },
         "RGB2": {
             maxZoom: 14,
-            cloudsField: "CLOUDS",
+            cloudsField: "clouds",
             name: "47A9D4E5E5AE497A8A1A7EA49C7FC336",
-            dateColumnName: "ACQDATE"
+            dateColumnName: "acqdate"
         },
         "FIRES": {
             name: "F2840D287CD943C4B1122882C5B92565",

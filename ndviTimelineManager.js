@@ -1017,10 +1017,10 @@ NDVITimelineManager.prototype._main = function () {
     this.resize();
 
     if (window.iconSidebarWidget) {
-        window.iconSidebarWidget.on("opened", function () {
+        window.iconSidebarWidget.addEventListener("opened", function () {
             that.resize();
         });
-        window.iconSidebarWidget.on("closed", function () {
+        window.iconSidebarWidget.addEventListener("closed", function () {
             that.resize();
         });
     }
