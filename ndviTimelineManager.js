@@ -693,7 +693,8 @@ NDVITimelineManager.prototype.getState = function () {
             'selectedPalette': palIndex,
             'palettesBands': palettesBands,
             'sliderBands': paletteSlidersBands,
-            'visibility': this.legendControl._dialog.getVisibility()
+            'visibility': this.legendControl._dialog.getVisibility(),
+            'ndviDistr': this.legendControl._ndviLegendView.model.getNDVIDistribution()
         }
     };
 };
@@ -732,6 +733,11 @@ NDVITimelineManager.prototype.loadState = function (data) {
     };
 
     if (data.ndviLegend) {
+
+        if (data.ndviLegend.ndviDistr) {
+            this.legendControl._ndviLegendView.model.setNDVIDistribution(data.ndviLegend.ndviDistr);
+        }
+
         this.legendControl._ndviLegendView.model.events.on("loadend", this.legendControl._ndviLegendView, function () {
             var bands = data.ndviLegend.palettesBands,
                 sliderBands = data.ndviLegend.sliderBands;

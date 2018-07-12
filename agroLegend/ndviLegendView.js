@@ -379,7 +379,15 @@ var NDVILegendView = function () {
                     '4': this._ndviDistributionPalette[4]
                 });
 
-            this._createNDVIDistributionPalette(el);
+            //this._createNDVIDistributionPalette(el);
+
+            this._setDistributionNDVIValues(
+                el,
+                this.model._ndviDistr.ndviArr.map(function (e) {
+                    return e.toFixed(2)
+                }),
+                this.model._ndviDistr.distrArr
+            );
 
             return el;
         } else {
@@ -640,7 +648,8 @@ var NDVILegendView = function () {
         if (this.model._ndviDistr) {
 
             var hAcc = this.model._ndviDistr.Hist256Acc;
-            var allPixels = this.model._ndviDistr.ValidPixels;
+            var allPixels = 1.0 / this.model._ndviDistr.ValidPixels;
+            var allPixels_100 = allPixels * 100.0;
             this.model._ndviDistr.palette = new Array(255);
 
             var c1 = shared.htmlColorToRgba(this._ndviDistributionPalette[0]),
@@ -663,32 +672,33 @@ var NDVILegendView = function () {
             var _D = [0.0, 0.20, 0.40, 0.60, 0.80, 1.00];
 
             var SIZE = 256;
+            var curr = 1;
+            var pal = this.model._ndviDistr.palette;
 
+            //TODO: объединить два следующих цикла
             for (var i = 100; i < SIZE; i++) {
                 if (hAcc[i] > 0) {
-                    distrArr[0] = hAcc[i] / allPixels * 100.0;;
-                    ndviArr[0] = (i) * 0.01 - 1.01;
+                    distrArr[0] = hAcc[i] * allPixels_100;
+                    ndviArr[0] = i * 0.01 - 1.01;
                     break;
                 }
             }
-
-            var curr = 1;
-
             for (var i = 0; i < SIZE; i++) {
 
-                var p = hAcc[i] / allPixels;
+                var p = hAcc[i] * allPixels;
 
                 if (p >= _D[curr]) {
-                    var pp = hAcc[i - 1] / allPixels * 100.0;
+                    var pp = hAcc[i - 1] * allPixels_100;
                     distrArr[curr] = pp;
                     ndviArr[curr] = (i - 1) * 0.01 - 1.01;
                     curr++;
                 }
 
-                this.model._ndviDistr.palette[i] = colors[curr] || colors[0];
+                pal[i] = colors[curr] || colors[0];
             }
 
-            for (var i = 0; i < distrArr.length - 1; i++) {
+            var l = distrArr.length - 1;
+            for (var i = 0; i < l; i++) {
                 var pp = distrArr[i + 1] - distrArr[i];
                 if (Math.round(pp) === 0) {
                     pp = pp.toFixed(1);
@@ -697,6 +707,9 @@ var NDVILegendView = function () {
                 }
                 distrArr[i] = pp + "%";
             };
+
+            this.model._ndviDistr.ndviArr = ndviArr;
+            this.model._ndviDistr.distrArr = distrArr;
 
             this._setDistributionNDVIValues(
                 el,
@@ -713,15 +726,15 @@ var NDVILegendView = function () {
             var min = this.model.palettes[slider.properties.paletteIndex].min,
                 max = this.model.palettes[slider.properties.paletteIndex].max;
             var h = this.model._ndviDistr.Bands.r.Hist256;
-            var allPixels = this.model._ndviDistr.ValidPixels;
+            var allPixels = 1.0 / this.model._ndviDistr.ValidPixels;
 
             var r = slider.getRange();
 
             var i0 = Math.floor((min + r[0] * (max - min) + 1.01) / 0.01),
                 i1 = Math.floor((min + r[1] * (max - min) + 1.01) / 0.01);
 
-            r0 = this.model._ndviDistr.Hist256Acc[i0] / allPixels;
-            r1 = this.model._ndviDistr.Hist256Acc[i1] / allPixels;
+            r0 = this.model._ndviDistr.Hist256Acc[i0] * allPixels;
+            r1 = this.model._ndviDistr.Hist256Acc[i1] * allPixels;
 
             slider.setValues(Math.round(r0 * 100.0) + '%', Math.round(r1 * 100.0) + '%');
         } else {
@@ -730,28 +743,33 @@ var NDVILegendView = function () {
     };
 
     this.appendDistribution = function () {
-        var date = this._selectionHandler.TEST_getSelectionDate(),
-            layers = this._selectionHandler.TEST_getSelectionLayers();
-        var _this = this;
-        this._getHist256(date, layers[0], function (data) {
-            _this.model._ndviDistr = data;
 
-            _this.model._ndviDistr.Hist256Acc = null;
-            _this.model._ndviDistr.Hist256Acc = new Array(256);
-            var sum = 0;
-            for (var i = 0; i < 255; i++) {
-                sum += data.Bands.r.Hist256[i];
-                _this.model._ndviDistr.Hist256Acc[i] = sum;
-            }
+        if (!window.exportMode) {
 
-            _this._createNDVIDistributionPalette(_this.el);
+            var date = this._selectionHandler.TEST_getSelectionDate(),
+                layers = this._selectionHandler.TEST_getSelectionLayers();
+            var _this = this;
+            this._getHist256(date, layers[0], function (data) {
+                _this.model._ndviDistr = data;
 
-            _this.refreshDistribution();
+                _this.model._ndviDistr.Hist256Acc = null;
+                var _histAcc = _this.model._ndviDistr.Hist256Acc = new Array(256);
 
-            if (_this.model.getSelectedPaletteIndex() == 1001) {
-                _this.events.dispatch(_this.events.changepalette, _this.model.getSelectedPaletteIndex());
-            }
-        });
+                var sum = 0;
+                for (var i = 0; i < 255; i++) {
+                    sum += data.Bands.r.Hist256[i];
+                    _histAcc[i] = sum;
+                }
+
+                _this._createNDVIDistributionPalette(_this.el);
+
+                _this.refreshDistribution();
+
+                if (_this.model.getSelectedPaletteIndex() === 1001) {
+                    _this.events.dispatch(_this.events.changepalette, _this.model.getSelectedPaletteIndex());
+                }
+            });
+        }
     };
 
     this.clearHist = function () {

@@ -78,47 +78,62 @@ var NDVILegend = function (options) {
             return BLACK;
     };
 
-    this.getNDVIDistribution = function (ndvi, min, max) {
-        if (this._ndviDistr) {
-            min = min || 0.0;
-            max = max || 1.0;
+    //this.getNDVIDistribution = function (ndvi, min, max) {
+    //    if (this._ndviDistr) {
+    //        min = min || 0.0;
+    //        max = max || 1.0;
 
-            var h = this._ndviDistr.Bands.r.Hist256;
-            var allPixels = this._ndviDistr.ValidPixels;
+    //        var h = this._ndviDistr.Bands.r.Hist256;
+    //        var allPixels = this._ndviDistr.ValidPixels;
 
-            var r = slider.getRange();
-            var sum = 0;
+    //        var r = slider.getRange();
+    //        var sum = 0;
 
-            var SIZE = 255,
-                SIZE_ONE = SIZE + 1;
+    //        var SIZE = 255,
+    //            SIZE_ONE = SIZE + 1;
 
-            for (var i = 0; i < SIZE_ONE; i++) {
-                sum += h[i];
-                if ((i * 0.01 - 1.01) >= min + ndvi * (max - min)) {
-                    return sum / allPixels;
-                }
-            }
+    //        for (var i = 0; i < SIZE_ONE; i++) {
+    //            sum += h[i];
+    //            if ((i * 0.01 - 1.01) >= min + ndvi * (max - min)) {
+    //                return sum / allPixels;
+    //            }
+    //        }
 
-            return 1.0;
-        }
+    //        return 1.0;
+    //    }
+    //};
+
+    this.getNDVIDistribution = function () {
+        return this._ndviDistr;
     };
 
+    this.setNDVIDistribution = function (ndviDistr) {
+        this._ndviDistr = ndviDistr;
+        this.update();
+    };
 
     this.setNDVIColor = function (ndviGrey, dstPix, ind) {
 
         if (this._selectedPaletteIndex === 1001) {
+
             if (this._ndviDistr) {
+
                 var c = this._ndviDistr.palette[ndviGrey];
+
                 dstPix[ind] = c.r;
                 dstPix[ind + 1] = c.g;
                 dstPix[ind + 2] = c.b;
                 dstPix[ind + 3] = c.a;
+
             } else {
+
                 dstPix[ind] = 0;
                 dstPix[ind + 1] = 0;
                 dstPix[ind + 2] = 0;
                 dstPix[ind + 3] = 0;
+
             }
+
         } else {
 
             var ndviValue = ndviGrey * 0.01 - 1.01;
