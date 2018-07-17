@@ -669,7 +669,7 @@ var NDVILegendView = function () {
 
             var ndviArr = [0, 0, 0, 0, 0, 0];
             var distrArr = [0, 0, 0, 0, 0, 0];
-            var _D = [0.0, 0.20, 0.40, 0.60, 0.80, 1.00];
+            var _D = [0.0, 0.20, 0.40, 0.60, 0.80, 0.99];
 
             var SIZE = 256;
             var curr = 1;
@@ -694,7 +694,11 @@ var NDVILegendView = function () {
                     curr++;
                 }
 
-                pal[i] = colors[curr] || colors[0];
+                if (curr < colors.length) {
+                    pal[i] = colors[curr] || colors[0];
+                } else {
+                    pal[i] = colors[colors.length - 1];
+                }
             }
 
             var l = distrArr.length - 1;
@@ -756,7 +760,7 @@ var NDVILegendView = function () {
                 var _histAcc = _this.model._ndviDistr.Hist256Acc = new Array(256);
 
                 var sum = 0;
-                for (var i = 0; i < 255; i++) {
+                for (var i = 0; i < 256; i++) {
                     sum += data.Bands.r.Hist256[i];
                     _histAcc[i] = sum;
                 }
