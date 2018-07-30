@@ -231,6 +231,7 @@ var NDVILegendView = function () {
                             }
                             p.min = v;
                             if (p.min < p.max) {
+                                that.model.update();
                                 that._renderAnaliticalPalette(ii);
                                 that.events.dispatch(that.events.changerange, this);
                             }
@@ -265,6 +266,7 @@ var NDVILegendView = function () {
                             }
                             p.max = v;
                             if (p.min < p.max) {
+                                that.model.update();
                                 that._renderAnaliticalPalette(ii);
                                 that.events.dispatch(that.events.changerange, this);
                             }
