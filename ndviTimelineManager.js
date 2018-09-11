@@ -1482,6 +1482,7 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
     this._tryCounter = 0;
 
     var success = function () {
+        that.lmap.setView(that.lmap.getCenter());
         if ($(".timeline-event.timeline-event-line").length) {
             clearInterval(that._intervalHandler);
 
@@ -1515,7 +1516,7 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
         }
     };
 
-    this._intervalHandler = setInterval(success, 10);
+    this._intervalHandler = setInterval(success, 50);
 
     this._activateOptions && this._activateOptions();
 };
@@ -4055,12 +4056,20 @@ NDVITimelineManager.strpad = function (str, len) {
 NDVITimelineManager.prototype.showLoadingSmall = function () {
     document.getElementById("ntLoading").style.display = "block";
     var that = this;
-    setTimeout(function () {
-        that.hideLoadingSmall();
-    }, 3000);
+    this._loadingIntervalHandler = setInterval(function () {
+        if ($(".timeline-event.timeline-event-line").length) {
+            that.hideLoadingSmall();
+        } else {
+            that.lmap.setView(that.lmap.getCenter());
+        }
+    }, 1000);
 };
 
 NDVITimelineManager.prototype.hideLoadingSmall = function () {
+
+    clearInterval(this._loadingIntervalHandler);
+    this._loadingIntervalHandler = null;
+
     document.getElementById("ntLoading").style.display = "none";
 
     document.getElementById("ntComboBox").disabled = false;
