@@ -965,7 +965,9 @@ NDVITimelineManager.prototype._main = function () {
 
 
     //баг не показываются деления при деволтном зумирвоании на хоз-ве
-    setTimeout(function () { that.onMoveEnd(); }, 3000);
+    setTimeout(function () {
+        that.onMoveEnd();
+    }, 3000);
 
     //деактивация некоторых радиокнопок
     this.deactivateUnknownRadios();
@@ -1448,11 +1450,7 @@ NDVITimelineManager.prototype.switchYear = function (year) {
 
 NDVITimelineManager.prototype._setStyleHook = function (layer) {
     var that = this;
-    //var b = layer.getBoundsMerc();
-    //var bounds = new gmxAPI.bounds([[gmxAPI.from_merc_x(b.minX), gmxAPI.from_merc_y(b.minY)], [gmxAPI.from_merc_x(b.maxX), gmxAPI.from_merc_y(b.maxY)]]);
-
     var bounds = layer.getBounds();
-
     this._visibleFieldsLayers[layer._gmx.layerID] = { "bounds": bounds, "visible": false, "layer": layer };
 };
 
@@ -1487,7 +1485,6 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
             clearInterval(that._intervalHandler);
 
             NDVITimelineManager.fires_ht = {};
-            //that.timeLine.updateFilters();
             that.hideLoadingSmall();
 
             if (that._activatePermalink) {
@@ -2757,13 +2754,13 @@ NDVITimelineManager.prototype.onMoveEnd = function () {
 };
 
 NDVITimelineManager.prototype._refreshTimeline = function () {
-    //if (this._selectedOption != "FIRES") {
-    //    this.__yearRefreshHandler && clearTimeout(this.__yearRefreshHandler);
-    //    var that = this;
-    //    this.__yearRefreshHandler = setTimeout(function () {
-    //        that.timeLine.getTimelineController().update();
-    //    }, 1500);
-    //}
+    if (this._selectedOption != "FIRES") {
+        this.__yearRefreshHandler && clearTimeout(this.__yearRefreshHandler);
+        var that = this;
+        this.__yearRefreshHandler = setTimeout(function () {
+            that.timeLine.getTimelineController().update();
+        }, 1500);
+    }
 };
 
 //кеш геометрий слоев
@@ -4056,13 +4053,9 @@ NDVITimelineManager.strpad = function (str, len) {
 NDVITimelineManager.prototype.showLoadingSmall = function () {
     document.getElementById("ntLoading").style.display = "block";
     var that = this;
-    this._loadingIntervalHandler = setInterval(function () {
-        if ($(".timeline-event.timeline-event-line").length) {
-            that.hideLoadingSmall();
-        } else {
-            that.lmap.setView(that.lmap.getCenter());
-        }
-    }, 1000);
+    setTimeout(function () {
+        that.hideLoadingSmall();
+    }, 3000);
 };
 
 NDVITimelineManager.prototype.hideLoadingSmall = function () {
