@@ -13,7 +13,7 @@ L.Control.gmxAgroTimeline = L.Control.extend({
         container.style.zIndex = "200000";
         container.style.right = "0px";
 
-        this.manager = new NDVITimelineManager(map, timelineParams, false, container);
+        this.manager = new NDVITimelineManager(map, timelineParams.cosmosagro_com, false, container);
         this.manager._oninit = this.options.oninit;
         this.manager.start();
         return container;

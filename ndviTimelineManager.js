@@ -1,5 +1,15 @@
 var NDVITimelineManager = function (lmap, params, userRole, container) {
 
+    if (!params || shared.isEmptyObj(params)) {
+        if (shared.host_contains("maps.kosmosnimki.ru")) {
+            params = timelineParams.maps_kosmosnimki_ru;
+        } else if (shared.host_contains('cosmosagro.kosmosnimki.ru')) {
+            params = timelineParams.cosmosagro_kosmosnimki_ru;
+        } else if (shared.host_contains('kosmosnimki.ru')) {
+            params = timelineParams.www_kosmosnimki_ru;
+        }
+    }
+
     this.events = new Events(["created", "changeselection", "clearselection", "changevisibility"]);
 
     //leaflet map

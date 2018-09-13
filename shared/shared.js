@@ -699,3 +699,20 @@ shared.colorTable = {
     "wheat": "#f5deb3", "white": "#ffffff", "whitesmoke": "#f5f5f5",
     "yellow": "#ffff00", "yellowgreen": "#9acd32"
 };
+
+shared.host_contains = function (str) {
+    return document.location.host.indexOf(str) !== -1;
+}
+
+shared.host_equal = function (str) {
+    return str = document.location.host;
+}
+
+shared.isEmptyObj = function (obj) {
+    for (var prop in obj) {
+        if (obj.hasOwnProperty(prop))
+            return false;
+    }
+
+    return JSON.stringify(obj) === JSON.stringify({});
+}
