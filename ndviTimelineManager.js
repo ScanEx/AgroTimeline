@@ -3,10 +3,13 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
     if (!params || shared.isEmptyObj(params)) {
         if (shared.host_contains("maps.kosmosnimki.ru")) {
             params = timelineParams.maps_kosmosnimki_ru;
-        } else if (shared.host_contains('cosmosagro.kosmosnimki.ru')) {
+        } else if (shared.host_contains('cosmosagro.kosmosnimki.ru') ||
+            shared.host_contains('amazone.kosmosnimki.ru')) {
             params = timelineParams.cosmosagro_kosmosnimki_ru;
         } else if (shared.host_contains('kosmosnimki.ru')) {
             params = timelineParams.www_kosmosnimki_ru;
+        } else {
+            params = timelineParams.maps_kosmosnimki_ru;
         }
     }
 
