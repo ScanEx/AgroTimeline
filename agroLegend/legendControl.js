@@ -178,7 +178,7 @@ var LegendControl = function (agroTimeline) {
     this.bindSelectionHandler = function (handler) {
         this._ndviLegendView.bindSelectionHandler(handler);
 
-        handler.events.on("changeselection", this, function () {
+        handler.events.on("changeselection", this, function (t) {
             if (this.isNDVI()) {
                 this._ndviLegendView.appendDistribution();
             }

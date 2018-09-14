@@ -114,7 +114,7 @@ var NDVILegend = function (options) {
 
     this.setNDVIColor = function (ndviGrey, dstPix, ind) {
 
-        if (this._selectedPaletteIndex === 1001) {
+        if (this.isDistribution()) {
 
             if (this._ndviDistr) {
 
@@ -204,6 +204,13 @@ var NDVILegend = function (options) {
         this.palettes[index].sliderMax = max;
         this.update();
     };
+
+    this.isDistribution = function () {
+        return this._selectedPaletteIndex === NDVILegend.DISTRIBUTION;
+    };
 };
+
+NDVILegend.DISTRIBUTION = 1001;
+NDVILegend.MAX_SELECTED_FIELDS = 50;
 
 inheritance.extend(NDVILegend, Legend);

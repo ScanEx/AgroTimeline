@@ -293,7 +293,7 @@ var NDVILegendView = function () {
 
     this._renderDistributionLegend = function () {
         var t = replaceSubstring(this.distributionTemplate, {
-            'id': 1001,
+            'id': NDVILegend.DISTRIBUTION,
             'title': p.title || "",
             'tag': "distribution",
             'display': "block",
@@ -343,7 +343,7 @@ var NDVILegendView = function () {
     this.getLegendHTML = function (className) {
         var index = this.model._selectedPaletteIndex;
 
-        if (index === 1001) {
+        if (index === NDVILegend.DISTRIBUTION) {
             var el = document.createElement('div');
             className && el.classList.add(className);
 
@@ -568,7 +568,7 @@ var NDVILegendView = function () {
     this._refreshPaletteShades = function () {
         var index = this.model.getSelectedPaletteIndex();
 
-        if (index !== 1001) {
+        if (index !== NDVILegend.DISTRIBUTION) {
             this.el.querySelector(".alpBlock.alpBlock-distribution .alpPaletteShade").style.width = SLIDER_CONTAINER_SIZE + "px";
         } else {
             this.el.querySelector(".alpBlock.alpBlock-distribution .alpPaletteShade").style.width = 0 + "px";
@@ -771,7 +771,7 @@ var NDVILegendView = function () {
 
                 _this.refreshDistribution();
 
-                if (_this.model.getSelectedPaletteIndex() === 1001) {
+                if (_this.model.isDistribution()) {
                     _this.events.dispatch(_this.events.changepalette, _this.model.getSelectedPaletteIndex());
                 }
             });
@@ -791,20 +791,30 @@ var NDVILegendView = function () {
 
     this._getHist256 = function (date, layer, callback) {
 
+        var sel = this._selectionHandler.TEST_getSelectedFieldsLayers();
+
+        var fieldCount = 0;
+        for (var i = 0; i < sel.length; i++) {
+            fieldCount += sel[i].gmx_id.length;
+        }
+
+
+        //if (sel) {
+
         this.clearHist();
         this.refreshDistribution();
 
-        var sel = this._selectionHandler.TEST_getSelectedFieldsLayers();
-
-        if (sel.length === 0 || !layer) {
+        if (sel.length === 0 || !layer || fieldCount > NDVILegend.MAX_SELECTED_FIELDS) {
 
             this.el.querySelector(".alpBlock.alpBlock-distribution .alpRadioTab").classList.add("alpRadioDisabled");
 
-            if (this.model.getSelectedPaletteIndex() === 1001) {
+            if (this.model.isDistribution()) {
                 this.events.dispatch(this.events.changepalette, this.model.getSelectedPaletteIndex());
             }
 
+            //stop distribution
             return;
+
         } else {
             this.el.querySelector(".alpBlock.alpBlock-distribution .alpRadioTab").classList.remove("alpRadioDisabled");
         }
@@ -848,6 +858,7 @@ var NDVILegendView = function () {
                     callback && callback(resp.Result[0]);
                 }
             });
+        //}
     };
 };
 
