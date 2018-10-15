@@ -3109,7 +3109,7 @@ NDVITimelineManager.prototype.initializeImageProcessor = function () {
             dstPix[ind + 2] = srcPix[srcInd + 2];
             dstPix[ind + 3] = srcPix[srcInd + 3];
 
-            if (dstPix[ind] === 0 || dstPix[ind] === 1) {
+            if ((dstPix[ind] === 0 || dstPix[ind] === 1) && dstPix[ind + 2] !== 255) {
                 dstPix[ind + 3] = 0;
             }
         }
