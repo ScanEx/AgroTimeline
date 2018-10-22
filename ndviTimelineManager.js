@@ -1493,8 +1493,11 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
     this._tryCounter = 0;
 
     var success = function () {
+
         that.lmap.setView(that.lmap.getCenter());
+
         if ($(".timeline-event.timeline-event-line").length) {
+
             clearInterval(that._intervalHandler);
 
             NDVITimelineManager.fires_ht = {};
@@ -1526,7 +1529,9 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
         }
     };
 
-    this._intervalHandler = setInterval(success, 50);
+    if (this.getTimelineVisibility()) {
+        this._intervalHandler = setInterval(success, 50);
+    }
 
     this._activateOptions && this._activateOptions();
 };
