@@ -185,7 +185,7 @@ var LegendControl = function (agroTimeline) {
         });
 
         this.timeline.events.on("changeselection", this, function (t) {
-            if (this.isNDVI()) {
+            if (t.selectedDiv && this.isNDVI()) {
                 this._ndviLegendView.appendDistribution();
             }
         });
