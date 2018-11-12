@@ -1492,11 +1492,20 @@ NDVITimelineManager.prototype.startFinishLoading = function () {
 
     this._tryCounter = 0;
 
+    var c = this.lmap.getCenter();
+    var counter = 0;
+
     var success = function () {
 
-        that.lmap.setView(that.lmap.getCenter());
+        var cc = that.lmap.getCenter();
 
-        if ($(".timeline-event.timeline-event-line").length) {
+        if (counter === 0) {
+            that.lmap.setView(cc);
+        }
+
+        counter++;
+
+        if ($(".timeline-event.timeline-event-line").length || counter > 100) {
 
             clearInterval(that._intervalHandler);
 
@@ -2171,7 +2180,7 @@ NDVITimelineManager.prototype._showLayerNDVI_HR = function (layerTypeName) {
         }).setDateInterval(
             NDVITimelineManager.addDays(this._selectedDate, -1),
             NDVITimelineManager.addDays(this._selectedDate, 1)
-            );
+        );
         this.lmap.addLayer(layer);
         layer.setZIndex(-1);
         this._selectedLayers.push(layer);
@@ -2213,7 +2222,7 @@ NDVITimelineManager.prototype._showNDVI_HR = function () {
     }).setDateInterval(
         NDVITimelineManager.addDays(this._selectedDate, -1),
         NDVITimelineManager.addDays(this._selectedDate, 1)
-        );
+    );
     this.lmap.addLayer(layer);
     layer.setZIndex(-1);
     this._selectedLayers.push(layer);
@@ -4986,8 +4995,8 @@ NDVITimelineManager.prototype.showCloudMask = function (date) {
                 ndviTimelineManager.repaintAllVisibleLayers();
             })
             .setDateInterval(
-            NDVITimelineManager.addDays(that._selectedDate, -1),
-            NDVITimelineManager.addDays(that._selectedDate, 1)
+                NDVITimelineManager.addDays(that._selectedDate, -1),
+                NDVITimelineManager.addDays(that._selectedDate, 1)
             );
         layer.setZIndex(0);
         that.lmap.addLayer(layer);
