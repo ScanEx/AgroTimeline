@@ -75,7 +75,7 @@ Rating.prototype.start = function (layersArr, dateStr) {
     var useData2016 = true;
     var year = parseInt(dateStr.split('.')[2]);
 
-    var url = "http://maps.kosmosnimki.ru/rest/ver1/layers/~/search?";
+    var url = "//maps.kosmosnimki.ru/rest/ver1/layers/~/search?";
     var tale = '&tables=[{"LayerName":"' + that.dataSource + '","Alias":"n"},{"LayerName":"88903D1BF4334AEBA79E1527EAD27F99","Alias":"f","Join":"Inner","On":"[n].[field_id] = [f].[gmx_id]"}]&' +
         'columns=[{"Value":"[f].[layer_id]"},{"Value":"[f].[layer_gmx_id]"},' +
         (useData2016 ?

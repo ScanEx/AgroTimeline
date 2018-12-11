@@ -394,7 +394,7 @@ ThematicHandler.prototype._applyLayer = function (layer) {
         var source = that.dataSource;
 
         if (!that.manualOnly) {
-            var url = "http://maps.kosmosnimki.ru/rest/ver1/layers/~/search?";
+            var url = "//maps.kosmosnimki.ru/rest/ver1/layers/~/search?";
             var tale = '&tables=[{"LayerName":"' + source + '","Alias":"n"},{"LayerName":"88903D1BF4334AEBA79E1527EAD27F99","Alias":"f","Join":"Inner","On":"[n].[field_id] = [f].[gmx_id]"}]&' +
                         'columns=[{"Value":"[f].[Farm]"},{"Value":"[f].[Region]"},{"Value":"[f].[Subregion]"},{"Value":"[f].[layer_id]"},{"Value":"[f].[' + identityField + ']"},' +
                         '{"Value":"[n].[ndvi_mean_clear]"},{"Value":"[n].[ndvi_std_clear]"},{"Value":"[n].[ndvi_min_clear]"},{"Value":"[n].[ndvi_max_clear]"},{"Value":"[n].[image_cover_pct]"},{"Value":"[n].[valid_area_pct]"}]';

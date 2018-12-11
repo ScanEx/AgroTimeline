@@ -503,7 +503,7 @@ shared.isPointInGeometry = function (geometry, point) {
 
 /*
 * Recursively merge properties of two objects
-* http://stackoverflow.com/questions/171251/how-can-i-merge-properties-of-two-javascript-objects-dynamically
+* //stackoverflow.com/questions/171251/how-can-i-merge-properties-of-two-javascript-objects-dynamically
 */
 shared.mergeRecursive = function (obj1, obj2) {
 

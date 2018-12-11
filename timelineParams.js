@@ -11,7 +11,7 @@ timelineParams.cosmosagro_com = {
             dateColumnName: "date",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                 }
             }
         },
@@ -22,7 +22,7 @@ timelineParams.cosmosagro_com = {
             dateColumnName: "date",
             palette: {
                 quality: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg',
+                    url: '//maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg',
                 }
             }
         },
@@ -34,7 +34,7 @@ timelineParams.cosmosagro_com = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             }
@@ -59,7 +59,7 @@ timelineParams.cosmosagro_com = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             }
@@ -117,7 +117,7 @@ timelineParams.cosmosagro_com = {
             dateColumnName: "date",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                 }
             }
         },
@@ -127,7 +127,7 @@ timelineParams.cosmosagro_com = {
             dateColumnName: "date",
             palette: {
                 quality: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg',
+                    url: '//maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg',
                 }
             }
         },
@@ -139,7 +139,7 @@ timelineParams.cosmosagro_com = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             },
@@ -154,7 +154,7 @@ timelineParams.cosmosagro_com = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             },
@@ -195,7 +195,7 @@ timelineParams.maps_kosmosnimki_ru = {
             dateColumnName: "date",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml'
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml'
                 }
             }
         },
@@ -205,7 +205,7 @@ timelineParams.maps_kosmosnimki_ru = {
             dateColumnName: "date",
             palette: {
                 quality: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg'
+                    url: '//maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg'
                 }
             }
         },
@@ -216,7 +216,7 @@ timelineParams.maps_kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             }
@@ -250,7 +250,7 @@ timelineParams.maps_kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             }
@@ -271,7 +271,7 @@ timelineParams.maps_kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 classification: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/CLASS_grade_1-5.icxleg',
+                    url: '//maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/CLASS_grade_1-5.icxleg',
                     prodtype: "CLASSIFICATION"
                 }
             }
@@ -325,7 +325,7 @@ timelineParams.maps_kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             },
@@ -338,7 +338,7 @@ timelineParams.maps_kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             },
@@ -382,7 +382,7 @@ timelineParams.kosmosnimki_ru = {
             dateColumnName: "date",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml'
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml'
                 }
             }
         },
@@ -392,7 +392,7 @@ timelineParams.kosmosnimki_ru = {
             dateColumnName: "date",
             palette: {
                 quality: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg'
+                    url: '//maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg'
                 }
             }
         },
@@ -403,7 +403,7 @@ timelineParams.kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             }
@@ -437,7 +437,7 @@ timelineParams.kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             }
@@ -458,7 +458,7 @@ timelineParams.kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 classification: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/CLASS_grade_1-5.icxleg',
+                    url: '//maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/CLASS_grade_1-5.icxleg',
                     prodtype: "CLASSIFICATION"
                 }
             }
@@ -512,7 +512,7 @@ timelineParams.kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             },
@@ -525,7 +525,7 @@ timelineParams.kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             },
@@ -568,7 +568,7 @@ timelineParams.cosmosagro_kosmosnimki_ru = {
             dateColumnName: "date",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml'
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml'
                 }
             }
         },
@@ -578,7 +578,7 @@ timelineParams.cosmosagro_kosmosnimki_ru = {
             dateColumnName: "date",
             palette: {
                 quality: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg'
+                    url: '//maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg'
                 }
             }
         },
@@ -588,7 +588,7 @@ timelineParams.cosmosagro_kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             }
@@ -609,7 +609,7 @@ timelineParams.cosmosagro_kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             }
@@ -651,7 +651,7 @@ timelineParams.cosmosagro_kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 classification: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/CLASS_grade_1-5.icxleg',
+                    url: '//maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/CLASS_grade_1-5.icxleg',
                     prodtype: "CLASSIFICATION"
                 }
             }
@@ -673,7 +673,7 @@ timelineParams.cosmosagro_kosmosnimki_ru = {
             dateColumnName: "date",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml'
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml'
                 }
             }
         },
@@ -683,7 +683,7 @@ timelineParams.cosmosagro_kosmosnimki_ru = {
             dateColumnName: "date",
             palette: {
                 quality: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg'
+                    url: '//maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg'
                 }
             }
         },
@@ -693,7 +693,7 @@ timelineParams.cosmosagro_kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             },
@@ -706,7 +706,7 @@ timelineParams.cosmosagro_kosmosnimki_ru = {
             dateColumnName: "acqdate",
             palette: {
                 ndvi: {
-                    url: 'http://maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
+                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
                     prodtype: "NDVI"
                 }
             },

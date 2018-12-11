@@ -67,7 +67,7 @@ RequestsQueue.prototype.loadRequestData = function (request) {
             _success(response);
         });
     } else {
-        sendCrossDomainPostRequest('http://maps.kosmosnimki.ru/plugins/getrasterhist.ashx', data, function (response) {
+        sendCrossDomainPostRequest('//maps.kosmosnimki.ru/plugins/getrasterhist.ashx', data, function (response) {
             _success(response);
         });
     }
