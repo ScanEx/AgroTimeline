@@ -85,14 +85,15 @@
 
 
 .alpBlock {
-    width: 495px;
+    /*width: 495px;*/
     height: 85px;
     cursor: default;
+    position: relative;
 }
 
 .alpRadio {
     cursor: pointer;
-    margin: 41px 4px;
+    margin: 40px 9px;
     width: 14px;
     height: 14px;
 }
@@ -107,7 +108,7 @@
 .alpColorTab {
     float: left;
     height: 100%;
-    width: 440px;
+    /*width: 440px;*/
     padding-top: 2px;
     padding-bottom: 3px;
 }
@@ -202,7 +203,7 @@
     width: 100%;
     height: 100%;
     overflow-y: auto;
-    overflow-x: hidden;
+    /*overflow-x: hidden;*/
 }
 
 .alpSlider .alpSliderValue {
@@ -270,4 +271,15 @@
 .alpRadioTab.alpRadioDisabled .alpRadioShade {
     display: block;
     cursor: default;
+}
+
+.wrnFrame {
+    position: absolute;
+    width: calc(100% - 30px);
+    z-index: 1;
+    top: 75px;
+    left: 40px;
+    color: red;
+    font-weight: 600;
+    font-size: 12px;
 }

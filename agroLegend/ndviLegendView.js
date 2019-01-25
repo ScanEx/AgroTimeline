@@ -804,7 +804,23 @@ var NDVILegendView = function () {
         this.clearHist();
         this.refreshDistribution();
 
+        var wrnFrameEl = this.el.querySelector(".wrnFrame");
+        if (wrnFrameEl) {
+            wrnFrameEl.parentNode.removeChild(wrnFrameEl);
+        }
+
         if (sel.length === 0 || !layer || fieldCount > NDVILegend.MAX_SELECTED_FIELDS) {
+
+            var wrnFrameEl = document.createElement('div');
+            wrnFrameEl.classList.add("wrnFrame");
+
+            this.el.querySelector(".alpBlock.alpBlock-distribution").appendChild(wrnFrameEl);
+
+            if (fieldCount > NDVILegend.MAX_SELECTED_FIELDS) {
+                wrnFrameEl.innerHTML = 'Вы выбрали более ' + NDVILegend.MAX_SELECTED_FIELDS + ' полей. Уменьшите кол-во выбранных полей в левой панели';
+            } else {
+                wrnFrameEl.innerHTML = 'Для активации шкалы распределения NDVI на карте, сначала выберите поля в левой панели, но не более ' + NDVILegend.MAX_SELECTED_FIELDS;
+            }
 
             this.el.querySelector(".alpBlock.alpBlock-distribution .alpRadioTab").classList.add("alpRadioDisabled");
 
@@ -817,6 +833,7 @@ var NDVILegendView = function () {
 
         } else {
             this.el.querySelector(".alpBlock.alpBlock-distribution .alpRadioTab").classList.remove("alpRadioDisabled");
+            this.el.querySelector(".alpBlock.alpBlock-distribution .alpCaption").innerHTML = "Распределение NDVI";
         }
 
         this._requestID++;
