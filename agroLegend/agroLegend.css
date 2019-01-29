@@ -86,7 +86,7 @@
 
 .alpBlock {
     /*width: 495px;*/
-    height: 85px;
+    height: 95px;
     cursor: default;
     position: relative;
 }
@@ -277,9 +277,9 @@
     position: absolute;
     width: calc(100% - 30px);
     z-index: 1;
-    top: 75px;
-    left: 40px;
+    top: 71px;
+    left: 30px;
     color: red;
-    font-weight: 600;
-    font-size: 12px;
+    font-weight: 500;
+    font-size: 11px;
 }

@@ -205,7 +205,7 @@ var NDVITimelineManager = function (lmap, params, userRole, container) {
 
     this._selectedType = [
         NDVITimelineManager.NDVI16,
-        NDVITimelineManager.RGB_HR,
+        NDVITimelineManager.RGB2_HR,
         NDVITimelineManager.NDVI16,
         NDVITimelineManager.NDVI16,
         NDVITimelineManager.FIRES_POINTS];
@@ -646,7 +646,10 @@ NDVITimelineManager.prototype.listenForPeramlink = function () {
 };
 
 NDVITimelineManager.prototype.getSelectedProductName = function () {
-    return $('input[name=shotsOptions_' + this._selectedCombo + ']').filter(':checked')[0].parentNode.parentNode.querySelector(".ntLblShotsType").innerHTML.trim().toLowerCase();
+    var el = $('input[name=shotsOptions_' + this._selectedCombo + ']').filter(':checked')[0];
+    if (el && el.parentNode) {
+        return el.parentNode.parentNode.querySelector(".ntLblShotsType").innerHTML.trim().toLowerCase();
+    }
 };
 
 NDVITimelineManager.prototype.getSelectedDateStr = function () {
@@ -660,10 +663,17 @@ NDVITimelineManager.prototype.getState = function () {
         optionsMenu[v.id] = v.checked;
     });
 
-    var rad = $('input[name=shotsOptions_' + this._selectedCombo + ']').filter(':checked');
-    var radioId = null;
-    if (rad.length) {
-        radioId = rad[0].id;
+    var radioId = null,
+        optionValue = null;
+
+    if (this._selectedCombo === 1) {
+        var c = this.timeLine.getContainer()[0];
+        optionValue = c.querySelector(".tml-radio:checked").parentNode.querySelector(".tml-select").value;
+    } else {
+        var rad = $('input[name=shotsOptions_' + this._selectedCombo + ']').filter(':checked');
+        if (rad.length) {
+            radioId = rad[0].id;
+        }
     }
 
     var selectedDate0, selectedDate1;
@@ -700,6 +710,7 @@ NDVITimelineManager.prototype.getState = function () {
         "selectedDiv": (this.selectedDiv ? true : false),
         "selectedCombo": this._selectedCombo,
         "radioId": radioId,
+        "optionValue": optionValue,
         "chkQl": this._chkQl,//document.getElementById("chkQl").checked,
         "optionsMenu": optionsMenu,
         "ndviLegend": {
@@ -844,6 +855,8 @@ NDVITimelineManager.prototype.loadState = function (data) {
 
             if (data.radioId) {
                 that.setActiveRadio(data.radioId);
+            } else if (data.optionValue && data.selectedCombo == 1) {
+                that.setActiveOption(data.optionValue);
             }
 
             var tl = this.timeLine.getTimelineController().getTimeline();
@@ -1595,91 +1608,6 @@ NDVITimelineManager.prototype.createOptionsPanel = function () {
 
     }
     fsComboOptions.innerHTML += html;
-};
-
-
-/**
- * text - текст радио кнопки
- * tag - название группы
- * id - идентификатор dom
- * comboIndex - индекс вклченного комбо при котором этот элемент активен(-1 - активен для всех)
- * comboVisibility - флаг того, что элемент для этого комбо будет отображаться или нет.
- * callback - событие припереключении
- * checkrd - значение по умолчанию
- */
-NDVITimelineManager.prototype.addRadio = function (elementId, text, tag, id, comboIndex, comboVisibility, callback, light, checked, notVisible) {
-
-    var element = document.getElementById(elementId);
-    var div0 = document.createElement('div');
-    div0.style.marginBottom = "4px";
-    div0.style.marginLeft = "4px";
-    div0.style.float = "left";
-    div0.displayCombo = comboVisibility;
-    element.appendChild(div0);
-
-    var div;
-    if (light) {
-        div = document.createElement('div');
-        div0.classList.add("ntHelp");
-        div0.id = "light_" + id;
-        div0.appendChild(div);
-    } else {
-        div = div0;
-        div0.style.marginTop = "0px";
-        div0.style.marginRight = "8px";
-        div0.style.marginLeft = "7px";
-    }
-
-    if (notVisible) {
-        div0.style.display = "none";
-    }
-
-    var overDiv1 = document.createElement('div');
-    overDiv1.style.float = "left";
-    var input = document.createElement('input');
-    overDiv1.appendChild(input);
-    div.appendChild(overDiv1);
-    input["comboIndex"] = comboIndex;
-    input.style.height = "17px";
-    input.style.marginTop = "1px";
-    input.type = "radio";
-    input.name = tag + "_" + comboIndex;
-    input.id = id;
-    input.checked = checked;
-    var that = this;
-    input.onchange = function () {
-        callback.call(that, this);
-    };
-
-    var overDiv2 = document.createElement('div');
-    overDiv2.style.float = "left";
-    overDiv2.style.paddingLeft = "5px";
-
-    var label = document.createElement('label');
-    overDiv2.appendChild(label);
-    div.appendChild(overDiv2);
-
-    label.innerHTML = text;
-    label.for = id;
-    label["comboIndex"] = comboIndex;
-    label.classList.add("ntLblShotsType");
-    label.classList.add(id);
-
-    label.onclick = function (e) {
-        if (!(input.disabled || input.checked)) {
-            input.checked = true;
-            callback.call(that, input);
-        }
-    };
-
-    label.ontouchstart = function (e) {
-        if (!(input.disabled || input.checked)) {
-            input.checked = true;
-            callback.call(that, input);
-        }
-    };
-
-    this._radioButtonLabels[id] = { "label": label, "parent": div };
 };
 
 NDVITimelineManager.prototype.setVisible = function (visibility) {
@@ -3966,33 +3894,81 @@ NDVITimelineManager.prototype._setSliderState = function (range, date, async) {
 };
 
 NDVITimelineManager.prototype.setRadioLabelActive = function (id, active) {
-    var lbl = this._radioButtonLabels[id].label;
-    var div = this._radioButtonLabels[id].parent;
-    if (active) {
-        lbl.classList.remove("ntDisabledLabel");
-        document.getElementById(lbl.for).disabled = false;
-        if (div.displayCombo)
-            div.style.display = "block";
-    } else {
-        lbl.classList.add("ntDisabledLabel");
-        document.getElementById(lbl.for).disabled = true;
-        if (this._selectedCombo != 1 || (id != "ndviMeanRadio" && id != "inhomogenuityRadio")) {
-            if (div.displayCombo)
-                div.style.display = "none";
+    var c = this._radioButtonLabels[id];
+
+    if (c) {
+        if (c.option) {
+
+            if (active) {
+                c.option.disabled = false;
+            } else {
+                c.option.disabled = true;
+            }
+
+            c.label.classList.add("ntDisabledLabel");
+            c.select.disabled = true;
+            c.label.for.disabled = true;
+            for (var i = 0; i < c.select.childNodes.length; i++) {
+                if (!c.select.childNodes[i].disabled) {
+                    c.select.disabled = false;
+                    c.label.classList.remove("ntDisabledLabel");
+                    c.label.for.disabled = false;
+                    return;
+                }
+            }
+
+        } else {
+            var lbl = c.label;
+            var div = c.parent;
+            if (active) {
+                lbl.classList.remove("ntDisabledLabel");
+                lbl.for.disabled = false;
+                if (div.displayCombo)
+                    div.style.display = "block";
+            } else {
+                lbl.classList.add("ntDisabledLabel");
+                lbl.for.disabled = true;
+                if (this._selectedCombo != 1 || (id != "ndviMeanRadio" && id != "inhomogenuityRadio")) {
+                    if (div.displayCombo)
+                        div.style.display = "none";
+                }
+            }
         }
     }
 };
 
 NDVITimelineManager.prototype.setRadioLabelActive_grey = function (id, active) {
-    if (this._radioButtonLabels[id]) {
-        var lbl = this._radioButtonLabels[id].label;
-        var div = this._radioButtonLabels[id].parent;
-        if (active) {
-            lbl.classList.remove("ntDisabledLabel");
-            document.getElementById(lbl.for).disabled = false;
+    var c = this._radioButtonLabels[id];
+    if (c) {
+        if (c.option) {
+
+            if (active) {
+                c.option.disabled = false;
+            } else {
+                c.option.disabled = true;
+            }
+
+            c.label.classList.add("ntDisabledLabel");
+            c.select.disabled = true;
+            c.label.for.disabled = true;
+            for (var i = 0; i < c.select.childNodes.length; i++) {
+                if (!c.select.childNodes[i].disabled) {
+                    c.select.disabled = false;
+                    c.label.classList.remove("ntDisabledLabel");
+                    c.label.for.disabled = false;
+                    return;
+                }
+            }
+
         } else {
-            lbl.classList.add("ntDisabledLabel");
-            document.getElementById(lbl.for).disabled = true;
+            var lbl = c.label;
+            if (active) {
+                lbl.classList.remove("ntDisabledLabel");
+                lbl.for.disabled = false;
+            } else {
+                lbl.classList.add("ntDisabledLabel");
+                lbl.for.disabled = true;
+            }
         }
     }
 };
@@ -4360,6 +4336,174 @@ NDVITimelineManager.prototype.selectPeriodItems = function (date0, date1, items)
     }
 };
 
+//("firstPanel_1", "Снимок",
+//    [{
+//        'title': loc.Snimok,
+//        'option': "rgbRadio2",
+//        'callback': function (r) {
+//            that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB2_HR;
+//            that._redrawShots();
+//        }
+//    }, {
+//        'title': loc.SnimokIK,
+//        'option': "rgbRadio",
+//        'callback': true, function(r) {
+//            that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB_HR;
+//            that._redrawShots();
+
+//        }
+//    }],
+//    "shotsOptions", 1)
+
+NDVITimelineManager.prototype.addRadioExt = function (containerId, radioTitle, options, tag, comboIndex, checked) {
+
+    var optionFn = function () {
+        radioEl.checked = true;
+        var c = valueCallbacks[this.value];
+        if (c) {
+            c.call(this.value);
+        }
+    };
+
+    var selectFn = function () {
+        radioEl.checked = true;
+        optionFn.call(selectEl);
+    };
+
+    var _this = this;
+
+    var paneEl = document.getElementById(containerId);
+
+    var container = document.createElement('div');
+    container.classList.add("tml-pane");
+
+    var radioEl = document.createElement('input');
+    radioEl.classList.add("tml-radio");
+    radioEl.type = "radio";
+    radioEl.comboIndex = comboIndex;
+    radioEl.style.height = "";
+    radioEl.style.marginTop = "";
+    radioEl.name = tag + "_" + comboIndex;
+    radioEl.checked = checked || false;
+    radioEl.onclick = selectFn;
+
+    var titleEl = document.createElement('div');
+    titleEl.classList.add("tml-title");
+    titleEl.innerHTML = radioTitle;
+    titleEl.onclick = selectFn;
+    titleEl.for = radioEl;
+
+    var selectEl = document.createElement('select');
+    selectEl.classList.add("tml-select");
+    var valueCallbacks = {};
+    for (var i = 0; i < options.length; i++) {
+        var oi = options[i];
+        var opt = document.createElement('option');
+        opt.value = oi.option;
+        opt.innerHTML = oi.title;
+        selectEl.appendChild(opt);
+        valueCallbacks[oi.option] = oi.callback;
+        this._radioButtonLabels[options[i].option] = {
+            "label": titleEl,
+            "parent": container,
+            "option": opt,
+            "select": selectEl
+        };
+    }
+
+    selectEl.onchange = optionFn;
+
+    container.appendChild(radioEl);
+    container.appendChild(titleEl);
+    container.appendChild(selectEl);
+
+    paneEl.appendChild(container);
+};
+
+/**
+ * text - текст радио кнопки
+ * tag - название группы
+ * id - идентификатор dom
+ * comboIndex - индекс вклченного комбо при котором этот элемент активен(-1 - активен для всех)
+ * comboVisibility - флаг того, что элемент для этого комбо будет отображаться или нет.
+ * callback - событие припереключении
+ * checkrd - значение по умолчанию
+ */
+NDVITimelineManager.prototype.addRadio = function (elementId, text, tag, id, comboIndex, comboVisibility, callback, light, checked, notVisible) {
+
+    var element = document.getElementById(elementId);
+    var div0 = document.createElement('div');
+    div0.style.marginBottom = "4px";
+    div0.style.marginLeft = "4px";
+    div0.style.float = "left";
+    div0.displayCombo = comboVisibility;
+    element.appendChild(div0);
+
+    var div;
+    if (light) {
+        div = document.createElement('div');
+        div0.classList.add("ntHelp");
+        div0.id = "light_" + id;
+        div0.appendChild(div);
+    } else {
+        div = div0;
+        div0.style.marginTop = "0px";
+        div0.style.marginRight = "8px";
+        div0.style.marginLeft = "7px";
+    }
+
+    if (notVisible) {
+        div0.style.display = "none";
+    }
+
+    var overDiv1 = document.createElement('div');
+    overDiv1.style.float = "left";
+    var input = document.createElement('input');
+    overDiv1.appendChild(input);
+    div.appendChild(overDiv1);
+    input["comboIndex"] = comboIndex;
+    input.style.height = "17px";
+    input.style.marginTop = "1px";
+    input.type = "radio";
+    input.name = tag + "_" + comboIndex;
+    input.id = id;
+    input.checked = checked;
+    var that = this;
+    input.onchange = function () {
+        callback.call(that, this);
+    };
+
+    var overDiv2 = document.createElement('div');
+    overDiv2.style.float = "left";
+    overDiv2.style.paddingLeft = "5px";
+
+    var label = document.createElement('label');
+    overDiv2.appendChild(label);
+    div.appendChild(overDiv2);
+
+    label.innerHTML = text;
+    label.for = input/*id*/;
+    label["comboIndex"] = comboIndex;
+    label.classList.add("ntLblShotsType");
+    label.classList.add(id);
+
+    label.onclick = function (e) {
+        if (!(input.disabled || input.checked)) {
+            input.checked = true;
+            callback.call(that, input);
+        }
+    };
+
+    label.ontouchstart = function (e) {
+        if (!(input.disabled || input.checked)) {
+            input.checked = true;
+            callback.call(that, input);
+        }
+    };
+
+    this._radioButtonLabels[id] = { "label": label, "parent": div };
+};
+
 NDVITimelineManager.prototype.initTimelineFooter = function () {
 
     var that = this;
@@ -4440,39 +4584,124 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
 
     this.initSlider();
 
-    var panels = this.createOptionsPanel();
+    this.createOptionsPanel();
 
     var loc = NDVITimelineManager.locale[L.gmxLocale.getLanguage()];
 
-    this.addRadio("secondPanel_1", "NDVI", "shotsOptions", "ndviRadio_hr", 1, false, function (r) {
-        that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI_HR;
-        that._redrawShots();
-    }, true);
 
-    this.addRadio("secondPanel_1", "MSAVI", "shotsOptions", "msaviRadio", 1, false, function (r) {
-        that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT_MSAVI;
-        that._redrawShots();
-    }, true, false, true);
+    //Панель HR теперь создается здесь ЖЕСТКО!
+
+    //// 1
+    //this.addRadio("firstPanel_1", loc.SnimokIK, "shotsOptions", "rgbRadio", 1, true, function (r) {
+    //    that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB_HR;
+    //    that._redrawShots();
+    //}, false, true);
+
+
+    //this.addRadio("firstPanel_1", loc.Snimok, "shotsOptions", "rgbRadio2", 1, true, function (r) {
+    //    that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB2_HR;
+    //    that._redrawShots();
+    //});
+    this.addRadioExt("firstPanel_1", "Снимок",
+        [{
+            'title': loc.Snimok,
+            'option': "rgbRadio2",
+            'callback': function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB2_HR;
+                that._redrawShots();
+            }
+        }, {
+            'title': loc.SnimokIK,
+            'option': "rgbRadio",
+            'callback': function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB_HR;
+                that._redrawShots();
+
+            }
+        }],
+        "shotsOptionsExt", 1, true);
+
+
+
+    //// 2
+    //this.addRadio("secondPanel_1", "NDVI", "shotsOptions", "ndviRadio_hr", 1, false, function (r) {
+    //    that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI_HR;
+    //    that._redrawShots();
+    //}, true);
+
+    //this.addRadio("secondPanel_1", "MSAVI", "shotsOptions", "msaviRadio", 1, false, function (r) {
+    //    that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT_MSAVI;
+    //    that._redrawShots();
+    //}, true, false, true);
+
+    this.addRadioExt("secondPanel_1", "Вегетация",
+        [{
+            'title': "NDVI",
+            'option': "ndviRadio_hr",
+            'callback': function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI_HR;
+                that._redrawShots();
+            }
+        }, {
+            'title': "MSAVI",
+            'option': "msaviRadio",
+            'callback': function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.LANDSAT_MSAVI;
+                that._redrawShots();
+            }
+        }],
+        "shotsOptionsExt", 1);
+
+
+    //// 3
+
+    //this.addRadio("secondPanel_1", loc.NDVIsrednee, "shotsOptions", "ndviMeanRadio", 1, true, function (r) {
+    //    that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI_MEAN;
+    //    that._redrawShots();
+    //}, true);
+
+    //this.addRadio("thirdPanel_1", loc.Reiting, "shotsOptions", "ratingRadio", 1, true, function (r) {
+    //    that._selectedType[that._selectedCombo] = NDVITimelineManager.RATING;
+    //    that._redrawShots();
+    //}, true);
+
+    //this.addRadio("thirdPanel_1", loc.Odnorodnost, "shotsOptions", "inhomogenuityRadio", 1, true, function (r) {
+    //    that._selectedType[that._selectedCombo] = NDVITimelineManager.INHOMOGENUITY;
+    //    that._redrawShots();
+    //}, true);
+
+    this.addRadioExt("thirdPanel_1", "Аналитика",
+        [{
+            'title': loc.NDVIsrednee,
+            'option': "ndviMeanRadio",
+            'callback': function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI_MEAN;
+                that._redrawShots();
+            }
+        }, {
+            'title': loc.Reiting,
+            'option': "ratingRadio",
+            'callback': function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.RATING;
+                that._redrawShots();
+            }
+        }, {
+            'title': loc.Odnorodnost,
+            'option': "inhomogenuityRadio",
+            'callback': function (r) {
+                that._selectedType[that._selectedCombo] = NDVITimelineManager.INHOMOGENUITY;
+                that._redrawShots();
+            }
+        }],
+        "shotsOptionsExt", 1);
+
+
+    //А здесь все остальные панели
 
     this.addRadio("firstPanel_0", loc.KompozitNDVI, "shotsOptions", "ndviRadio_modis", 0, false, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI16;
         that._redrawShots();
     }, false, true);
-
-    this.addRadio("secondPanel_1", loc.NDVIsrednee, "shotsOptions", "ndviMeanRadio", 1, true, function (r) {
-        that._selectedType[that._selectedCombo] = NDVITimelineManager.NDVI_MEAN;
-        that._redrawShots();
-    }, true);
-
-    this.addRadio("thirdPanel_1", loc.Reiting, "shotsOptions", "ratingRadio", 1, true, function (r) {
-        that._selectedType[that._selectedCombo] = NDVITimelineManager.RATING;
-        that._redrawShots();
-    }, true);
-
-    this.addRadio("thirdPanel_1", loc.Odnorodnost, "shotsOptions", "inhomogenuityRadio", 1, true, function (r) {
-        that._selectedType[that._selectedCombo] = NDVITimelineManager.INHOMOGENUITY;
-        that._redrawShots();
-    }, true);
 
     this.addRadio("firstPanel_0", loc.OcenkaKachestva, "shotsOptions", "qualityRadio", 0, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.QUALITY16;
@@ -4484,15 +4713,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         that._redrawShots();
     });
 
-    this.addRadio("firstPanel_1", loc.SnimokIK, "shotsOptions", "rgbRadio", 1, true, function (r) {
-        that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB_HR;
-        that._redrawShots();
-    }, false, true);
 
-    this.addRadio("firstPanel_1", loc.Snimok, "shotsOptions", "rgbRadio2", 1, true, function (r) {
-        that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB2_HR;
-        that._redrawShots();
-    });
 
     for (var k = 2; k < this._combo.length; k++) {
         if (this._combo[k].rk[0] == "FIRES") {
@@ -4867,19 +5088,21 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
                     }
                 }
             }
-        }, {
-            "id": "chkMSAVI",
-            "class": "ntOptionsHR",
-            "type": "checkbox",
-            "text": "Включить опцию MSAVI",
-            "click": function (e) {
-                if (!e.checked) {
-                    that.timeLine.getContainer()[0].querySelector("#light_msaviRadio").style.display = "none";
-                } else {
-                    that.timeLine.getContainer()[0].querySelector("#light_msaviRadio").style.display = "block";
-                }
-            }
-        }];
+        }
+            //, {
+            //"id": "chkMSAVI",
+            //"class": "ntOptionsHR",
+            //"type": "checkbox",
+            //"text": "Включить опцию MSAVI",
+            //"click": function (e) {
+            //    if (!e.checked) {
+            //        that.timeLine.getContainer()[0].querySelector("#light_msaviRadio").style.display = "none";
+            //    } else {
+            //        that.timeLine.getContainer()[0].querySelector("#light_msaviRadio").style.display = "block";
+            //    }
+            //}
+            //}
+        ];
 
     if (!window.cosmosagro) {
         items.push({
@@ -4936,7 +5159,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
 NDVITimelineManager.prototype.refreshExperimentalPalettes = function () {
     if (this._selectedOption === "SENTINEL_MSAVI" || this._selectedOption === "LANDSAT_MSAVI") {
         this.legendControl._ndviLegendView.displayTags(["experimental-msavi"]);
-        this.legendControl._ndviLegendView.model.setSelectedPaletteIndex(3);
+        this.legendControl._ndviLegendView.model.setSelectedPaletteIndex(window.cosmosagro ? 2 : 3);
     } else if (this._experimentalPalettesVisibility) {
         this.legendControl._ndviLegendView.displayTags(["default", "experimental-ndvi"]);
         var currIndex = this.legendControl._ndviLegendView.model.getSelectedPaletteIndex();
@@ -5032,40 +5255,39 @@ NDVITimelineManager.prototype.setTimelineCombo = function (index, currentSelecti
         (x.value == index && (x.selected = true));
     });
 
-    that = this;
-    that.selectedShotFilename = "";
-    that.setFilenameCaption("");
+    this.selectedShotFilename = "";
+    this.setFilenameCaption("");
 
-    var timelineMode = that._layersLegend[that._combo[index].rk[0]].timelineMode || "center";
+    var timelineMode = this._layersLegend[this._combo[index].rk[0]].timelineMode || "center";
 
-    that.timeLine.setTimelineMode(timelineMode);
+    this.timeLine.setTimelineMode(timelineMode);
 
     //при переключении сбрасываем опции в ndvi
-    that._selectedType[0] = NDVITimelineManager.NDVI16;
-    that._selectedType[1] = NDVITimelineManager.RGB_HR;
+    this._selectedType[0] = NDVITimelineManager.NDVI16;
+    this._selectedType[1] = NDVITimelineManager.RGB2_HR;
 
-    document.getElementById("rgbRadio").checked = true;
-    document.getElementById("ndviRadio_modis").checked = true;
+    //document.getElementById("rgbRadio").checked = true;
+    //document.getElementById("ndviRadio_modis").checked = true;
 
-    document.getElementById("optionsPanel_" + that._selectedCombo).style.display = "none";
+    document.getElementById("optionsPanel_" + this._selectedCombo).style.display = "none";
 
-    that._selectedCombo = index;
+    this._selectedCombo = index;
     document.getElementById("optionsPanel_" + index).style.display = "block";
-    that.bindTimelineCombo(index);
+    this.bindTimelineCombo(index);
 
-    that.refreshTimeline();
-    that.setRadioLabelActive("ndviMeanRadio", false);
-    that.setRadioLabelActive("ratingRadio", false);
+    this.refreshTimeline();
+    this.setRadioLabelActive("ndviMeanRadio", false);
+    this.setRadioLabelActive("ratingRadio", false);
 
-    that.setDatesStickHoverCallback();
+    this.setDatesStickHoverCallback();
 
     if (!currentSelection) {
-        that.selectedDiv = null;
-        that._hideLayers();
+        this.selectedDiv = null;
+        this._hideLayers();
     }
 
-    that._currentZoom = that.lmap.getZoom();
-    that.applyZoomRestriction(that._currentZoom);
+    this._currentZoom = this.lmap.getZoom();
+    this.applyZoomRestriction(this._currentZoom);
 
     ////выключим гомогенность на время
     //if (index) {
@@ -5073,34 +5295,33 @@ NDVITimelineManager.prototype.setTimelineCombo = function (index, currentSelecti
     //}
 
     //выключаем "неопознанные" продукты
-    that.deactivateUnknownRadios();
+    this.deactivateUnknownRadios();
 
     //выключеам кнопки
-    that.setRadioLabelActive_grey("rgbRadio", false);
-    that.setRadioLabelActive_grey("ndviRadio_modis", false);
-    that.setRadioLabelActive_grey("conditionsOfVegetationRadio", false);
+    this.setRadioLabelActive_grey("rgbRadio", false);
+
+    this.setRadioLabelActive_grey("ndviRadio_modis", false);
+    this.setRadioLabelActive_grey("conditionsOfVegetationRadio", false);
 
     NDVITimelineManager.fires_ht = {};
-    that.timeLine.updateFilters();
+    this.timeLine.updateFilters();
 
-    if (!that._firstTimeCombo[index]) {
-        that.showLoadingSmall();
+    if (!this._firstTimeCombo[index]) {
+        this.showLoadingSmall();
     }
 
     if (!currentSelection) {
         //снимаем выделение
-        that._dontTouchEmptyClick = true;
-        that.clearSelection();
-        that._dontTouchEmptyClick = false;
+        this._dontTouchEmptyClick = true;
+        this.clearSelection();
+        this._dontTouchEmptyClick = false;
     }
-
-    //that.startFinishLoading();
 
     document.getElementById("ntRightPanel").scrollLeft = 0;
 
-    that.resetFireOption();
+    this.resetFireOption();
 
-    that.refreshOptionsDisplay();
+    this.refreshOptionsDisplay();
 };
 
 NDVITimelineManager.prototype.resetFireOption = function () {
@@ -5189,6 +5410,18 @@ NDVITimelineManager.prototype.setCutOff = function (e) {
     }
 
     this.applyHRZoomREstriction(this.lmap.getZoom());
+};
+
+NDVITimelineManager.prototype.setActiveOption = function (radioId) {
+    if (NDVITimelineManager.radioProduct[radioId]) {
+        var prod = NDVITimelineManager.radioProduct[radioId].prodId;
+        var selectedCombo = NDVITimelineManager.radioProduct[radioId].numCombo;
+        this._selectedType[selectedCombo] = prod;
+        var c = this.timeLine.getContainer()[0];
+        var selEl = c.querySelector('option[value=' + radioId + ']').parentNode;
+        selEl.value = radioId;
+        selEl.parentNode.querySelector("input").checked = true;
+    }
 };
 
 NDVITimelineManager.prototype.setActiveRadio = function (radioId) {

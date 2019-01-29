@@ -1089,3 +1089,32 @@ div.timeline-axis-grid {
 #ntFilenameCaption {
     -webkit-user-select: none;
 }
+
+.tml-pane {
+    display: inline-block;
+}
+
+.tml-radio {
+    float: left;
+    cursor: pointer;
+}
+
+.tml-title {
+    float: left;
+    margin: 1px 0px 0px 6px;
+    cursor: pointer;
+}
+
+.tml-select {
+    float: left;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+#secondPanel_1 {
+    margin-left: 25px;
+}
+
+#thirdPanel_1 {
+    margin-left: 25px;
+}
