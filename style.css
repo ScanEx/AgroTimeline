@@ -1145,21 +1145,22 @@ div.timeline-axis-grid {
 
 .tml-options
 .flBlueCombo-list {
-    width: 156px;
+    width: 165px;
     background-color: white;
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
-    /* max-height: 208px; */
     overflow-y: auto;
-    margin-top: -206px;
+    margin-top: -181px;
+    border-top: 1px solid #ccc;
+    position: absolute;
 }
 
 .tml-options
 .flBlueCombo-label {
-    color: #7a838b;
-    width: calc(100% - 7px);
-    padding: 7px 0px 0px 7px;
+    color: #323232;
+    width: calc(100% - 15px);
+    padding: 7px 0px 0px 0px;
 }
 
 .tml-options
@@ -1175,4 +1176,9 @@ div.timeline-axis-grid {
     width: 0px;
     height: 0px;
     margin-left: 2px;
+}
+
+.tml-options
+.flBlueCombo-option {
+    height: 30px;
 }

@@ -4357,7 +4357,7 @@ NDVITimelineManager.prototype.selectPeriodItems = function (date0, date1, items)
 //    }],
 //    "shotsOptions", 1)
 
-NDVITimelineManager.prototype.addRadioExt = function (containerId, radioTitle, options, tag, comboIndex, checked) {
+NDVITimelineManager.prototype.addRadioExt = function (containerId, radioTitle, options, tag, comboIndex, checked, isLight) {
 
     var optionFn = function () {
         radioEl.checked = true;
@@ -4378,6 +4378,10 @@ NDVITimelineManager.prototype.addRadioExt = function (containerId, radioTitle, o
 
     var container = document.createElement('div');
     container.classList.add("tml-pane");
+
+    if (isLight) {
+        container.classList.add("ntHelp");
+    }
 
     var radioEl = document.createElement('input');
     radioEl.classList.add("tml-radio");
@@ -4690,7 +4694,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
                 that._redrawShots();
             }
         }],
-        "shotsOptionsExt", 1);
+        "shotsOptionsExt", 1, false, true);
 
 
     //// 3
@@ -4733,7 +4737,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
                 that._redrawShots();
             }
         }],
-        "shotsOptionsExt", 1);
+        "shotsOptionsExt", 1, false, true);
 
 
     //А здесь все остальные панели
