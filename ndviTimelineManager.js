@@ -1039,10 +1039,12 @@ NDVITimelineManager.prototype._main = function () {
     this.setRadioLabelActive_grey("rgbRadio", false);
     this.setRadioLabelActive_grey("ndviRadio_modis", false);
 
-    document.getElementById("ntComboBox").disabled = true;
-    document.getElementById("ntComboBox").classList.add("ntDisabledLabel");
+    //document.getElementById("ntComboBox").disabled = true;
+    //document.getElementById("ntComboBox").classList.add("ntDisabledLabel");
 
     document.getElementById('ntComboBox').value = this._selectedCombo.toString();
+
+    this._options.setSelectedId(this._selectedCombo);
 
     $(window).resize(function () {
         that.resize();
@@ -1482,8 +1484,8 @@ NDVITimelineManager.prototype._setStyleHook = function (layer) {
 
 NDVITimelineManager.prototype.startFinishLoading = function () {
 
-    document.getElementById("ntComboBox").disabled = false;
-    document.getElementById("ntComboBox").classList.remove("ntDisabledLabel");
+    //document.getElementById("ntComboBox").disabled = false;
+    //document.getElementById("ntComboBox").classList.remove("ntDisabledLabel");
 
     function _extremRefresh() {
         //that.setTimelineCombo(that._selectedCombo, true);
@@ -1575,7 +1577,7 @@ NDVITimelineManager.prototype.shadeTimeline = function () {
     $(".timeline-container").addClass("shadeBackground");
     $(".timeline-axis-text-minor").addClass("shadeColor");
     $("#ntYear").addClass("shadeColor");
-    $("#ntComboBox").addClass("shadeColor");
+    //$("#ntComboBox").addClass("shadeColor");
     $(".ntSliderCaption").addClass("shadeColor");
 };
 
@@ -1590,7 +1592,7 @@ NDVITimelineManager.prototype.removeShading = function () {
     $(".timeline-container").removeClass("shadeBackground");
     $(".timeline-axis-text-minor").removeClass("shadeColor");
     $("#ntYear").removeClass("shadeColor");
-    $("#ntComboBox").removeClass("shadeColor");
+    //$("#ntComboBox").removeClass("shadeColor");
     $(".ntSliderCaption").removeClass("shadeColor");
 };
 
@@ -3371,11 +3373,11 @@ NDVITimelineManager.prototype.initializeTimeline = function (show) {
 
     bindScrollControl("ntRightPanel", this.lmap);
 
-    $("#ntComboBox > option").each(function (e, n) {
-        if (that._combo[parseInt(n.value)].hide) {
-            $(n).remove();
-        }
-    });
+    //$("#ntComboBox > option").each(function (e, n) {
+    //    if (that._combo[parseInt(n.value)].hide) {
+    //        $(n).remove();
+    //    }
+    //});
 };
 
 NDVITimelineManager.prototype.redrawTimelineLinks = function () {
@@ -4068,8 +4070,8 @@ NDVITimelineManager.prototype.hideLoadingSmall = function () {
 
     document.getElementById("ntLoading").style.display = "none";
 
-    document.getElementById("ntComboBox").disabled = false;
-    document.getElementById("ntComboBox").classList.remove("ntDisabledLabel");
+    //document.getElementById("ntComboBox").disabled = false;
+    //document.getElementById("ntComboBox").classList.remove("ntDisabledLabel");
 };
 
 NDVITimelineManager.equalDates = function (d1, d2) {
@@ -4504,29 +4506,65 @@ NDVITimelineManager.prototype.addRadio = function (elementId, text, tag, id, com
     this._radioButtonLabels[id] = { "label": label, "parent": div };
 };
 
+NDVITimelineManager.menuIcon = '<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" version="1.1"><defs id = "defs12"></defs><sodipodi: namedview pagecolor="#ffffff" bordercolor="#666666" borderopacity="1" objecttolerance="10" gridtolerance="10" guidetolerance="10" inkscape: pageopacity="0" inkscape: pageshadow="2" inkscape: window-width="1920" inkscape: window-height="1001" id="namedview10" showgrid="false" inkscape: zoom="14.302792" inkscape: cx="-12.429739" inkscape: cy="-0.15655977" inkscape: window-x="-9" inkscape: window-y="-9" inkscape: window-maximized="1" inkscape: current-layer="svg8"></sodipodi: namedview><path style="fill:#747474" d="m 6,0 v 2 h 7 v 8 h 2 V 1 C 15,0.4 14.6,0 14,0 Z M 3,3 v 2 h 7 v 8 h 2 V 4 C 12,3.4 11.6,3 11,3 Z M 1,6 C 0.4,6 0,6.4 0,7 v 8 c 0,0.6 0.4,1 1,1 h 7 c 0.6,0 1,-0.4 1,-1 V 7 C 9,6.4 8.6,6 8,6 Z" id="path2" inkscape: connector-curvature="0"></path></svg>';
+NDVITimelineManager.arrowIcon = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 11.4L8.00001 7.4L4.00001 11.4L2.60001 10L8.00001 4.6L13.4 10L12 11.4Z" fill="#111111"/></svg>';
+
 NDVITimelineManager.prototype.initTimelineFooter = function () {
 
     var that = this;
 
-    var getComboRadios = function () {
+    var getComboRadios = function (container) {
 
         var lang = L.gmxLocale.getLanguage();
 
-        return '<select id="ntComboBox">' +
-            '<option value="' + 1 + '">' + (this._combo[1].caption[lang] || this._combo[1].caption) + '</option>' +
-            '<option value="' + 0 + '">' + (this._combo[0].caption[lang] || this._combo[0].caption) + '</option>' +
-            '<option value="' + 2 + '">' + (this._combo[2].caption[lang] || this._combo[2].caption) + '</option>' +
-            ((this._combo[3] && '<option value="' + 3 + '">' + (this._combo[3].caption[lang] || this._combo[3].caption) + '</option>') || "") +
-            ((this._combo[4] && '<option value="' + 4 + '" selected>' + (this._combo[4].caption[lang] || this._combo[4].caption) + '</option>') || "") +
-            ((this._combo[5] && '<option value="' + 5 + '">' + (this._combo[5].caption[lang] || this._combo[5].caption) + '</option>') || "") +
-            ((this._combo[6] && '<option value="' + 6 + '">' + (this._combo[6].caption[lang] || this._combo[6].caption) + '</option>') || "") +
-            '</select>';
-    }
+        var options = [
+            { 'id': 1, 'label': this._combo[1].caption[lang] || this._combo[1].caption },
+            { 'id': 0, 'label': this._combo[0].caption[lang] || this._combo[0].caption },
+            { 'id': 2, 'label': this._combo[2].caption[lang] || this._combo[2].caption }
+        ];
+
+        if (this._combo[3])
+            options.push({ 'id': 3, 'label': this._combo[3].caption[lang] || this._combo[3].caption });
+
+        if (this._combo[4])
+            options.push({ 'id': 4, 'label': this._combo[4].caption[lang] || this._combo[4].caption });
+
+        if (this._combo[5])
+            options.push({ 'id': 5, 'label': this._combo[5].caption[lang] || this._combo[5].caption });
+
+        if (this._combo[6])
+            options.push({ 'id': 6, 'label': this._combo[6].caption[lang] || this._combo[6].caption });
+
+        var that = this;
+
+        return new BlueCombo({
+            'class': "tml-options",
+            'type': "menu",
+            'container': container,
+            'caption': NDVITimelineManager.menuIcon,
+            'arrow': NDVITimelineManager.arrowIcon,
+            'options': options.reverse(),
+            'onselect': function (e) {
+                that.setTimelineCombo(parseInt(e.id));
+            }
+        });
+
+        //return '<select id="ntComboBox">' +
+        //    '<option value="' + 1 + '">' + (this._combo[1].caption[lang] || this._combo[1].caption) + '</option>' +
+        //    '<option value="' + 0 + '">' + (this._combo[0].caption[lang] || this._combo[0].caption) + '</option>' +
+        //    '<option value="' + 2 + '">' + (this._combo[2].caption[lang] || this._combo[2].caption) + '</option>' +
+        //    ((this._combo[3] && '<option value="' + 3 + '">' + (this._combo[3].caption[lang] || this._combo[3].caption) + '</option>') || "") +
+        //    ((this._combo[4] && '<option value="' + 4 + '" selected>' + (this._combo[4].caption[lang] || this._combo[4].caption) + '</option>') || "") +
+        //    ((this._combo[5] && '<option value="' + 5 + '">' + (this._combo[5].caption[lang] || this._combo[5].caption) + '</option>') || "") +
+        //    ((this._combo[6] && '<option value="' + 6 + '">' + (this._combo[6].caption[lang] || this._combo[6].caption) + '</option>') || "") +
+        //    '</select>';
+    };
 
     var htmlTxt = '<div class="ntFooter">' +
         '<div class="ntLeftPanel">' +
         '</div>' +
-        getComboRadios.call(this) +
+        //getComboRadios.call(this) +
+        '<div id="ntComboBox"></div>' +
         '<div class="ntRightPanel" id="ntRightPanel">' +
         '<div class="ntOptionsFieldset">' +
         '<div id="fsComboOptions"></div>' +
@@ -4539,6 +4577,8 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
     this.loadingDiv = '<div id="ntLoading">' + NDVITimelineManager.locale[lang].Zagruzka + '</div>';
 
     this.timeLine.getFooterContainer().html(htmlTxt + this.loadingDiv);
+
+    this._options = getComboRadios.call(this, this.timeLine.getFooterContainer()[0].querySelector("#ntComboBox"));
 
     this.zoomRestrictionLabel = document.createElement("div");
     this.zoomRestrictionLabel.id = "ntZoomRestrictionLabel";
@@ -4558,17 +4598,17 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
     this.meanNdviNoDataLabel.style.display = "none";
     this.timeLine.getFooterContainer()[0].appendChild(this.meanNdviNoDataLabel);
 
-    document.getElementById("ntComboBox").ontouchstart = function (e) {
-        e.stopPropagation();
-    };
+    //document.getElementById("ntComboBox").ontouchstart = function (e) {
+    //    e.stopPropagation();
+    //};
 
-    document.getElementById("ntComboBox").onchange = function (e) {
+    //document.getElementById("ntComboBox").onchange = function (e) {
 
-        e.stopPropagation();
+    //    e.stopPropagation();
 
-        var index = parseInt(this.value);
-        that.setTimelineCombo(index);
-    };
+    //    var index = parseInt(this.value);
+    //    that.setTimelineCombo(index);
+    //};
 
     var visQl = '<div><div id="qlVis" style="float:left;display: block;"></div></div>';
 
@@ -5169,7 +5209,7 @@ NDVITimelineManager.prototype.refreshExperimentalPalettes = function () {
     } else {
         this.legendControl._ndviLegendView.displayTags(["default"]);
         var currIndex = this.legendControl._ndviLegendView.model.getSelectedPaletteIndex();
-        if (currIndex === 3) {
+        if (currIndex > 1) {
             this.legendControl._ndviLegendView.model.setSelectedPaletteIndex(0);
         }
     }

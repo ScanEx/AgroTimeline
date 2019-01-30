@@ -231,7 +231,7 @@ div.timeline-currenttime {
 }
 
 #ntComboBox {
-    background-color: #DADBDF;
+    /*background-color: #DADBDF;
     height: 20px;
     border: solid 1px #B9B9B9;
     color: rgb(48,48,48);
@@ -251,6 +251,9 @@ div.timeline-currenttime {
     box-shadow: rgba(192, 187, 187, 0.7) 0px 0px 0.5px;
     z-index: 5000000;
     left: 87px;
+    position: absolute;*/
+    z-index: 5000000;
+    left: 145px;
     position: absolute;
 }
 
@@ -487,12 +490,12 @@ div.timeline-axis-grid {
 }
 
 .ntLeftPanel {
-    width: 200px;
+    width: 70px;
     float: left;
     padding-left: 88px;
     height: 100%;
-    /*border-right: solid 1px #B1B2B4;*/
-    padding-right: 30px;
+    /* border-right: solid 1px #B1B2B4; */
+    /* padding-right: 30px; */
 }
 
 .ntFieldset {
@@ -1117,4 +1120,56 @@ div.timeline-axis-grid {
 
 #thirdPanel_1 {
     margin-left: 25px;
+}
+
+.tml-options.flBlueCombo {
+    width: 40px;
+    position: absolute;
+    font-family: 'Roboto';
+    font-weight: 400;
+    font-size: 14px;
+    /* right: 0; */
+    height: 20px;
+    z-index: 10000;
+    font-size: 12px;
+    margin-top: -4px;
+}
+
+.tml-options
+.flBlueCombo-current {
+    background-color: white;
+    height: 30px;
+    cursor: pointer;
+    width: 40px;
+}
+
+.tml-options
+.flBlueCombo-list {
+    width: 156px;
+    background-color: white;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    /* max-height: 208px; */
+    overflow-y: auto;
+    margin-top: -206px;
+}
+
+.tml-options
+.flBlueCombo-label {
+    color: #7a838b;
+    width: calc(100% - 7px);
+    padding: 7px 0px 0px 7px;
+}
+
+.tml-options
+.flBlueCombo-caption {
+    padding: 7px 2px 0px 6px;
+}
+
+.tml-options
+.flBlueCombo-arrow {
+    background: none;
+    transform: scale(0.7);
+    margin-top: 6px;
 }

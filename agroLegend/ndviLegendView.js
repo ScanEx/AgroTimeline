@@ -15,7 +15,7 @@ var NDVILegendView = function () {
             'max': 1.0,
             'isStatic': false
         }, {
-            'title': "Экспериментальная шкала MSAVI",
+            'title': "Шкала MSAVI",
             'tag': "experimental-msavi",
             'url': "//maps.kosmosnimki.ru/api/plugins/palettes/EXPERIMENTAL_NDVI_MSAVI_interp_legend.icxleg.xml",
             'min': 0.0,
@@ -811,13 +811,15 @@ var NDVILegendView = function () {
 
         if (sel.length === 0 || !layer || fieldCount > NDVILegend.MAX_SELECTED_FIELDS) {
 
+            this.el.querySelector(".alpBlock.alpBlock-distribution .alpCaption").style.color = "#8d8d8d";
+
             var wrnFrameEl = document.createElement('div');
             wrnFrameEl.classList.add("wrnFrame");
 
             this.el.querySelector(".alpBlock.alpBlock-distribution").appendChild(wrnFrameEl);
 
             if (fieldCount > NDVILegend.MAX_SELECTED_FIELDS) {
-                wrnFrameEl.innerHTML = 'Вы выбрали более ' + NDVILegend.MAX_SELECTED_FIELDS + ' полей. Уменьшите кол-во выбранных полей в левой панели';
+                wrnFrameEl.innerHTML = 'Вы выбрали более ' + NDVILegend.MAX_SELECTED_FIELDS + ' полей - уменьшите кол-во выбранных полей';
             } else {
                 wrnFrameEl.innerHTML = 'Для активации шкалы распределения NDVI на карте, сначала выберите поля в левой панели, но не более ' + NDVILegend.MAX_SELECTED_FIELDS;
             }
@@ -834,6 +836,7 @@ var NDVILegendView = function () {
         } else {
             this.el.querySelector(".alpBlock.alpBlock-distribution .alpRadioTab").classList.remove("alpRadioDisabled");
             this.el.querySelector(".alpBlock.alpBlock-distribution .alpCaption").innerHTML = "Распределение NDVI";
+            this.el.querySelector(".alpBlock.alpBlock-distribution .alpCaption").style.color = "";
         }
 
         this._requestID++;
@@ -883,12 +886,12 @@ inheritance.extend(NDVILegendView, LegendView);
 
 NDVILegendView.locale = {
     'rus': {
-        'CvetovajaShkalaNdvi': "Цветовая шкала NDVI",
+        'CvetovajaShkalaNdvi': "Цветовая шкала",
         'EstestvennayaShkala': "Базовая шкала",
         'AnaliticheskayaShkala': "Аналитическая шкала"
     },
     'eng': {
-        'CvetovajaShkalaNdvi': "Color NDVI Scale",
+        'CvetovajaShkalaNdvi': "Color scale",
         'EstestvennayaShkala': "Basic scale",
         'AnaliticheskayaShkala': "Analitical scale"
     }
