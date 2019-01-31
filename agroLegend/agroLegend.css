@@ -85,7 +85,7 @@
 
 
 .alpBlock {
-    /*width: 495px;*/
+    width: 450px;
     height: 95px;
     cursor: default;
     position: relative;
@@ -203,7 +203,7 @@
     width: 100%;
     height: 100%;
     overflow-y: auto;
-    /*overflow-x: hidden;*/
+    overflow-x: hidden;
 }
 
 .alpSlider .alpSliderValue {
