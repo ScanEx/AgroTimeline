@@ -2675,10 +2675,10 @@ NDVITimelineManager.prototype.updateRadioLabelsActivity = function () {
 
     if (!this._cutOff) {
         this.getProductAvailability("ndviRadio_hr") && this.setRadioLabelActive_grey("ndviRadio_hr", true);
-        $("#light_ndviRadio_hr").removeClass("ntHelpLightOn");
+        $(".ntHelp").removeClass("ntHelpLightOn");
 
         this.getProductAvailability("msaviRadio") && this.setRadioLabelActive_grey("msaviRadio", true);
-        $("#light_msaviRadio").removeClass("ntHelpLightOn");
+        //$("#light_msaviRadio").removeClass("ntHelpLightOn");
     }
 };
 
@@ -4360,16 +4360,20 @@ NDVITimelineManager.prototype.selectPeriodItems = function (date0, date1, items)
 NDVITimelineManager.prototype.addRadioExt = function (containerId, radioTitle, options, tag, comboIndex, checked, isLight) {
 
     var optionFn = function () {
-        radioEl.checked = true;
-        var c = valueCallbacks[this.value];
-        if (c) {
-            c.call(this.value);
+        if (!radioEl.disabled) {
+            radioEl.checked = true;
+            var c = valueCallbacks[this.value];
+            if (c) {
+                c.call(this.value);
+            }
         }
     };
 
     var selectFn = function () {
-        radioEl.checked = true;
-        optionFn.call(selectEl);
+        if (!radioEl.disabled) {
+            radioEl.checked = true;
+            optionFn.call(selectEl);
+        }
     };
 
     var _this = this;

@@ -1020,15 +1020,12 @@ div.timeline-axis-grid {
 }
 
 .ntHelper {
-    /*position: absolute;*/
-    border-color: #F07609;
+    height: 20px;
+    padding: 2px 3px 0px 7px;
+    border-color: rgba(255,255,255,0);
     border-style: solid;
     border-width: 2px;
-    z-index: 10000000;
-    box-shadow: #F07609 0px 0px 2px;
-    height: 23px;
-    width: 40px;
-    border-radius: 4px;
+    margin-top: -4px;
 }
 
 #light_ndviRadio_hr {
@@ -1094,7 +1091,7 @@ div.timeline-axis-grid {
 }
 
 .tml-pane {
-    display: inline-block;
+    /*display: inline-block;*/
 }
 
 .tml-radio {
