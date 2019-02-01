@@ -508,7 +508,7 @@ NDVITimelineManager.radioProduct = {
     "sentinel432": { "prodId": NDVITimelineManager.SENTINEL_432, "numCombo": 4 },
     "sentinel384": { "prodId": NDVITimelineManager.SENTINEL_384, "numCombo": 4 },
 
-    "firesPoints": { "prodId": NDVITimelineManager.FIRES_POINTS, "numCombo": 5 },
+    "firesPoints": { "prodId": NDVITimelineManager.FIRES_POINTS, "numCombo": 3/*5*/ },
 
     "msaviRadio": { "prodId": NDVITimelineManager.LANDSAT_MSAVI, "numCombo": 1 }
 };

@@ -106,31 +106,6 @@ timelineParams.cosmosagro_com = {
             timelineMode: "screen",
             viewTimeline: true
         },
-        "MODIS143": {
-            viewTimeline: true,
-            name: "509762F05B0044D8A7CCC9D3C2383365",
-            dateColumnName: "acqdate"
-        },
-        "EVERYDAY250": {
-            viewTimeline: true,
-            name: "02BA2ACF5B26491681EBAD888771FC55",
-            dateColumnName: "date",
-            palette: {
-                ndvi: {
-                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml',
-                }
-            }
-        },
-        "EVERYDAY250_QUALITY": {
-            sceneFieldName: "sceneid",
-            name: "94B096994CBA47D889C1077C669BC466",
-            dateColumnName: "date",
-            palette: {
-                quality: {
-                    url: '//maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg',
-                }
-            }
-        },
         "LANDSAT_MSAVI": {
             clip: true,
             maxZoom: 13,
@@ -163,21 +138,13 @@ timelineParams.cosmosagro_com = {
     },
     combo: [{
         resolution: "modis",
-        caption: "Композиты/16дн, 250м",
+        caption: "Композиты 250 м",
         rk: ["MODIS", "MODIS_QUALITY"]
     }, {
         resolution: "landsat",
         clouds: true,
         caption: "Космосъемка 10-30 м",
         rk: ["HR", "RGB", "RGB2", "SENTINEL", "SENTINEL_NDVI", "SENTINEL_IR", "LANDSAT_PREVIEW", "SENTINEL_PREVIEW", "LANDSAT_MSAVI", "SENTINEL_MSAVI"]
-    }, {
-        caption: "Космосъемка 250 м",
-        resolution: "modis",
-        rk: ["MODIS143"]
-    }, {
-        caption: "Композиты/8дн, 250м",
-        resolution: "modis",
-        rk: ["EVERYDAY250", "EVERYDAY250_QUALITY"]
     }, {
         caption: "Пожары",
         rk: ["FIRES"]
@@ -348,7 +315,7 @@ timelineParams.maps_kosmosnimki_ru = {
     combo: [{
         hide: true,
         resolution: "modis",
-        caption: "Композиты/16дн, 250м",
+        caption: "Композиты 250 м",
         rk: ["MODIS", "MODIS_QUALITY"]
     }, {
         hide: true,
@@ -535,7 +502,7 @@ timelineParams.kosmosnimki_ru = {
     combo: [{
         hide: true,
         resolution: "modis",
-        caption: "Композиты/16дн, 250м",
+        caption: "Композиты 250 м",
         rk: ["MODIS", "MODIS_QUALITY"]
     }, {
         hide: true,
@@ -667,26 +634,6 @@ timelineParams.cosmosagro_kosmosnimki_ru = {
             name: "509762F05B0044D8A7CCC9D3C2383365",
             dateColumnName: "acqdate"
         },
-        "EVERYDAY250": {
-            viewTimeline: true,
-            name: "02BA2ACF5B26491681EBAD888771FC55",
-            dateColumnName: "date",
-            palette: {
-                ndvi: {
-                    url: '//maps.kosmosnimki.ru/api/plugins/palettes/NDVI_interp_legend.icxleg.xml'
-                }
-            }
-        },
-        "EVERYDAY250_QUALITY": {
-            sceneFieldName: "sceneid",
-            name: "94B096994CBA47D889C1077C669BC466",
-            dateColumnName: "date",
-            palette: {
-                quality: {
-                    url: '//maps.kosmosnimki.ru/api/plugins/ndvipublic/legend/QC_grade_1-5.icxleg'
-                }
-            }
-        },
         "LANDSAT_MSAVI": {
             name: "E5450B8BDDE44E9A903BCF850327766E",
             //mask: "A05BB0207AEE4CFD93C045BF71576FDE",
@@ -715,21 +662,13 @@ timelineParams.cosmosagro_kosmosnimki_ru = {
     },
     combo: [{
         resolution: "modis",
-        caption: { 'rus': "Композиты/16дн, 250м", 'eng': "Compositions/16d,250m" },
+        caption: { 'rus': "Композиты 250 м", 'eng': "Compositions 250 m" },
         rk: ["MODIS", "MODIS_QUALITY"]
     }, {
         resolution: "landsat",
         clouds: true,
         caption: { 'rus': "Космосъемка 10-30 м", 'eng': "High Resolution/10-30m" },
         rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI", "SENTINEL_IR", "LANDSAT_PREVIEW", "SENTINEL_PREVIEW", "LANDSAT_MSAVI", "SENTINEL_MSAVI"]
-    }, {
-        caption: { 'rus': "Космосъемка 250 м", 'eng': "MODIS 250m" },
-        resolution: "modis",
-        rk: ["MODIS143"]
-    }, {
-        caption: { 'rus': "Композиты/8дн, 250м", 'eng': "Compositions/8d,250m" },
-        resolution: "modis",
-        rk: ["EVERYDAY250", "EVERYDAY250_QUALITY"]
     }, {
         caption: { 'rus': "Пожары", 'eng': "Fires" },
         rk: ["FIRES"]
