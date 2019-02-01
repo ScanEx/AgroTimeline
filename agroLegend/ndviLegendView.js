@@ -57,7 +57,7 @@ var NDVILegendView = function () {
     inheritance.base(this, new NDVILegend({
         'name': NDVILegendView.locale[lang].CvetovajaShkalaNdvi,
         'width': 480,
-        'height': 235,
+        'height': 255,
         'palettes': _palettes
     }));
 

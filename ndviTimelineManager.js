@@ -5214,6 +5214,12 @@ NDVITimelineManager.prototype.refreshExperimentalPalettes = function () {
         if (currIndex === 3) {
             this.legendControl._ndviLegendView.model.setSelectedPaletteIndex(0);
         }
+    } else if (this._selectedOption === "SENTINEL_NDVI" || this._selectedOption === "LANDSAT_NDVI") {
+        this.legendControl._ndviLegendView.displayTags(["default", "distribution"]);
+        var currIndex = this.legendControl._ndviLegendView.model.getSelectedPaletteIndex();
+        if (currIndex > 1) {
+            this.legendControl._ndviLegendView.model.setSelectedPaletteIndex(0);
+        }
     } else {
         this.legendControl._ndviLegendView.displayTags(["default"]);
         var currIndex = this.legendControl._ndviLegendView.model.getSelectedPaletteIndex();
@@ -5221,6 +5227,7 @@ NDVITimelineManager.prototype.refreshExperimentalPalettes = function () {
             this.legendControl._ndviLegendView.model.setSelectedPaletteIndex(0);
         }
     }
+
     this.legendControl._ndviLegendView._refreshPaletteShades();
 };
 
