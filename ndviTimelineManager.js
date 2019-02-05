@@ -1994,7 +1994,8 @@ NDVITimelineManager.prototype._showPREVIEW = function () {
 
     this.setRadioLabelActive_grey("rgbRadio2", true);
 
-    document.getElementById("rgbRadio2").checked = true;
+    //document.getElementById("rgbRadio2").checked = true;
+    this.setActiveOption("rgbRadio2");
 
     this._selectedType[1] = NDVITimelineManager.RGB2_HR;
 
@@ -3628,7 +3629,11 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                         this.layerCollection[selectedLayer]._gmx.tileAttributeIndexes["clouds"];
                     clouds = prop[_CLOUDS];
                     that._selectedType[that._selectedCombo] = NDVITimelineManager.RGB_HR;
-                    document.getElementById("rgbRadio").checked = true;
+
+                    //document.getElementById("rgbRadio").checked = true;
+                    this.setActiveOption("rgbRadio");
+
+
                     this.setRadioLabelActive_grey("ndviRadio_hr", false);
                     this.setRadioLabelActive_grey("ratingRadio", false);
                     this.setRadioLabelActive_grey("ndviMeanRadio", false);
