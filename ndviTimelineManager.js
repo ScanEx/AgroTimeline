@@ -5222,7 +5222,7 @@ NDVITimelineManager.prototype.refreshExperimentalPalettes = function () {
     } else if (this._selectedOption === "SENTINEL_NDVI" || this._selectedOption === "LANDSAT_NDVI") {
         this.legendControl._ndviLegendView.displayTags(["default", "distribution"]);
         var currIndex = this.legendControl._ndviLegendView.model.getSelectedPaletteIndex();
-        if (currIndex > 1) {
+        if (currIndex === 3 || currIndex === 2) {
             this.legendControl._ndviLegendView.model.setSelectedPaletteIndex(0);
         }
     } else {

@@ -141,7 +141,7 @@ var LegendControl = function (agroTimeline) {
                 that.setVisibility(true);
             }
 
-            t.refreshExperimentalPalettes();;
+            t.refreshExperimentalPalettes();
 
         } else if (so == "RATING") {
             that.showButton();
