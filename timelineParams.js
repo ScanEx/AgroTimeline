@@ -106,6 +106,11 @@ timelineParams.cosmosagro_com = {
             timelineMode: "screen",
             viewTimeline: true
         },
+        "MODIS143": {
+            viewTimeline: true,
+            name: "509762F05B0044D8A7CCC9D3C2383365",
+            dateColumnName: "acqdate"
+        },
         "LANDSAT_MSAVI": {
             clip: true,
             maxZoom: 13,
@@ -145,6 +150,10 @@ timelineParams.cosmosagro_com = {
         clouds: true,
         caption: "Космосъемка 10-30 м",
         rk: ["HR", "RGB", "RGB2", "SENTINEL", "SENTINEL_NDVI", "SENTINEL_IR", "LANDSAT_PREVIEW", "SENTINEL_PREVIEW", "LANDSAT_MSAVI", "SENTINEL_MSAVI"]
+    }, {
+        caption: "Космосъемка 250 м",
+        resolution: "modis",
+        rk: ["MODIS143"]
     }, {
         caption: "Пожары",
         rk: ["FIRES"]
@@ -315,7 +324,7 @@ timelineParams.maps_kosmosnimki_ru = {
     combo: [{
         hide: true,
         resolution: "modis",
-        caption: "Композиты 250 м",
+        caption: "Композиты/16дн, 250м",
         rk: ["MODIS", "MODIS_QUALITY"]
     }, {
         hide: true,
@@ -502,7 +511,7 @@ timelineParams.kosmosnimki_ru = {
     combo: [{
         hide: true,
         resolution: "modis",
-        caption: "Композиты 250 м",
+        caption: "Композиты/16дн, 250м",
         rk: ["MODIS", "MODIS_QUALITY"]
     }, {
         hide: true,
@@ -662,13 +671,17 @@ timelineParams.cosmosagro_kosmosnimki_ru = {
     },
     combo: [{
         resolution: "modis",
-        caption: { 'rus': "Композиты 250 м", 'eng': "Compositions 250 m" },
+        caption: { 'rus': "Композиты 250 м", 'eng': "Compositions/16d,250m" },
         rk: ["MODIS", "MODIS_QUALITY"]
     }, {
         resolution: "landsat",
         clouds: true,
         caption: { 'rus': "Космосъемка 10-30 м", 'eng': "High Resolution/10-30m" },
         rk: ["HR", "RGB", "RGB2", "CLASSIFICATION", "SENTINEL", "SENTINEL_NDVI", "SENTINEL_IR", "LANDSAT_PREVIEW", "SENTINEL_PREVIEW", "LANDSAT_MSAVI", "SENTINEL_MSAVI"]
+    }, {
+        caption: { 'rus': "Космосъемка 250 м", 'eng': "MODIS 250m" },
+        resolution: "modis",
+        rk: ["MODIS143"]
     }, {
         caption: { 'rus': "Пожары", 'eng': "Fires" },
         rk: ["FIRES"]

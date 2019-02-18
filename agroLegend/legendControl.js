@@ -1,4 +1,4 @@
-var LegendControl = function (agroTimeline) {
+﻿var LegendControl = function (agroTimeline) {
     var that = this;
 
     var _BOTTOM = 150,
@@ -38,6 +38,7 @@ var LegendControl = function (agroTimeline) {
 
     this._btn = document.createElement("div");
     this._btn.classList.add("legendControlButton");
+    this._btn.title = "Цветовая шкала";
     this._btn.style.display = "none";
     this._btn.onclick = function () {
         that._manual = true;
