@@ -453,7 +453,7 @@ NDVITimelineManager.prototype.setWidth = function (width, right) {
 
         this.setTimeLineYear(this._selectedYear);
 
-        $(".ntRightPanel").css("width", width - 422);
+        //$(".ntRightPanel").css("width", width - 422);
 
         $(".ntOptionsFieldset").css("width", $("#ntRightPanel").width());
 
