@@ -5219,7 +5219,7 @@ NDVITimelineManager.prototype.refreshExperimentalPalettes = function () {
         if (currIndex === 3) {
             this.legendControl._ndviLegendView.model.setSelectedPaletteIndex(0);
         }
-    } else if (this._selectedOption === "SENTINEL_NDVI" || this._selectedOption === "LANDSAT_NDVI") {
+    } else if (this._selectedOption === "SENTINEL_NDVI" || this._selectedOption === "LANDSAT_NDVI" || this._selectedOption === "HR") {
         this.legendControl._ndviLegendView.displayTags(["default", "distribution"]);
         var currIndex = this.legendControl._ndviLegendView.model.getSelectedPaletteIndex();
         if (currIndex === 3 || currIndex === 2) {
