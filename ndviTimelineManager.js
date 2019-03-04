@@ -5311,6 +5311,10 @@ NDVITimelineManager.prototype.hideCloudMask = function (force) {
 
 NDVITimelineManager.prototype.setTimelineCombo = function (index, currentSelection) {
 
+    this._slider.setCaption("");
+    this._slider.setCaption0("");
+    this._slider.setCaption1("");
+
     $("#ntComboBox > option").each(function (e, x) {
         (x.value == index && (x.selected = true));
     });
