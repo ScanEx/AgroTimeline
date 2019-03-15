@@ -762,27 +762,37 @@ NDVITimelineManager.prototype.loadState = function (data) {
             this.legendControl._ndviLegendView.model.setNDVIDistribution(data.ndviLegend.ndviDistr);
         }
 
-        this.legendControl._ndviLegendView.model.events.on("loadend", this.legendControl._ndviLegendView, function () {
+        var _setNDVILegend = function () {
+            var lView = that.legendControl._ndviLegendView;
+
             var bands = data.ndviLegend.palettesBands,
                 sliderBands = data.ndviLegend.sliderBands;
-            var palettes = this.model.palettes;
+            var palettes = lView.model.palettes;
             for (var i = 0; i < palettes.length; i++) {
                 var min = parseFloat(bands[i][0]),
                     max = parseFloat(bands[i][1]);
                 var sliderMin = parseFloat(sliderBands[i][0]),
                     sliderMax = parseFloat(sliderBands[i][1]);
-                this.sliders[i].setRange(sliderMin, sliderMax);
-                this.model.palettes[i].min = min;
-                this.model.palettes[i].max = max;
-                this.model.palettes[i].sliderMin = sliderMin;
-                this.model.palettes[i].sliderMax = sliderMax;
+                lView.sliders[i].setRange(sliderMin, sliderMax);
+                lView.model.palettes[i].min = min;
+                lView.model.palettes[i].max = max;
+                lView.model.palettes[i].sliderMin = sliderMin;
+                lView.model.palettes[i].sliderMax = sliderMax;
             }
-            this.model.setSelectedPaletteIndex(parseInt(data.ndviLegend.selectedPalette));
-            this._refreshPaletteShades();
-            this._renderAnaliticalPalette();
-            this.refreshRangeValues();
+            lView.model.setSelectedPaletteIndex(parseInt(data.ndviLegend.selectedPalette));
+            lView._refreshPaletteShades();
+            lView._renderAnaliticalPalette();
+            lView.refreshRangeValues();
             that.showExperimentalPalettes(that._experimentalPalettesVisibility);
+        };
+
+        this.legendControl._ndviLegendView.model.events.on("loadend", null, function () {
+            _setNDVILegend();
         });
+
+        if (this.legendControl._ndviLegendView.model.isReady()) {
+            _setNDVILegend();
+        }
     }
 
     //эти параметры применяются до того как произойдет инициализация таймлайна

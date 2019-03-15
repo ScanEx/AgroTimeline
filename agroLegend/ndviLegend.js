@@ -7,6 +7,8 @@ var NDVILegend = function (options) {
 
     this._selectedPaletteIndex = 0;
 
+    this._ready = false;
+
     var _p = null;
     var _oneBy_d = 0.0;
     var _sliderMin = 0;
@@ -45,9 +47,14 @@ var NDVILegend = function (options) {
     }
 
     $.when.apply($, defArr).then(function () {
+        that._ready = true;
         that.setSelectedPaletteIndex(0);
         that.events.dispatch(that.events.loadend, that);
     });
+
+    this.isReady = function () {
+        return this._ready;
+    };
 
     this.getSelectedPalette = function () {
         return this.palettes[this._selectedPaletteIndex];
