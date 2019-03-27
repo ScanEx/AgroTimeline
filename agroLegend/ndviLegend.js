@@ -218,6 +218,6 @@ var NDVILegend = function (options) {
 };
 
 NDVILegend.DISTRIBUTION = 1001;
-NDVILegend.MAX_SELECTED_FIELDS = 50;
+NDVILegend.MAX_SELECTED_FIELDS = 100;
 
 inheritance.extend(NDVILegend, Legend);

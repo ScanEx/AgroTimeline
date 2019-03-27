@@ -590,14 +590,16 @@
                 }
             });
 
-            var prevDiv = makeImageButton("img/prev.png", "img/prev_a.png");
+            //var prevDiv = makeImageButton("img/prev.png", "img/prev_a.png");
+            var prevDiv = makeImageButton("", "");
             _title(prevDiv, _gtxt("Предыдущий слой"));
             prevDiv.onclick = function () {
                 _this.shiftActiveItem(-1);
             }
             $(prevDiv).addClass('timeline-shift-icon');
 
-            var nextDiv = makeImageButton("img/next.png", "img/next_a.png");
+            //var nextDiv = makeImageButton("img/next.png", "img/next_a.png");
+            var nextDiv = makeImageButton("", "");
             _title(nextDiv, _gtxt("Следующий слой"));
 
             nextDiv.onclick = function () {

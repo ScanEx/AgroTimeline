@@ -16,9 +16,7 @@ var scripts = ['./timeline/timeline.js', './timeline/LineItem.js', './timeline/g
     'timelineParams.js', 'timelineProxyLayer.js', 'switchControl.js', 'optionsMenu.js', 'ndviTimelineSlider.js', 'ndviTimelineManager.js',
     'meanVCIManager.js', 'bindScrollControl.js', 'agroWarning.js', 'rating.js', 'ajax.js', 'L.Control.gmxAgroTimeline.js'];
 
-var images = ['images/up_a.png', 'images/up.png', 'images/settings.png', 'images/prev_a.png', 'images/prev.png', 'images/pointer1.png',
-    'images/pointer0.png', 'images/pointer_light.png', 'images/pointer_dark.png', 'images/next_a.png', 'images/next.png',
-    'images/minimize.png', 'images/maximize.png', 'images/down_a.png', 'down.png', 'images/comboup.png'];
+var images = [];
 
 gulp.task('default', function() {
     var sourcesStream = gulp.src(scripts);
