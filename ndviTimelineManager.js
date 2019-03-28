@@ -860,6 +860,9 @@ NDVITimelineManager.prototype.loadState = function (data) {
         //...а эти после
         //отложенный вызов активации по пермалику, после загрузки снимков на таймлайн
         that._activatePermalink = function () {
+
+            that.setVisibleYear(that._selectedYear);
+
             if (that._combo[data.selectedCombo].rk[0] == "FIRES") {
                 document.getElementById("ntPeriodSelectOption").style.display = "block";
                 $(".ntOptionsHR").css("display", "none");
@@ -902,8 +905,10 @@ NDVITimelineManager.prototype.loadState = function (data) {
         };
     }
 
-    this.setVisibleYear(this._selectedYear);
-    this.setTimelineCombo(this._selectedCombo);
+    if (this.timeLine && !window.exportMode) {
+        this.setVisibleYear(this._selectedYear);
+        this.setTimelineCombo(this._selectedCombo);
+    }
 }
 
 NDVITimelineManager.prototype.refreshOptionsDisplay = function () {
