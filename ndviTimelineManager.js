@@ -826,6 +826,13 @@ NDVITimelineManager.prototype.loadState = function (data) {
     if (data.selectedDate0 && data.selectedDate1) {
         that._activatePermalink = function () {
             that._slider.setPeriodSelector(true);
+
+            if (data.radioId) {
+                that.setActiveRadio(data.radioId);
+            } else if (data.optionValue && data.selectedCombo == 1) {
+                that.setActiveOption(data.optionValue);
+            }
+
             document.getElementById("ntPeriodSelectOption").style.display = "block";
             $(".ntOptionsHR").css("display", "none");
             $(".ntOptionsMODIS").css("display", "none");
@@ -853,9 +860,6 @@ NDVITimelineManager.prototype.loadState = function (data) {
         //...а эти после
         //отложенный вызов активации по пермалику, после загрузки снимков на таймлайн
         that._activatePermalink = function () {
-
-            that.setVisibleYear(that._selectedYear);
-
             if (that._combo[data.selectedCombo].rk[0] == "FIRES") {
                 document.getElementById("ntPeriodSelectOption").style.display = "block";
                 $(".ntOptionsHR").css("display", "none");
@@ -897,6 +901,9 @@ NDVITimelineManager.prototype.loadState = function (data) {
             return false;
         };
     }
+
+    this.setVisibleYear(this._selectedYear);
+    this.setTimelineCombo(this._selectedCombo);
 }
 
 NDVITimelineManager.prototype.refreshOptionsDisplay = function () {
@@ -2555,7 +2562,7 @@ NDVITimelineManager.prototype.getVisibility = function (l) {
 };
 
 NDVITimelineManager.prototype.getTimelineVisibility = function (l) {
-    return !this.switcher.isCollapsed();
+    return this.switcher && !this.switcher.isCollapsed();
 };
 
 NDVITimelineManager.prototype.refreshVisibleLayersOnDisplay = function () {
@@ -5344,10 +5351,9 @@ NDVITimelineManager.prototype.setTimelineCombo = function (index, currentSelecti
     this._selectedType[0] = NDVITimelineManager.NDVI16;
     this._selectedType[1] = NDVITimelineManager.RGB2_HR;
 
-    //document.getElementById("rgbRadio").checked = true;
-    //document.getElementById("ndviRadio_modis").checked = true;
-
-    document.getElementById("optionsPanel_" + this._selectedCombo).style.display = "none";
+    for (var i = 0; i < this._combo.length; i++) {
+        document.getElementById("optionsPanel_" + i).style.display = "none";
+    }
 
     this._selectedCombo = index;
     document.getElementById("optionsPanel_" + index).style.display = "block";
@@ -5443,9 +5449,10 @@ NDVITimelineManager.prototype.resetFireOption = function () {
         var that = this;
         that._hideLayers();
         that._showFIRES_POINTS();
+
         //вот тут тоже странный баг надо дважды включить и выключить слой.
-        that._hideLayers();
-        that._showFIRES_POINTS();
+        this.hideSelectedLayer();
+        this._showFIRES_POINTS();
     }
 };
 
@@ -5654,7 +5661,7 @@ NDVITimelineManager.prototype._filterTimeline = function (elem, layer) {
             return true;
         }
     } else if (this._combo[this._selectedCombo].resolution === "landsat") {
-        var isQl = this._chkQl;//$("#chkQl").is(':checked');
+        var isQl = this._chkQl;
         var conf = this._layerConfigs[layer.getGmxProperties().name];
         var isPreview = conf.isPreview;
 
