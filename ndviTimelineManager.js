@@ -1,5 +1,4 @@
 var NDVITimelineManager = function (lmap, params, userRole, container) {
-
     if (!params || shared.isEmptyObj(params)) {
         if (shared.host_contains("maps.kosmosnimki.ru")) {
             params = timelineParams.maps_kosmosnimki_ru;
@@ -1417,9 +1416,15 @@ NDVITimelineManager.prototype.setVisibleYear = function (year) {
     var d0 = new Date(year, 0, 1),
         d1 = new Date(year, 11, 31);
 
+    if (window.exportMode && this._selectedDate) {
+        d0 = NDVITimelineManager.addDays(this._selectedDate, -1);
+        d1 = NDVITimelineManager.addDays(this._selectedDate, 1);
+    }
+
     for (var l in this._proxyLayers) {
         this._proxyLayers[l].setDateInterval(d0, d1);
     }
+
 
     this.timeLine.getTimelineController().setDateInterval(d0, d1);
 
@@ -1884,7 +1889,6 @@ NDVITimelineManager.prototype._showFIRES_POINTS = function () {
         this._selectedDate0 &&
         this._selectedDate1) {
         if (this._selectedOption == "FIRES") {
-            //this._selectedLayer.setDateInterval(this._selectedDate0, this._selectedDate1);
             this.setSelectedLayersDateInterval(this._selectedDate0, this._selectedDate1);
         } else {
             this.hideSelectedLayer();

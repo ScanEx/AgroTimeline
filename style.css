@@ -1097,6 +1097,7 @@ div.timeline-axis-grid {
 .tml-radio {
     float: left;
     cursor: pointer;
+    margin: 3px 3px 0px 5px;
 }
 
 .tml-title {
