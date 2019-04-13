@@ -5807,40 +5807,40 @@ links.Timeline.StepDate.prototype.isMajor = function () {
     }
 };
 
-links.Timeline.defaultLanguage = "ru";
+links.Timeline.defaultLanguage = "rus";
 
 links.Timeline.months_short = {
-    "en": ["Jan", "Feb", "Mar",
+    "eng": ["Jan", "Feb", "Mar",
             "Apr", "May", "Jun",
             "Jul", "Aug", "Sep",
             "Oct", "Nov", "Dec"],
 
-    "ru": ["Янв", "Фев", "Мар",
+    "rus": ["Янв", "Фев", "Мар",
             "Апр", "Май", "Июн",
             "Июл", "Авг", "Сен",
             "Окт", "Ноя", "Дек"]
 };
 
 links.Timeline.days_short = {
-    "en": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-    "ru": ["Вс", "Пн", "Втр", "Ср", "Чт", "Пт", "Сб"]
+    "eng": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "rus": ["Вс", "Пн", "Втр", "Ср", "Чт", "Пт", "Сб"]
 };
 
 links.Timeline.months_full = {
-    "en": ["January", "February", "March",
+    "eng": ["January", "February", "March",
             "April", "May", "June",
             "July", "August", "September",
             "October", "November", "December"],
-    "ru": ["Январь", "Февраль", "Март",
+    "rus": ["Январь", "Февраль", "Март",
         "Апрель", "Май", "Июнь",
         "Июль", "Август", "Сентябрь",
         "Октябрь", "Ноябрь", "Декабрь"]
 };
 
 links.Timeline.days_full = {
-    "en": ["Sunday", "Monday", "Tuesday",
+    "eng": ["Sunday", "Monday", "Tuesday",
         "Wednesday", "Thursday", "Friday", "Saturday"],
-    "ru": ["Воскресенье", "Понедельник", "Вторник",
+    "rus": ["Воскресенье", "Понедельник", "Вторник",
         "Среда", "Четверг", "Пятница", "Суббота"]
 };
 
