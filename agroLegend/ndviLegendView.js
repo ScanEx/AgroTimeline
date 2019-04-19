@@ -112,7 +112,7 @@ var NDVILegendView = function () {
                <input type= "radio" class="alpRadio" name= "alpRadio" value="{id}"/>\
              </div>\
              <div class="alpColorTab">\
-               <div class="alpCaption">Распределение NDVI</div>\
+               <div class="alpCaption">'+ lang.RaspredelenieNDVI + '</div>\
                <div class="alpPaletteDistrValues">\
                  <div></div>\
                  <div></div>\
@@ -809,6 +809,8 @@ var NDVILegendView = function () {
             wrnFrameEl.parentNode.removeChild(wrnFrameEl);
         }
 
+        var lang = NDVILegendView.locale[L.gmxLocale.getLanguage()];
+
         if (sel.length === 0 || !layer || fieldCount > NDVILegend.MAX_SELECTED_FIELDS) {
 
             this.el.querySelector(".alpBlock.alpBlock-distribution .alpCaption").style.color = "#8d8d8d";
@@ -819,9 +821,9 @@ var NDVILegendView = function () {
             this.el.querySelector(".alpBlock.alpBlock-distribution").appendChild(wrnFrameEl);
 
             if (fieldCount > NDVILegend.MAX_SELECTED_FIELDS) {
-                wrnFrameEl.innerHTML = 'Вы выбрали более ' + NDVILegend.MAX_SELECTED_FIELDS + ' полей - уменьшите кол-во выбранных полей';
+                wrnFrameEl.innerHTML = lang.ViVibraliBolee + ' ' + NDVILegend.MAX_SELECTED_FIELDS + ' ' + lang.UmenshiteKOlvopolei;
             } else {
-                wrnFrameEl.innerHTML = 'Для активации шкалы распределения NDVI на карте, сначала выберите поля в левой панели, но не более ' + NDVILegend.MAX_SELECTED_FIELDS;
+                wrnFrameEl.innerHTML = lang.DliaAktivaciiViberite + ' ' + NDVILegend.MAX_SELECTED_FIELDS;
             }
 
             this.el.querySelector(".alpBlock.alpBlock-distribution .alpRadioTab").classList.add("alpRadioDisabled");
@@ -835,7 +837,7 @@ var NDVILegendView = function () {
 
         } else {
             this.el.querySelector(".alpBlock.alpBlock-distribution .alpRadioTab").classList.remove("alpRadioDisabled");
-            this.el.querySelector(".alpBlock.alpBlock-distribution .alpCaption").innerHTML = "Распределение NDVI";
+            this.el.querySelector(".alpBlock.alpBlock-distribution .alpCaption").innerHTML = lang.RaspredelenieNDVI;
             this.el.querySelector(".alpBlock.alpBlock-distribution .alpCaption").style.color = "";
         }
 
@@ -888,11 +890,19 @@ NDVILegendView.locale = {
     'rus': {
         'CvetovajaShkalaNdvi': "Цветовая шкала",
         'EstestvennayaShkala': "Базовая шкала",
-        'AnaliticheskayaShkala': "Аналитическая шкала"
+        'AnaliticheskayaShkala': "Аналитическая шкала",
+        'RaspredelenieNDVI': "Распределение NDVI",
+        'ViVibraliBolee': "Вы выбрали более",
+        'UmenshiteKolvoPolei': "полей - уменьшите кол-во выбранных полей",
+        'DliaAktivaciiViberite': "Для активации шкалы распределения NDVI на карте, сначала выберите поля в левой панели, но не более"
     },
     'eng': {
-        'CvetovajaShkalaNdvi': "Color scale",
-        'EstestvennayaShkala': "Basic scale",
-        'AnaliticheskayaShkala': "Analitical scale"
+        'CvetovajaShkalaNdvi': "Legend",
+        'EstestvennayaShkala': "Basic coloring",
+        'AnaliticheskayaShkala': "Analitical coloring",
+        'RaspredelenieNDVI': "NDVI variability",
+        'ViVibraliBolee': "You have selected more than",
+        'UmenshiteKolvoPolei': "fields - decrease the selected fields count",
+        'DliaAktivaciiViberite': "Select fields in the left panel. No more than "
     }
 };

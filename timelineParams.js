@@ -29,7 +29,9 @@ timelineParams.cosmosagro_com = {
         "HR": {
             clip: true,
             maxZoom: 13,
-            name: "8288D69C7C0040EFBB7B7EE6671052E3",
+            //name: "8288D69C7C0040EFBB7B7EE6671052E3",
+            //mask: "A05BB0207AEE4CFD93C045BF71576FDE",
+            name: "E541359719264F2CBEEA4BB2BCA5BEB1",
             mask: "A05BB0207AEE4CFD93C045BF71576FDE",
             dateColumnName: "acqdate",
             palette: {
@@ -114,7 +116,8 @@ timelineParams.cosmosagro_com = {
         "LANDSAT_MSAVI": {
             clip: true,
             maxZoom: 13,
-            name: "E5450B8BDDE44E9A903BCF850327766E",
+            //name: "E5450B8BDDE44E9A903BCF850327766E",
+            name: "4280091A6C6546B8A406E993903C0012",
             //mask: "A05BB0207AEE4CFD93C045BF71576FDE",
             dateColumnName: "acqdate",
             palette: {
