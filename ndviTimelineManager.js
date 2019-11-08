@@ -1909,81 +1909,85 @@ NDVITimelineManager.prototype._showINDEX_NDVI = function () {
 
     this._selectedOption = "INDEX_NDVI";
 
-    console.log("XXX");
+    //console.log("XXX");
 
-    //if (fns) {
-    //    var url = '//maps.kosmosnimki.ru/VectorLayer/Search.ashx?WrapStyle=func&geometry=false&tables=[{%22LayerName%22:%224B68E05D988E404D962F5CC79FFCE67F%22,%22Alias%22:%22v%22},{%22LayerName%22:%2258B949C8E8454CF297184034DD8A62CD%22,%22Alias%22:%22a%22,%22Join%22:%22Inner%22,%22On%22:%22[v].area_id%20=%20[a].ogc_fid%22}]&columns=[{%22Value%22:%22[a].[Region]%22},{%22Value%22:%22[a].[District]%22},{%22Value%22:%22[v].[Value]%22}]';
-    //    var query = '&query="Type"=' + (document.getElementById("chkVciType").checked ? 1 : 0) +
-    //        ' AND "date"=' + "'" + NDVITimelineManager.formatDate(this._selectedDate.getDate(),
-    //            this._selectedDate.getMonth() + 1, this._selectedDate.getFullYear()) + "'";
+    if (fns) {
+        var url = '//maps.kosmosnimki.ru/VectorLayer/Search.ashx?WrapStyle=func&geometry=false&tables=[{%22LayerName%22:%22B30C04B4FD98437299B2EAD01D6ACC0B%22,%22Alias%22:%22v%22},{%22LayerName%22:%2258B949C8E8454CF297184034DD8A62CD%22,%22Alias%22:%22a%22,%22Join%22:%22Inner%22,%22On%22:%22[v].area_id%20=%20[a].ogc_fid%22}]&columns=[{%22Value%22:%22[a].[Region]%22},{%22Value%22:%22[a].[District]%22},{%22Value%22:%22[v].[Value]%22}]';
+        var query = '&query="Type"=' + (document.getElementById("chkVciType").checked ? 1 : 0) +
+            ' AND "date"=' + "'" + NDVITimelineManager.formatDate(this._selectedDate.getDate(),
+                this._selectedDate.getMonth() + 1, this._selectedDate.getFullYear()) + "'";
 
-    //    //делаем запрос и раскрашиваем
-    //    var that = this;
-    //    sendCrossDomainJSONRequest(url + query, function (res) {
-    //        AgroShared._meanVCIStyleData = {};
-    //        var data = res.Result;
-    //        for (var i = 0; i < data.values.length; i++) {
-    //            var VCI = data.values[i][2];
-    //            var r = 0, g = 0, b = 0, a = 100;
-    //            if (VCI <= 20) {
-    //                //красный
-    //                r = 255;
-    //                g = 0;
-    //                b = 0;
-    //            } else if (VCI <= 40) {
-    //                //розовый
-    //                r = 255;
-    //                g = 127;
-    //                b = 127;
-    //            } else if (VCI <= 60) {
-    //                //желтый
-    //                r = 255;
-    //                g = 255;
-    //                b = 0;
-    //            } else if (VCI <= 80) {
-    //                //зеленый
-    //                r = 0;
-    //                g = 255;
-    //                b = 0;
-    //            } else if (VCI <= 100) {
-    //                //темно зеленый
-    //                r = 0;
-    //                g = 128;
-    //                b = 0;
-    //            } else {
-    //                //VCI > 100
-    //                r = 0;
-    //                g = 0;
-    //                b = 0;
-    //            }
+        //делаем запрос и раскрашиваем
+        var that = this;
+        sendCrossDomainJSONRequest(url + query, function (res) {
+            AgroShared._meanVCIStyleData = {};
+            var data = res.Result;
+            for (var i = 0; i < data.values.length; i++) {
+                var ndvi = data.values[i][2];
 
-    //            var nameId = data.values[i][0] + ":" + data.values[i][1];
+                var color = that.legendControl._ndviLegendView.model.getNDVIColor(ndvi);
 
-    //            AgroShared._meanVCIStyleData[nameId] = {
-    //                fillStyle: "rgb(" + r + "," + g + "," + b + ")",
-    //                fillOpacity: 1.0,
-    //                strokeStyle: "rgb(" + (r - (r > 0 ? 15 : 0)) + "," + (g - (g > 0 ? 15 : 0)) + "," + (b - (b > 0 ? 15 : 0)) + ")",
-    //                opacity: a,
-    //                weight: 1
-    //            };
-    //        }
+                var r = color[0] || 0, g = color[1] || 0, b = color[2] || 0, a = color[3] || 255;
 
-    //        var typeId = that._meanVCILayer._gmx.tileAttributeIndexes["Type"];
+                //if (VCI <= 20) {
+                //    //красный
+                //    r = 255;
+                //    g = 0;
+                //    b = 0;
+                //} else if (VCI <= 40) {
+                //    //розовый
+                //    r = 255;
+                //    g = 127;
+                //    b = 127;
+                //} else if (VCI <= 60) {
+                //    //желтый
+                //    r = 255;
+                //    g = 255;
+                //    b = 0;
+                //} else if (VCI <= 80) {
+                //    //зеленый
+                //    r = 0;
+                //    g = 255;
+                //    b = 0;
+                //} else if (VCI <= 100) {
+                //    //темно зеленый
+                //    r = 0;
+                //    g = 128;
+                //    b = 0;
+                //} else {
+                //    //VCI > 100
+                //    r = 0;
+                //    g = 0;
+                //    b = 0;
+                //}
 
-    //        that._meanVCILayer.setFilter(function (item) {
-    //            var p = item.properties;
-    //            if (p[typeId] == 0) {
-    //                return true;
-    //            }
-    //            return false;
-    //        });
+                var nameId = data.values[i][0] + ":" + data.values[i][1];
 
-    //        that.lmap.addLayer(that._meanVCILayer);
-    //        that._selectedLayers.push(that._meanVCILayer);
-    //        that._selectedOption = "VCI";
-    //        document.getElementById("chkVciType").disabled = false;
-    //    });
-    //}
+                AgroShared._meanVCIStyleData[nameId] = {
+                    fillStyle: "rgb(" + r + "," + g + "," + b + ")",
+                    fillOpacity: 1.0,
+                    strokeStyle: "rgb(" + (r - (r > 0 ? 15 : 0)) + "," + (g - (g > 0 ? 15 : 0)) + "," + (b - (b > 0 ? 15 : 0)) + ")",
+                    opacity: a,
+                    weight: 1
+                };
+            }
+
+            var typeId = that._meanVCILayer._gmx.tileAttributeIndexes["Type"];
+
+            that._meanVCILayer.setFilter(function (item) {
+                var p = item.properties;
+                if (p[typeId] == 0) {
+                    return true;
+                }
+                return false;
+            });
+
+            that.lmap.addLayer(that._meanVCILayer);
+            that._selectedLayers.push(that._meanVCILayer);
+            that._selectedOption = "VCI";
+            document.getElementById("chkVciType").disabled = false;
+        });
+    }
 };
 
 NDVITimelineManager.prototype.setSelectedLayersDateInterval = function (date0, date1) {
