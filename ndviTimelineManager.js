@@ -347,6 +347,7 @@ NDVITimelineManager.QUALITY16 = 103;
 NDVITimelineManager.NDVI_MEAN = 104;
 NDVITimelineManager.CLASSIFICATION = 105;
 NDVITimelineManager.CONDITIONS_OF_VEGETATION = 106;
+NDVITimelineManager.INDEX_NDVI = 1006;
 NDVITimelineManager.INHOMOGENUITY = 107;
 NDVITimelineManager.MEAN_VCI = 108;
 NDVITimelineManager.RATING = 109;
@@ -505,6 +506,7 @@ NDVITimelineManager.radioProduct = {
     "ndviRadio_modis": { "prodId": NDVITimelineManager.NDVI16, "numCombo": 0 },
     "qualityRadio": { "prodId": NDVITimelineManager.QUALITY16, "numCombo": 0 },
     "conditionsOfVegetationRadio": { "prodId": NDVITimelineManager.CONDITIONS_OF_VEGETATION, "numCombo": 0 },
+    "indexNDVIRadio": { "prodId": NDVITimelineManager.INDEX_NDVI, "numCombo": 0 },
 
     "landsat432": { "prodId": NDVITimelineManager.LANDSAT_432, "numCombo": 3 },
     "landsat753": { "prodId": NDVITimelineManager.LANDSAT_753, "numCombo": 3 },
@@ -531,6 +533,7 @@ NDVITimelineManager.minZoomOption[NDVITimelineManager.NDVI_MEAN] = NDVITimelineM
 NDVITimelineManager.minZoomOption[NDVITimelineManager.CLASSIFICATION] = NDVITimelineManager.MIN_ZOOM_HR;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.RATING] = NDVITimelineManager.MIN_ZOOM_HR;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.CONDITIONS_OF_VEGETATION] = 0;
+NDVITimelineManager.minZoomOption[NDVITimelineManager.INDEX_NDVI] = 0;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.INHOMOGENUITY] = NDVITimelineManager.MIN_ZOOM_HR;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.MEAN_VCI] = NDVITimelineManager.MIN_ZOOM_HR;
 NDVITimelineManager.minZoomOption[NDVITimelineManager.SENTINEL] = NDVITimelineManager.MIN_ZOOM + 1;
@@ -1725,6 +1728,8 @@ NDVITimelineManager.prototype._showRedraw = function () {
             //this._showCLASSIFICATION();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.CONDITIONS_OF_VEGETATION) {
             this._showCONDITIONS_OF_VEGETATION();
+        } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.INDEX_NDVI) {
+            this._showINDEX_NDVI();
         } else if (this._selectedType[this._selectedCombo] == NDVITimelineManager.FIRES_POINTS) {
             this._showFIRES_POINTS();
         } else {
@@ -1744,6 +1749,7 @@ NDVITimelineManager.prototype._redrawShots = function () {
         this.setRadioLabelActive_grey("rgbRadio", true);
     this.setRadioLabelActive_grey("ndviRadio_modis", true);
     this.setRadioLabelActive_grey("conditionsOfVegetationRadio", true);
+    this.setRadioLabelActive_grey("indexNDVIRadio", true);
 };
 
 NDVITimelineManager._makeSqlFilenames = function (filenames, type) {
@@ -1893,6 +1899,91 @@ NDVITimelineManager.prototype._showCONDITIONS_OF_VEGETATION = function () {
             document.getElementById("chkVciType").disabled = false;
         });
     }
+};
+
+//Это новый вариант визуализации условия вегетации
+NDVITimelineManager.prototype._showINDEX_NDVI = function () {
+    document.getElementById("chkVciType").disabled = true;
+    this.hideSelectedLayer();
+    var fns = this._comboFilenames[this._selectedCombo];
+
+    this._selectedOption = "INDEX_NDVI";
+
+    console.log("XXX");
+
+    //if (fns) {
+    //    var url = '//maps.kosmosnimki.ru/VectorLayer/Search.ashx?WrapStyle=func&geometry=false&tables=[{%22LayerName%22:%224B68E05D988E404D962F5CC79FFCE67F%22,%22Alias%22:%22v%22},{%22LayerName%22:%2258B949C8E8454CF297184034DD8A62CD%22,%22Alias%22:%22a%22,%22Join%22:%22Inner%22,%22On%22:%22[v].area_id%20=%20[a].ogc_fid%22}]&columns=[{%22Value%22:%22[a].[Region]%22},{%22Value%22:%22[a].[District]%22},{%22Value%22:%22[v].[Value]%22}]';
+    //    var query = '&query="Type"=' + (document.getElementById("chkVciType").checked ? 1 : 0) +
+    //        ' AND "date"=' + "'" + NDVITimelineManager.formatDate(this._selectedDate.getDate(),
+    //            this._selectedDate.getMonth() + 1, this._selectedDate.getFullYear()) + "'";
+
+    //    //делаем запрос и раскрашиваем
+    //    var that = this;
+    //    sendCrossDomainJSONRequest(url + query, function (res) {
+    //        AgroShared._meanVCIStyleData = {};
+    //        var data = res.Result;
+    //        for (var i = 0; i < data.values.length; i++) {
+    //            var VCI = data.values[i][2];
+    //            var r = 0, g = 0, b = 0, a = 100;
+    //            if (VCI <= 20) {
+    //                //красный
+    //                r = 255;
+    //                g = 0;
+    //                b = 0;
+    //            } else if (VCI <= 40) {
+    //                //розовый
+    //                r = 255;
+    //                g = 127;
+    //                b = 127;
+    //            } else if (VCI <= 60) {
+    //                //желтый
+    //                r = 255;
+    //                g = 255;
+    //                b = 0;
+    //            } else if (VCI <= 80) {
+    //                //зеленый
+    //                r = 0;
+    //                g = 255;
+    //                b = 0;
+    //            } else if (VCI <= 100) {
+    //                //темно зеленый
+    //                r = 0;
+    //                g = 128;
+    //                b = 0;
+    //            } else {
+    //                //VCI > 100
+    //                r = 0;
+    //                g = 0;
+    //                b = 0;
+    //            }
+
+    //            var nameId = data.values[i][0] + ":" + data.values[i][1];
+
+    //            AgroShared._meanVCIStyleData[nameId] = {
+    //                fillStyle: "rgb(" + r + "," + g + "," + b + ")",
+    //                fillOpacity: 1.0,
+    //                strokeStyle: "rgb(" + (r - (r > 0 ? 15 : 0)) + "," + (g - (g > 0 ? 15 : 0)) + "," + (b - (b > 0 ? 15 : 0)) + ")",
+    //                opacity: a,
+    //                weight: 1
+    //            };
+    //        }
+
+    //        var typeId = that._meanVCILayer._gmx.tileAttributeIndexes["Type"];
+
+    //        that._meanVCILayer.setFilter(function (item) {
+    //            var p = item.properties;
+    //            if (p[typeId] == 0) {
+    //                return true;
+    //            }
+    //            return false;
+    //        });
+
+    //        that.lmap.addLayer(that._meanVCILayer);
+    //        that._selectedLayers.push(that._meanVCILayer);
+    //        that._selectedOption = "VCI";
+    //        document.getElementById("chkVciType").disabled = false;
+    //    });
+    //}
 };
 
 NDVITimelineManager.prototype.setSelectedLayersDateInterval = function (date0, date1) {
@@ -3519,6 +3610,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
     this.setRadioLabelActive_grey("rgbRadio2", false);
     this.setRadioLabelActive_grey("ndviRadio_modis", false);
     this.setRadioLabelActive_grey("conditionsOfVegetationRadio", false);
+    this.setRadioLabelActive_grey("indexNDVIRadio", false);
 
     this.zoomRestrictionLabel.style.display = "none";
     $(".ntHelp").removeClass("ntHelpLightOn");
@@ -3748,6 +3840,7 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
                 this.setRadioLabelActive_grey("qualityRadio", true);
 
                 this.setRadioLabelActive_grey("conditionsOfVegetationRadio", true);
+                this.setRadioLabelActive_grey("indexNDVIRadio", true);
 
                 //params = [{"name":<имя слоя>,"filename":<имя файла>, "id":<radio element id>} ]
                 var params = [];
@@ -4788,6 +4881,10 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         that._redrawShots();
     });
 
+    this.addRadio("secondPanel_0", "Индекс NDVI", "shotsOptions", "indexNDVIRadio", 0, true, function (r) {
+        that._selectedType[that._selectedCombo] = NDVITimelineManager.INDEX_NDVI;
+        that._redrawShots();
+    });
 
 
     for (var k = 2; k < this._combo.length; k++) {
