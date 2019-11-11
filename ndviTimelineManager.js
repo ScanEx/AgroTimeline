@@ -303,7 +303,8 @@ NDVITimelineManager.locale = {
         'DljaAktivaciiNavedite': "Для активации опций, наведите карту на контуры полей",
         'NetDannihPoVibrannomuProductu': "Нет данных по выбранному продукту",
         'PriblizteKartuDljaZagruzkiDannih': "Приблизьте карту для загрузки данных на таймлайн",
-        'Zagruzka': "Загрузка..."
+        'Zagruzka': "Загрузка...",
+        'IndexNDVI': "Индекс NDVI"
     },
     'eng': {
         'Analitika': "Analytics",
@@ -332,7 +333,8 @@ NDVITimelineManager.locale = {
         'DljaAktivaciiNavedite': "Zoom in to the field layer, for access to the options",
         'NetDannihPoVibrannomuProductu': "No data for selected product",
         'PriblizteKartuDljaZagruzkiDannih': "Zoom in to the map for loading data to the timeline",
-        'Zagruzka': "Loading..."
+        'Zagruzka': "Loading...",
+        'IndexNDVI': "NDVI index"
     }
 };
 
@@ -1929,38 +1931,6 @@ NDVITimelineManager.prototype._showINDEX_NDVI = function () {
 
                 var r = color[0] || 0, g = color[1] || 0, b = color[2] || 0, a = color[3] || 255;
 
-                //if (VCI <= 20) {
-                //    //красный
-                //    r = 255;
-                //    g = 0;
-                //    b = 0;
-                //} else if (VCI <= 40) {
-                //    //розовый
-                //    r = 255;
-                //    g = 127;
-                //    b = 127;
-                //} else if (VCI <= 60) {
-                //    //желтый
-                //    r = 255;
-                //    g = 255;
-                //    b = 0;
-                //} else if (VCI <= 80) {
-                //    //зеленый
-                //    r = 0;
-                //    g = 255;
-                //    b = 0;
-                //} else if (VCI <= 100) {
-                //    //темно зеленый
-                //    r = 0;
-                //    g = 128;
-                //    b = 0;
-                //} else {
-                //    //VCI > 100
-                //    r = 0;
-                //    g = 0;
-                //    b = 0;
-                //}
-
                 var nameId = data.values[i][0] + ":" + data.values[i][1];
 
                 AgroShared._meanVCIStyleData[nameId] = {
@@ -1984,8 +1954,8 @@ NDVITimelineManager.prototype._showINDEX_NDVI = function () {
 
             that.lmap.addLayer(that._meanVCILayer);
             that._selectedLayers.push(that._meanVCILayer);
-            that._selectedOption = "VCI";
-            document.getElementById("chkVciType").disabled = false;
+            that._selectedOption = "INDEX_NDVI";
+            //document.getElementById("chkVciType").disabled = false;
         });
     }
 };
@@ -4885,7 +4855,7 @@ NDVITimelineManager.prototype.initTimelineFooter = function () {
         that._redrawShots();
     });
 
-    this.addRadio("secondPanel_0", "Индекс NDVI", "shotsOptions", "indexNDVIRadio", 0, true, function (r) {
+    this.addRadio("secondPanel_0", loc.IndexNDVI, "shotsOptions", "indexNDVIRadio", 0, true, function (r) {
         that._selectedType[that._selectedCombo] = NDVITimelineManager.INDEX_NDVI;
         that._redrawShots();
     });
@@ -5488,6 +5458,7 @@ NDVITimelineManager.prototype.setTimelineCombo = function (index, currentSelecti
 
     this.setRadioLabelActive_grey("ndviRadio_modis", false);
     this.setRadioLabelActive_grey("conditionsOfVegetationRadio", false);
+    this.setRadioLabelActive_grey("indexNDVIRadio", false);
 
     NDVITimelineManager.fires_ht = {};
     this.timeLine.updateFilters();
