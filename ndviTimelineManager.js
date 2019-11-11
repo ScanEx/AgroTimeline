@@ -1927,7 +1927,7 @@ NDVITimelineManager.prototype._showINDEX_NDVI = function () {
             for (var i = 0; i < data.values.length; i++) {
                 var ndvi = data.values[i][2];
 
-                var color = that.legendControl._ndviLegendView.model.getNDVIColor(ndvi);
+				var color = that.legendControl._ndviLegendView.model.getNDVIColor((ndvi - 101.0) / 100.0);
 
                 var r = color[0] || 0, g = color[1] || 0, b = color[2] || 0, a = color[3] || 255;
 
