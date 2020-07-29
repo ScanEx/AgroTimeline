@@ -3616,6 +3616,16 @@ NDVITimelineManager.prototype.onChangeSelection = function (x) {
     if (!selection) {
         return;
     }
+    if (Object.keys(selection).length === 0 && selection.constructor === Object)
+    {
+        var agro = cosmosagro.agroFieldProjectView; // added
+        agro.toolBar.el.querySelector(".fl-file-type.fl-file-json").style.display = "none";
+    }
+    else {
+        var agro = cosmosagro.agroFieldProjectView; // added
+        if (agro._selectedFields.length > 0)
+            agro.toolBar.el.querySelector(".fl-file-type.fl-file-json").style.display = "inline";
+    }
 
     var selectedLayer;
     for (var sel in selection) {
