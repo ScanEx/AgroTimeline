@@ -7,12 +7,12 @@ var uniqueGlobalName = (function () {
     }
 })();
 
-/** Посылает кросс-доменный GET запрос к серверу с использованием транспорта JSONP.
+/** РџРѕСЃС‹Р»Р°РµС‚ РєСЂРѕСЃСЃ-РґРѕРјРµРЅРЅС‹Р№ GET Р·Р°РїСЂРѕСЃ Рє СЃРµСЂРІРµСЂСѓ СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј С‚СЂР°РЅСЃРїРѕСЂС‚Р° JSONP.
  * 
- * @param {String} url URL сервера.
- * @param {Function} callback Ф-ция, которая будет вызвана при получении от сервера результата.
- * @param {String} [callbackParamName=CallbackName] Имя параметра для задания имени ф-ции ответа.
- * @param {Function} [errorCallback] Ф-ция, которая будет вызвана в случае ошибки запроса к серверу
+ * @param {String} url URL СЃРµСЂРІРµСЂР°.
+ * @param {Function} callback Р¤-С†РёСЏ, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ РІС‹Р·РІР°РЅР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё РѕС‚ СЃРµСЂРІРµСЂР° СЂРµР·СѓР»СЊС‚Р°С‚Р°.
+ * @param {String} [callbackParamName=CallbackName] РРјСЏ РїР°СЂР°РјРµС‚СЂР° РґР»СЏ Р·Р°РґР°РЅРёСЏ РёРјРµРЅРё С„-С†РёРё РѕС‚РІРµС‚Р°.
+ * @param {Function} [errorCallback] Р¤-С†РёСЏ, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ РІС‹Р·РІР°РЅР° РІ СЃР»СѓС‡Р°Рµ РѕС€РёР±РєРё Р·Р°РїСЂРѕСЃР° Рє СЃРµСЂРІРµСЂСѓ
  */
 var sendCrossDomainJSONRequest = function (url, callback, callbackParamName, errorCallback) {
     callbackParamName = callbackParamName || 'CallbackName';
@@ -35,13 +35,13 @@ var sendCrossDomainJSONRequest = function (url, callback, callbackParamName, err
     document.getElementsByTagName("head").item(0).appendChild(script);
 };
 
-/** Посылает кроссдоменный POST запрос
+/** РџРѕСЃС‹Р»Р°РµС‚ РєСЂРѕСЃСЃРґРѕРјРµРЅРЅС‹Р№ POST Р·Р°РїСЂРѕСЃ
 *
-* @param {String} url URL запроса
-* @param {Object} params Хэш параметров-запросов
-* @param {Function} [callback] Callback, который вызывается при приходе ответа с сервера. Единственный параметр ф-ции - собственно данные
-* @param {DOMElement} [baseForm] базовая форма запроса. Используется, когда нужно отправить на сервер файл. 
-*                                В функции эта форма будет модифицироваться, но после отправления запроса будет приведена к исходному виду.
+* @param {String} url URL Р·Р°РїСЂРѕСЃР°
+* @param {Object} params РҐСЌС€ РїР°СЂР°РјРµС‚СЂРѕРІ-Р·Р°РїСЂРѕСЃРѕРІ
+* @param {Function} [callback] Callback, РєРѕС‚РѕСЂС‹Р№ РІС‹Р·С‹РІР°РµС‚СЃСЏ РїСЂРё РїСЂРёС…РѕРґРµ РѕС‚РІРµС‚Р° СЃ СЃРµСЂРІРµСЂР°. Р•РґРёРЅСЃС‚РІРµРЅРЅС‹Р№ РїР°СЂР°РјРµС‚СЂ С„-С†РёРё - СЃРѕР±СЃС‚РІРµРЅРЅРѕ РґР°РЅРЅС‹Рµ
+* @param {DOMElement} [baseForm] Р±Р°Р·РѕРІР°СЏ С„РѕСЂРјР° Р·Р°РїСЂРѕСЃР°. РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ, РєРѕРіРґР° РЅСѓР¶РЅРѕ РѕС‚РїСЂР°РІРёС‚СЊ РЅР° СЃРµСЂРІРµСЂ С„Р°Р№Р». 
+*                                Р’ С„СѓРЅРєС†РёРё СЌС‚Р° С„РѕСЂРјР° Р±СѓРґРµС‚ РјРѕРґРёС„РёС†РёСЂРѕРІР°С‚СЊСЃСЏ, РЅРѕ РїРѕСЃР»Рµ РѕС‚РїСЂР°РІР»РµРЅРёСЏ Р·Р°РїСЂРѕСЃР° Р±СѓРґРµС‚ РїСЂРёРІРµРґРµРЅР° Рє РёСЃС…РѕРґРЅРѕРјСѓ РІРёРґСѓ.
 */
 var sendCrossDomainPostRequest = function (url, params, callback, baseForm) {
     var form,
@@ -187,7 +187,7 @@ var processMessage = function (e) {
         request.callback && request.callback({ Status: "error", ErrorInfo: { ErrorMessage: "JSON.parse exeption", ExceptionType: "JSON.parse", StackTrace: dataStr } });
     }
     var request = requests[e.origin][dataObj.CallbackName];
-    if (!request) return;    // message от других запросов
+    if (!request) return;    // message РѕС‚ РґСЂСѓРіРёС… Р·Р°РїСЂРѕСЃРѕРІ
 
     delete requests[e.origin][dataObj.CallbackName];
     delete dataObj.CallbackName;
@@ -196,7 +196,7 @@ var processMessage = function (e) {
     request.callback && request.callback(dataObj);
 }
 
-//совместимость с IE8
+//СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚СЊ СЃ IE8
 if (window.addEventListener) {
     window.addEventListener('message', processMessage);
 } else {

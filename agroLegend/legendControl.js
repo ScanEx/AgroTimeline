@@ -1,4 +1,4 @@
-﻿var LegendControl = function (agroTimeline) {
+var LegendControl = function (agroTimeline) {
     var that = this;
 
     var _BOTTOM = 150,

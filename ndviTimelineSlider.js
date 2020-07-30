@@ -30,7 +30,7 @@ var NDVITimelineSlider = function (id, events, lmap) {
 
     var limitCallback = null;
 
-    //два слайдера
+    //РґРІР° СЃР»Р°Р№РґРµСЂР°
     var pointer0 = document.createElement("div");
     pointer0.style.display = "none";
     pointer0.classList.add("ntSliderPointer0");
@@ -57,7 +57,7 @@ var NDVITimelineSlider = function (id, events, lmap) {
     caption1.innerHTML = "";
     element.appendChild(caption1);
 
-    //один слайдер
+    //РѕРґРёРЅ СЃР»Р°Р№РґРµСЂ
     var pointer = document.createElement("div");
     pointer.classList.add("ntSliderPointer");
     pointer.classList.add("ntSliderPointerLight");
@@ -146,7 +146,7 @@ var NDVITimelineSlider = function (id, events, lmap) {
 
     var that = this;
 
-    //планшет
+    //РїР»Р°РЅС€РµС‚
     pointer.ontouchstart = function (e) {
         pointerIndex = -1;
         selectedPointer = pointer;
@@ -180,7 +180,7 @@ var NDVITimelineSlider = function (id, events, lmap) {
         onMouseDown();
     };
 
-    //мышь0
+    //РјС‹С€СЊ0
     pointer0.onmousedown = function (e) {
         pointerIndex = 0;
         selectedPointer = pointer0;
@@ -201,7 +201,7 @@ var NDVITimelineSlider = function (id, events, lmap) {
         mouseOver = false;
     };
 
-    //мышь1
+    //РјС‹С€СЊ1
     pointer1.onmousedown = function (e) {
         pointerIndex = 1;
         selectedPointer = pointer1;
@@ -222,7 +222,7 @@ var NDVITimelineSlider = function (id, events, lmap) {
         mouseOver = false;
     };
 
-    //мышь
+    //РјС‹С€СЊ
     pointer.onmousedown = function (e) {
         pointerIndex = -1;
         selectedPointer = pointer;
@@ -369,7 +369,7 @@ var NDVITimelineSlider = function (id, events, lmap) {
         slide = true;
     };
 
-    //планшет
+    //РїР»Р°РЅС€РµС‚
     document.addEventListener('touchmove', function (e) {
         if (slide) {
             e.preventDefault();
@@ -386,7 +386,7 @@ var NDVITimelineSlider = function (id, events, lmap) {
         onMouseUp();
     }, false);
 
-    //мышка
+    //РјС‹С€РєР°
     $(document.body).on("mousemove", function (e) {
         posX = e.screenX;
         onMouseMove();
